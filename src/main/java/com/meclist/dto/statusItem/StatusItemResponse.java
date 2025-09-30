@@ -9,3 +9,7 @@ public record StatusItemResponse(
     LocalDateTime atualizadoEm
 ) {}
 
+
+
+
+

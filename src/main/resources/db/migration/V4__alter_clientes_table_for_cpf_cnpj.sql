@@ -22,3 +22,7 @@ CHECK (
     (tipo_documento = 'CNPJ' AND LENGTH(documento) = 14)
 );
 
+
+
+
+

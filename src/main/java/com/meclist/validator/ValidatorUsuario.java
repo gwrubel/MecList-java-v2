@@ -14,7 +14,7 @@ public class ValidatorUsuario {
 
     public static void validarEmail(String email) {
         if (!isEmailValido(email)) {
-            throw new IllegalArgumentException("E-mail inválido!");
+            throw new IllegalArgumentException("E-mail inválido!!");
         }
     }
 
