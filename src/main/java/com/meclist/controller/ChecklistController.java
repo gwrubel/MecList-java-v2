@@ -52,6 +52,7 @@ public class ChecklistController {
         return ResponseEntity.status(HttpStatus.CREATED).body(resposta);
     }
     
+    //lista itens que estão no checklist pelo id do checklist
     @GetMapping("/{id}/itens")
     public ResponseEntity<Map<String, Object>> listarItensChecklist(
         @PathVariable Long id,

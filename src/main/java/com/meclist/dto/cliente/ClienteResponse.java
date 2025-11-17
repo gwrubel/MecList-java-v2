@@ -16,7 +16,6 @@ public record ClienteResponse(
     TipoDocumento tipoDocumento,
     String telefone,
     String endereco,
-    TipoDeUsuario tipoDeUsuario,
     Situacao situacao,
     LocalDateTime criadoEm,
     LocalDateTime atualizadoEm,

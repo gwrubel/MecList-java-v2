@@ -2,7 +2,6 @@ package com.meclist.usecase.cliente;
 
 import org.springframework.stereotype.Service;
 
-import com.meclist.domain.enums.TipoDocumento;
 import com.meclist.dto.cliente.AtualizarClienteRequest;
 import com.meclist.interfaces.ClienteGateway;
 import com.meclist.validator.ValidatorUsuario;
@@ -25,39 +24,40 @@ public class AtualizarDadosClienteUseCase {
             throw new EntityNotFoundException("Cliente com ID " + id + " não encontrado!");
         }
 
-        ValidatorUsuario.validarTelefone(request.telefone());
-        ValidatorUsuario.validarEmail(request.email());
-
         var cliente = clienteExistente.get();
 
-        if (request.nome() != null) {
-            cliente.atualizarNome(request.nome());
+        // Validar e atualizar nome
+        if (request.nome() != null && !request.nome().trim().isEmpty()) {
+            cliente.atualizarNome(request.nome().trim());
         }
 
+        // Validar e atualizar telefone
         if (request.telefone() != null) {
+            ValidatorUsuario.validarTelefone(request.telefone());
             cliente.atualizarTelefone(request.telefone());
         }
 
+        // Validar e atualizar email
         if (request.email() != null) {
+            ValidatorUsuario.validarEmail(request.email());
             cliente.atualizarEmail(request.email());
         }
 
+        // Validar e atualizar documento
         if (request.documento() != null && request.tipoDocumento() != null) {
-            // Validar documento baseado no tipo
-            if (request.tipoDocumento() == TipoDocumento.CPF) {
-                ValidatorUsuario.validarCpf(request.documento());
-            } else if (request.tipoDocumento() == TipoDocumento.CNPJ) {
-                ValidatorUsuario.validarCnpj(request.documento());
-            }
-            cliente.atualizarDocumento(request.documento(), request.tipoDocumento());
+            String documentoLimpo = request.documentoLimpo();
+            ValidatorUsuario.validarDocumentoPorTipo(documentoLimpo, request.tipoDocumento());
+            cliente.atualizarDocumento(documentoLimpo, request.tipoDocumento());
         }
 
+        // Atualizar situação
         if (request.situacao() != null) {
             cliente.setSituacao(request.situacao());
         }
 
-        if (request.endereco() != null) {
-            cliente.atualizarEndereco(request.endereco());
+        // Validar e atualizar endereço
+        if (request.endereco() != null && !request.endereco().trim().isEmpty()) {
+            cliente.atualizarEndereco(request.endereco().trim());
         }
 
         clienteGateway.atualizarCliente(cliente);

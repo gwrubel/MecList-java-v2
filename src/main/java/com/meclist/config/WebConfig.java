@@ -1,5 +1,6 @@
 package com.meclist.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -9,10 +10,12 @@ import java.nio.file.Paths;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
+    @Value("${upload.base.dir:C:/uploads}")
+    private String baseDir;
+    
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        String caminhoUpload = Paths.get("C:/Users/usuário/OneDrive/Documentos/GitHub/Beckend/uploads/")
-                                    .toUri().toString();
+        String caminhoUpload = Paths.get(baseDir).toUri().toString();
 
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations(caminhoUpload);

@@ -116,5 +116,28 @@ public ResponseEntity<Object> handleMissingPart(MissingServletRequestPartExcepti
     return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 }
 
+    @ExceptionHandler({java.sql.SQLException.class, org.springframework.dao.DataAccessException.class})
+    public ResponseEntity<Object> handleDatabaseExceptions(Exception ex, WebRequest request) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("timestamp", LocalDateTime.now());
+        response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        response.put("error", "DatabaseError");
+        response.put("message", "Ocorreu um erro interno ao acessar o banco de dados.");
+        response.put("path", extractPath(request));
+
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Object> handleGenericExceptions(Exception ex, WebRequest request) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("timestamp", LocalDateTime.now());
+        response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        response.put("error", "InternalServerError");
+        response.put("message", "Ocorreu um erro inesperado.");
+        response.put("path", extractPath(request));
+
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
 }

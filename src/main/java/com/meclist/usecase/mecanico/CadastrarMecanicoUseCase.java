@@ -24,23 +24,31 @@ public class CadastrarMecanicoUseCase {
     }
 
     public void cadastrarMecanico(MecanicoRequest request) {
+        // Limpar CPF removendo caracteres não numéricos
+        String cpfLimpo = ValidatorUsuario.limparCpf(request.cpf());
+        
+        // Validar todos os dados do mecânico de forma centralizada
+        ValidatorUsuario.validarDadosCompletosMecanico(
+            request.nome(),
+            request.email(),
+            request.senha(),
+            request.telefone(),
+            cpfLimpo
+        );
 
-        ValidatorUsuario.validarCpf(request.cpf());
-        ValidatorUsuario.isTelefoneValido(request.telefone());
-        ValidatorUsuario.validarEmail(request.email());
-        ValidatorUsuario.validarSenha(request.senha());
-
+        // Verificar se o mecânico já existe
         if (mecanicogateway.buscarPorEmail(request.email()).isPresent()) {
             throw new CampoInvalidoException(Map.of("email", "E-mail já cadastrado!"));
         }
-        if (mecanicogateway.buscarPorCpf(request.cpf()).isPresent()) {
+        if (mecanicogateway.buscarPorCpf(cpfLimpo).isPresent()) {
             throw new CampoInvalidoException(Map.of("cpf", "CPF já cadastrado!"));
         }
 
+        // Criptografar a senha
         String senhaHash = encrypter.hash(request.senha());
 
         Mecanico novoMecanico = Mecanico.novoCadastro(
-                request.cpf(),
+                cpfLimpo,
                 request.telefone(),
                 request.nome(),
                 request.email(),

@@ -89,7 +89,6 @@ public static ClienteResponse toResponse(Cliente cliente) {
         cliente.getTipoDocumento(),
         cliente.getTelefone(),
         cliente.getEndereco(),
-        cliente.getTipoDeUsuario(),
         cliente.getSituacao(),
         cliente.getCriadoEm(),
         cliente.getAtualizadoEm(),

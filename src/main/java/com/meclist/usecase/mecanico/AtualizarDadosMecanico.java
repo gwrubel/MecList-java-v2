@@ -19,47 +19,52 @@ public class AtualizarDadosMecanico {
     }
 
     public void atualizarDados(AtualizarMecanicoRequest request, Long id) {
-
         var mecanicoExistente = mecanicoGateway.bucarPorId(id);
 
         if (mecanicoExistente.isEmpty()) {
             throw new EntityNotFoundException("Mecânico com ID " + id + " não encontrado!");
         }
 
+        // Limpar CPF se fornecido
+        String cpfLimpo = request.cpf() != null ? ValidatorUsuario.limparCpf(request.cpf()) : null;
+
+        // Validar todos os dados de atualização de forma centralizada
+        ValidatorUsuario.validarDadosAtualizacaoMecanico(
+            request.nome(),
+            request.email(),
+            request.senha(),
+            request.telefone(),
+            cpfLimpo
+        );
+
         var mecanico = mecanicoExistente.get();
 
-        if (request.telefone() != null) {
-            ValidatorUsuario.isTelefoneValido(request.telefone());
-            mecanico.atualizarTelefone(request.telefone());
+        // Atualizar nome
+        if (request.nome() != null && !request.nome().trim().isEmpty()) {
+            mecanico.atualizarNome(request.nome().trim());
         }
 
-        if (request.email() != null) {
-            ValidatorUsuario.validarEmail(request.email());
-            mecanico.atualizarEmail(request.email());
-        }
-
-        if (request.nome() != null) {
-            mecanico.atualizarNome(request.nome());
-        }
-
+        // Atualizar telefone
         if (request.telefone() != null) {
             mecanico.atualizarTelefone(request.telefone());
         }
 
+        // Atualizar email
         if (request.email() != null) {
             mecanico.atualizarEmail(request.email());
         }
 
-        if (request.cpf() != null) {
-            mecanico.atualizarCpf(request.cpf());
+        // Atualizar CPF
+        if (cpfLimpo != null) {
+            mecanico.atualizarCpf(cpfLimpo);
         }
 
+        // Atualizar situação
         if (request.situacao() != null) {
             mecanico.setSituacao(request.situacao());
         }
 
         mecanicoGateway.atualizarMecanico(mecanico);
-
     }
 
 }

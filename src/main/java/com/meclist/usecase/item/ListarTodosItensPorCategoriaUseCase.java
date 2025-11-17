@@ -1,7 +1,5 @@
-package com.meclist.usecase.checklist;
+package com.meclist.usecase.item;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -10,8 +8,8 @@ import org.springframework.stereotype.Service;
 
 import com.meclist.domain.Item;
 import com.meclist.domain.enums.CategoriaParteVeiculo;
-import com.meclist.dto.checklist.ItemResponse;
-import com.meclist.dto.checklist.ItemsPorCategoriaResponse;
+import com.meclist.dto.item.ItemResponse;
+import com.meclist.dto.item.ItemsPorCategoriaResponse;
 import com.meclist.interfaces.ItemGateway;
 
 @Service
@@ -40,7 +38,9 @@ public class ListarTodosItensPorCategoriaUseCase {
                                     item.getId(),
                                     item.getNome(),
                                     item.getParteDoVeiculo(),
-                                    item.getImagemIlustrativa()
+                                    item.getImagemIlustrativa(),
+                                    item.getCriadoEm(),
+                                    item.getAtualizadoEm()
                             ))
                             .collect(Collectors.toList());
                     

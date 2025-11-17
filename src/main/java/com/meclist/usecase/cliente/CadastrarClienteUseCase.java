@@ -5,7 +5,6 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 import com.meclist.domain.Cliente;
-import com.meclist.domain.enums.TipoDocumento;
 import com.meclist.dto.cliente.ClienteRequest;
 import com.meclist.exception.CampoInvalidoException;
 import com.meclist.interfaces.ClienteGateway;
@@ -23,31 +22,32 @@ public class CadastrarClienteUseCase {
     }
 
     public void cadastrarCliente(ClienteRequest request) {
-        // Validar telefone e email
-        ValidatorUsuario.validarTelefone(request.telefone());
-        ValidatorUsuario.validarEmail(request.email());
-        ValidatorUsuario.validarSenha(request.senha());
-
-        // Validar documento baseado no tipo
-        if (request.tipoDocumento() == TipoDocumento.CPF) {
-            ValidatorUsuario.validarCpf(request.documento());
-        } else if (request.tipoDocumento() == TipoDocumento.CNPJ) {
-            ValidatorUsuario.validarCnpj(request.documento());
-        }
+        // Limpar documento removendo caracteres não numéricos
+        String documentoLimpo = request.documentoLimpo();
+        
+        // Validar todos os dados do cliente de forma centralizada
+        ValidatorUsuario.validarDadosCompletosCliente(
+            request.nome(),
+            request.email(),
+            request.senha(),
+            request.telefone(),
+            documentoLimpo,
+            request.tipoDocumento(),
+            request.endereco()
+        );
 
         // Verificar se o cliente já existe
         if (clienteGateway.buscarPorEmail(request.email()).isPresent()) {
             throw new CampoInvalidoException(Map.of("email", "E-mail já cadastrado!"));
         }
-        if (clienteGateway.buscarPorDocumento(request.documento()).isPresent()) {
+        if (clienteGateway.buscarPorDocumento(documentoLimpo).isPresent()) {
             throw new CampoInvalidoException(Map.of("documento", "Documento já cadastrado!"));
         }
 
         // Criptografar a senha
         String senhaHash = encrypter.hash(request.senha());
 
-        
-        Cliente novoCliente = Cliente.novoCadastro(request.documento(),
+        Cliente novoCliente = Cliente.novoCadastro(documentoLimpo,
          request.tipoDocumento(),
          request.telefone(), 
          request.nome(), 

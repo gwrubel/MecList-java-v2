@@ -32,7 +32,10 @@ public class SecurityConfig {
                 .requestMatchers("/adms", "/adms/login", "/mecanicos/login").permitAll()
                 .requestMatchers("/clientes", "/clientes/**").permitAll() // manter aberto por enquanto
                 .requestMatchers("/veiculos/**", "/categorias-veiculo/**").permitAll() // manter aberto por enquanto
-                .requestMatchers("/itens", "/itens/**").permitAll() // Permitir acesso aos itens
+                .requestMatchers("/itens", "/itens/**").permitAll()
+                .requestMatchers("/checklists", "/checklists/**").permitAll()
+                .requestMatchers("/mecanicos", "/mecanicos/**").permitAll() // Permitir acesso aos itens
+                .requestMatchers("/uploads/**").permitAll() // Permitir acesso aos recursos estáticos
                 // Demais precisam de autenticação
                 .anyRequest().authenticated()
             )
@@ -55,6 +58,4 @@ public class SecurityConfig {
 
         return source;
     }
-
-
 }

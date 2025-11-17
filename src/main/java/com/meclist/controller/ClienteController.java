@@ -4,7 +4,6 @@ import com.meclist.domain.enums.Situacao;
 import com.meclist.dto.cliente.AtualizarClienteRequest;
 import com.meclist.dto.cliente.ClienteRequest;
 import com.meclist.dto.cliente.ClienteResponse;
-import com.meclist.response.ApiResponse;
 import com.meclist.usecase.cliente.AtualizarDadosClienteUseCase;
 import com.meclist.usecase.cliente.BuscarDadosDoClienteUseCase;
 import com.meclist.usecase.cliente.BuscarPorSituacaoUseCase;
@@ -19,7 +18,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/clientes")
@@ -45,13 +47,18 @@ public class ClienteController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Void>> cadastrarCliente(
+    public ResponseEntity<Map<String, Object>> cadastrarCliente(
             @RequestBody @Valid ClienteRequest request,
             HttpServletRequest servletRequest) {
         cadastrarClienteUseCase.cadastrarCliente(request);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(ApiResponse.created("Cliente cadastrado com sucesso!", servletRequest.getRequestURI(), null));
+
+        Map<String, Object> resposta = new HashMap<>();
+        resposta.put("timestamp", LocalDateTime.now());
+        resposta.put("status", HttpStatus.CREATED.value());
+        resposta.put("message", "Cliente cadastrado com sucesso!");
+        resposta.put("path", servletRequest.getRequestURI());
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(resposta);
     }
 
     @GetMapping
@@ -64,13 +71,19 @@ public class ClienteController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> atualizarCliente(
+    public ResponseEntity<Map<String, Object>> atualizarCliente(
             @RequestBody @Valid AtualizarClienteRequest request,
             @PathVariable Long id,
             HttpServletRequest servletRequest) {
         atualizarDadosClienteUseCase.atualizarDados(request, id);
-        return ResponseEntity
-                .ok(ApiResponse.success("Cliente atualizado com sucesso!", servletRequest.getRequestURI(), null));
+
+        Map<String, Object> resposta = new HashMap<>();
+        resposta.put("timestamp", LocalDateTime.now());
+        resposta.put("status", HttpStatus.OK.value());
+        resposta.put("message", "Cliente atualizado com sucesso!");
+        resposta.put("path", servletRequest.getRequestURI());
+
+        return ResponseEntity.ok(resposta);
     }
 
     @GetMapping("/{id}")
