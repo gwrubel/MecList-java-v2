@@ -4,21 +4,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.meclist.dto.adm.AdmRequest;
+import com.meclist.response.ApiResponse;
 import com.meclist.usecase.adm.AutenticarAdmUseCase;
 import com.meclist.usecase.adm.CadastroAdmUseCase;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 import java.util.Map;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+
 @RestController
 @RequestMapping("/adms")
-public class AdmController {
+public class AdmController extends BaseController {
 
     private final CadastroAdmUseCase cadastroAdmUseCase;
     private final AutenticarAdmUseCase autenticarAdmUseCase;
@@ -29,16 +31,42 @@ public class AdmController {
         this.autenticarAdmUseCase = autenticarAdmUseCase;
     }
 
+    /**
+     * Cadastra um novo administrador.
+     * 
+     * @param request Dados do administrador (email e senha)
+     * @param servletRequest HttpServletRequest para obter informações da requisição
+     * @return Resposta de sucesso com status 201 CREATED
+     */
     @PostMapping
-    public ResponseEntity<String> cadastrar(@RequestBody @Valid AdmRequest request) {
+    public ResponseEntity<ApiResponse<Void>> cadastrar(
+            @RequestBody @Valid AdmRequest request,
+            HttpServletRequest servletRequest) {
+        
         cadastroAdmUseCase.cadastrarAdm(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Administrador cadastrado com sucesso!");
+        
+        return created("Administrador cadastrado com sucesso!", null, servletRequest);
     }
 
+    /**
+     * Autentica um administrador e retorna um token JWT.
+     * 
+     * @param request Credenciais (email e senha)
+     * @param servletRequest HttpServletRequest para obter informações da requisição
+     * @return Token JWT encapsulado em ApiResponse
+     */
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(@RequestBody AdmRequest request) {
+    public ResponseEntity<ApiResponse<Map<String, String>>> login(
+            @RequestBody AdmRequest request,
+            HttpServletRequest servletRequest) {
+        
         String token = autenticarAdmUseCase.autenticar(request.email(), request.senha());
-        return ResponseEntity.ok(Map.of("token", token));
+        
+        return success(
+            "Autenticação realizada com sucesso!",
+            Map.of("token", token),
+            servletRequest
+        );
     }
 
 }

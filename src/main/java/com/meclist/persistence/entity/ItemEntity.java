@@ -9,6 +9,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
+
+
 @Getter
 @Setter
 @Entity
@@ -38,6 +41,9 @@ public class ItemEntity {
     
     @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ItemChecklistEntity> itensChecklist;
+    
+    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ItemProdutoEntity> produtosSugeridos = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {

@@ -1,70 +1,64 @@
 package com.meclist.controller;
 
-import com.meclist.dto.veiculo.VeiculoRequestDTO;
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.meclist.response.ApiResponse;
-import com.meclist.usecase.veiculo.AtualizarVeiculoUseCase;
-import com.meclist.usecase.veiculo.CadastrarVeiculoUseCase;
 import com.meclist.usecase.veiculo.BuscarPorPlacaUseCase;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-
+/**
+ * Controller para consultas gerais de Veículos.
+ * 
+ * Endpoints:
+ * - GET    /veiculos/placas/busca?termo=ABC         - Busca placas por termo
+ * - GET    /veiculos/placa/{placa}                  - Busca veículo por placa específica
+ */
 @RestController
-@RequestMapping
-public class VeiculoController {
+@RequestMapping("/veiculos")
+public class VeiculoController extends BaseController {
 
-    private final CadastrarVeiculoUseCase cadastrarVeiculoUseCase;
-    private final AtualizarVeiculoUseCase atualizarVeiculoUseCase;
     private final BuscarPorPlacaUseCase buscarPorPlacaUseCase;
 
-    public VeiculoController(
-            CadastrarVeiculoUseCase cadastrarVeiculoUseCase,
-            AtualizarVeiculoUseCase atualizarVeiculoUseCase,
-            BuscarPorPlacaUseCase buscarPorPlacaUseCase) {
-        this.cadastrarVeiculoUseCase = cadastrarVeiculoUseCase;
-        this.atualizarVeiculoUseCase = atualizarVeiculoUseCase;
+    public VeiculoController(BuscarPorPlacaUseCase buscarPorPlacaUseCase) {
         this.buscarPorPlacaUseCase = buscarPorPlacaUseCase;
     }
 
-    // Endpoints para veículos de um cliente (rota aninhada)
-    @PostMapping("/clientes/{idCliente}/veiculos")
-    public ResponseEntity<ApiResponse<Void>> adicionarVeiculo(
-            @PathVariable Long idCliente,
-            @Valid @RequestBody VeiculoRequestDTO request,
+    /**
+     * Busca placas de veículos por termo de busca.
+     * 
+     * @param termo Termo de busca para filtrar placas
+     * @param servletRequest HttpServletRequest
+     * @return Lista de placas encontradas
+     */
+    @GetMapping("/placas/busca")
+    public ResponseEntity<ApiResponse<List<String>>> buscarPlacasPorTermo(
+            @RequestParam String termo,
             HttpServletRequest servletRequest) {
-        cadastrarVeiculoUseCase.cadastarVeiculo(idCliente, request);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(ApiResponse.created("Veículo cadastrado com sucesso!", servletRequest.getRequestURI(), null));
+        List<String> placas = buscarPorPlacaUseCase.executar(termo);
+        return success("Placas encontradas com sucesso!", placas, servletRequest);
     }
 
-    @PutMapping("/clientes/{idCliente}/veiculos/{idVeiculo}")
-    public ResponseEntity<ApiResponse<Void>> atualizarVeiculo(
-            @PathVariable Long idCliente,
-            @PathVariable Long idVeiculo,
-            @Valid @RequestBody VeiculoRequestDTO request,
+    /**
+     * Busca um veículo por placa específica.
+     * 
+     * @param placa Placa do veículo
+     * @param servletRequest HttpServletRequest
+     * @return Dados do veículo encontrado
+     */
+    @GetMapping("/placa/{placa}")
+    public ResponseEntity<ApiResponse<Object>> buscarPorPlaca(
+            @PathVariable String placa,
             HttpServletRequest servletRequest) {
-        atualizarVeiculoUseCase.atualizarVeiculo(idCliente, idVeiculo, request);
-        return ResponseEntity
-                .ok(ApiResponse.success("Veículo atualizado com sucesso!", servletRequest.getRequestURI(), null));
-    }
-
-    // Endpoint para buscar placas (busca simples, geral)
-    @GetMapping("/veiculos/placas")
-    public ResponseEntity<List<String>> buscarPlacas(@RequestParam String busca) {
-        List<String> placas = buscarPorPlacaUseCase.executar(busca);
-        return ResponseEntity.ok(placas);
-    }
-
-    @GetMapping("/veiculos/{placa}")
-    public ResponseEntity<ApiResponse<?>> buscarPorPlaca(@PathVariable String placa) {
         var veiculoResponse = buscarPorPlacaUseCase.buscarPorPlaca(placa);
-        return ResponseEntity.ok(ApiResponse.success("Veículo encontrado com sucesso!", null, veiculoResponse));
+        return success("Veículo encontrado com sucesso!", veiculoResponse, servletRequest);
     }
 }
+

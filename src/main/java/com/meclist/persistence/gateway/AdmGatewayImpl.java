@@ -10,10 +10,10 @@ import com.meclist.mapper.AdmMapper;
 import com.meclist.persistence.repository.AdmRepository;
 
 @Component
-public class AdmJpaGatewayImpl implements AdmGateway {
+public class AdmGatewayImpl implements AdmGateway {
     private final AdmRepository repository;
 
-    public AdmJpaGatewayImpl(AdmRepository repository) {
+    public AdmGatewayImpl(AdmRepository repository) {
         this.repository = repository;
     }
 

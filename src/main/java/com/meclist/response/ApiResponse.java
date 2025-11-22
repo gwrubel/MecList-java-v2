@@ -71,5 +71,7 @@ public class ApiResponse<T> {
         this.data = data;
     }
 
-    
+    public static <T> ApiResponse<T> error(int code, String message, String path, T data) {
+        return new ApiResponse<>(code, message, path, data);
+    }
 }

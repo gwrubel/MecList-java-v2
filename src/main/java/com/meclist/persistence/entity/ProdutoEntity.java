@@ -1,6 +1,8 @@
 package com.meclist.persistence.entity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -17,24 +19,22 @@ public class ProdutoEntity {
     @Column(name = "id_produto")
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "id_item_checklist", nullable = false)
-    private ItemChecklistEntity itemChecklist;
-
     @Column(name = "nome_produto", nullable = false)
     private String nomeProduto;
-
-    @Column(name = "quantidade", nullable = false)
-    private Integer quantidade;
-
-    @Column(name = "valor_uni", nullable = false)
-    private Float valorUnitario;
 
     @Column(name = "criado_em")
     private LocalDateTime criadoEm;
 
     @Column(name = "atualizado_em")
     private LocalDateTime atualizadoEm;
+
+    // Relacionamento com itens (template/sugestão)
+    @OneToMany(mappedBy = "produto", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ItemProdutoEntity> itensSugeridos = new ArrayList<>();
+
+    // Relacionamento com checklists (execução/orçamento)
+    @OneToMany(mappedBy = "produto", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChecklistProdutoEntity> checklistProdutos = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {

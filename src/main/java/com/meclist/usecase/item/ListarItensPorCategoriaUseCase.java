@@ -1,4 +1,4 @@
-package com.meclist.usecase.checklist;
+package com.meclist.usecase.item;
 
 import java.util.List;
 import java.util.stream.Collectors;

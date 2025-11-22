@@ -4,7 +4,7 @@ import com.meclist.domain.Adm;
 import com.meclist.dto.adm.AdmRequest;
 import com.meclist.interfaces.AdmGateway;
 import com.meclist.interfaces.PasswordEncrypter;
-import com.meclist.validator.ValidatorUsuario;
+import com.meclist.validator.ValidatorUtils;
 
 import org.springframework.stereotype.Service;
 
@@ -19,8 +19,8 @@ public class CadastroAdmUseCase {
     }
 
    public void cadastrarAdm(AdmRequest request) {
-    ValidatorUsuario.validarEmail(request.email());
-    ValidatorUsuario.validarSenha(request.senha());
+    ValidatorUtils.validarEmail(request.email());
+    ValidatorUtils.validarSenha(request.senha());
 
     if (gateway.buscarPorEmail(request.email()).isPresent()) {
         throw new IllegalArgumentException("Já existe um administrador com esse e-mail.");

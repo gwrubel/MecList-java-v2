@@ -1,6 +1,8 @@
 package com.meclist.domain;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.meclist.domain.enums.CategoriaParteVeiculo;
 
@@ -11,6 +13,18 @@ public class Item {
     private String imagemIlustrativa;
     private LocalDateTime criadoEm;
     private LocalDateTime atualizadoEm;
+    private List<Produto> produtos = new ArrayList<>();
+
+    public void adicionarProduto(Produto produto) {
+        if (this.produtos == null) {
+            this.produtos = new ArrayList<>();
+        }
+        this.produtos.add(produto);
+    }
+    
+    public List<Produto> getProdutosSugeridos() {
+        return produtos != null ? produtos : new ArrayList<>();
+    }
 
     public Item(Long id, String nome, CategoriaParteVeiculo parteDoVeiculo, String imagemIlustrativa,
                 LocalDateTime criadoEm, LocalDateTime atualizadoEm) {

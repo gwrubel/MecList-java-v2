@@ -1,7 +1,6 @@
-package com.meclist.usecase.checklist;
+package com.meclist.usecase.item;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -15,11 +14,11 @@ import com.meclist.dto.checklist.ItemsPorCategoriaResponse;
 import com.meclist.interfaces.ItemGateway;
 
 @Service
-public class ListarTodosItensPorCategoriaUseCase {
+public class ListarItensAgrupadosUseCase {
 
     private final ItemGateway itemGateway;
 
-    public ListarTodosItensPorCategoriaUseCase(ItemGateway itemGateway) {
+    public ListarItensAgrupadosUseCase(ItemGateway itemGateway) {
         this.itemGateway = itemGateway;
     }
 

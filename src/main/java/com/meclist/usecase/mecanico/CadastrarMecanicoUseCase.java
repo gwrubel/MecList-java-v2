@@ -1,16 +1,14 @@
-
 package com.meclist.usecase.mecanico;
-
-import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
 import com.meclist.domain.Mecanico;
 import com.meclist.dto.mecanico.MecanicoRequest;
-import com.meclist.exception.CampoInvalidoException;
+import com.meclist.exception.CpfJaCadastrado;
+import com.meclist.exception.EmailJaCadastrado;
 import com.meclist.interfaces.MecanicoGateway;
 import com.meclist.interfaces.PasswordEncrypter;
-import com.meclist.validator.ValidatorUsuario;
+import com.meclist.validator.ValidatorUtils;
 
 @Service
 public class CadastrarMecanicoUseCase {
@@ -25,16 +23,17 @@ public class CadastrarMecanicoUseCase {
 
     public void cadastrarMecanico(MecanicoRequest request) {
 
-        ValidatorUsuario.validarCpf(request.cpf());
-        ValidatorUsuario.isTelefoneValido(request.telefone());
-        ValidatorUsuario.validarEmail(request.email());
-        ValidatorUsuario.validarSenha(request.senha());
+        ValidatorUtils.validarCpf(request.cpf());
+        ValidatorUtils.validarTelefone(request.telefone());
+        ValidatorUtils.validarEmail(request.email());
+        ValidatorUtils.validarSenha(request.senha());
 
         if (mecanicogateway.buscarPorEmail(request.email()).isPresent()) {
-            throw new CampoInvalidoException(Map.of("email", "E-mail já cadastrado!"));
+            throw new EmailJaCadastrado("E-mail já cadastrado!");
         }
+        
         if (mecanicogateway.buscarPorCpf(request.cpf()).isPresent()) {
-            throw new CampoInvalidoException(Map.of("cpf", "CPF já cadastrado!"));
+            throw new CpfJaCadastrado("CPF já cadastrado!");
         }
 
         String senhaHash = encrypter.hash(request.senha());
