@@ -15,8 +15,8 @@ public class ItemChecklist {
     // Lista de fotos de evidência
     private List<FotoEvidencia> fotosEvidencia = new ArrayList<>();
     
-    // Lista de produtos
-    private List<Produto> produtos = new ArrayList<>();
+    // Lista de produtos orçados (checklist_produto)
+    private List<ChecklistProduto> produtosOrcados = new ArrayList<>();
 
     // Construtor original mantido para compatibilidade
     public ItemChecklist(Long id, Long idChecklist, Long idItem, Long idStatusItem,
@@ -38,16 +38,16 @@ public class ItemChecklist {
         this.atualizadoEm = atualizadoEm;
     }
 
-    // Construtor com fotos e produtos
+    // Construtor com fotos e produtos orçados
     public ItemChecklist(Long id, Checklist checklist, Item item, StatusItem statusItem,
-                         List<FotoEvidencia> fotosEvidencia, List<Produto> produtos,
+                         List<FotoEvidencia> fotosEvidencia, List<ChecklistProduto> produtosOrcados,
                          LocalDateTime criadoEm, LocalDateTime atualizadoEm) {
         this.id = id;
         this.checklist = checklist;
         this.item = item;
         this.statusItem = statusItem;
         this.fotosEvidencia = fotosEvidencia != null ? fotosEvidencia : new ArrayList<>();
-        this.produtos = produtos != null ? produtos : new ArrayList<>();
+        this.produtosOrcados = produtosOrcados != null ? produtosOrcados : new ArrayList<>();
         this.criadoEm = criadoEm;
         this.atualizadoEm = atualizadoEm;
     }
@@ -77,23 +77,23 @@ public class ItemChecklist {
         }
     }
 
-    // Métodos para gerenciar produtos
-    public void adicionarProduto(Produto produto) {
-        if (this.produtos == null) {
-            this.produtos = new ArrayList<>();
+    // Métodos para gerenciar produtos orçados
+    public void adicionarProdutoOrcado(ChecklistProduto produtoOrcado) {
+        if (this.produtosOrcados == null) {
+            this.produtosOrcados = new ArrayList<>();
         }
-        this.produtos.add(produto);
+        this.produtosOrcados.add(produtoOrcado);
     }
 
-    public void removerProduto(Produto produto) {
-        if (this.produtos != null) {
-            this.produtos.remove(produto);
+    public void removerProdutoOrcado(ChecklistProduto produtoOrcado) {
+        if (this.produtosOrcados != null) {
+            this.produtosOrcados.remove(produtoOrcado);
         }
     }
 
-    public void limparProdutos() {
-        if (this.produtos != null) {
-            this.produtos.clear();
+    public void limparProdutosOrcados() {
+        if (this.produtosOrcados != null) {
+            this.produtosOrcados.clear();
         }
     }
 
@@ -109,8 +109,8 @@ public class ItemChecklist {
     public List<FotoEvidencia> getFotosEvidencia() { 
         return fotosEvidencia != null ? fotosEvidencia : new ArrayList<>(); 
     }
-    public List<Produto> getProdutos() { 
-        return produtos != null ? produtos : new ArrayList<>(); 
+    public List<ChecklistProduto> getProdutosOrcados() { 
+        return produtosOrcados != null ? produtosOrcados : new ArrayList<>(); 
     }
 
     // Setters
@@ -123,8 +123,8 @@ public class ItemChecklist {
     public void setFotosEvidencia(List<FotoEvidencia> fotosEvidencia) { 
         this.fotosEvidencia = fotosEvidencia != null ? fotosEvidencia : new ArrayList<>(); 
     }
-    public void setProdutos(List<Produto> produtos) { 
-        this.produtos = produtos != null ? produtos : new ArrayList<>(); 
+    public void setProdutosOrcados(List<ChecklistProduto> produtosOrcados) { 
+        this.produtosOrcados = produtosOrcados != null ? produtosOrcados : new ArrayList<>(); 
     }
 
     // Métodos de compatibilidade (para manter funcionalidade existente)

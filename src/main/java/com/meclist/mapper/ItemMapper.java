@@ -1,6 +1,9 @@
 package com.meclist.mapper;
 
+import java.util.List;
+
 import com.meclist.domain.Item;
+import com.meclist.domain.Produto;
 import com.meclist.persistence.entity.ItemEntity;
 
 public class ItemMapper {
@@ -32,7 +35,29 @@ public class ItemMapper {
                 entity.getParteDoVeiculo(),
                 entity.getImagemIlustrativa(),
                 entity.getCriadoEm(),
-                entity.getAtualizadoEm()
+                entity.getAtualizadoEm()             
         );
+    }
+
+    public static Item ItemComProdutosToDomain(ItemEntity entity, List<Produto> produtos) {
+        if (entity == null) {
+            return null;
+        }
+
+        Item item = new Item(
+            entity.getId(),
+            entity.getNomeItem(),
+            entity.getParteDoVeiculo(),
+            entity.getImagemIlustrativa(),
+            entity.getCriadoEm(),
+            entity.getAtualizadoEm()
+        );
+        
+        // Adicionar produtos diretamente
+        if (produtos != null) {
+            produtos.forEach(item::adicionarProduto);
+        }
+        
+        return item;
     }
 }

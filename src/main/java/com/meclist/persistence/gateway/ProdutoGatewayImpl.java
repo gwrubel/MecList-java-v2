@@ -9,35 +9,28 @@ import org.springframework.stereotype.Component;
 import com.meclist.domain.Produto;
 import com.meclist.interfaces.ProdutoGateway;
 import com.meclist.mapper.ProdutoMapper;
-import com.meclist.persistence.entity.ItemChecklistEntity;
 import com.meclist.persistence.entity.ProdutoEntity;
-import com.meclist.persistence.repository.ItemChecklistRepository;
 import com.meclist.persistence.repository.ProdutoRepository;
 
 @Component
 public class ProdutoGatewayImpl implements ProdutoGateway {
 
     private final ProdutoRepository produtoRepository;
-    private final ItemChecklistRepository itemChecklistRepository;
 
-    public ProdutoGatewayImpl(ProdutoRepository produtoRepository, ItemChecklistRepository itemChecklistRepository) {
+    public ProdutoGatewayImpl(ProdutoRepository produtoRepository) {
         this.produtoRepository = produtoRepository;
-        this.itemChecklistRepository = itemChecklistRepository;
     }
 
     @Override
     public Produto salvar(Produto produto) {
-        ItemChecklistEntity itemChecklist = itemChecklistRepository.findById(produto.getItemChecklist().getId())
-                .orElseThrow(() -> new RuntimeException("Item Checklist não encontrado"));
-        
-        ProdutoEntity entity = ProdutoMapper.toEntity(produto, itemChecklist);
+        ProdutoEntity entity = ProdutoMapper.toEntity(produto);
         entity = produtoRepository.save(entity);
         return ProdutoMapper.toDomain(entity);
     }
 
     @Override
-    public List<Produto> buscarPorItemChecklist(Long idItemChecklist) {
-        return produtoRepository.findByItemChecklistId(idItemChecklist)
+    public List<Produto> buscarTodos() {
+        return produtoRepository.findAll()
                 .stream()
                 .map(ProdutoMapper::toDomain)
                 .collect(Collectors.toList());
@@ -47,6 +40,20 @@ public class ProdutoGatewayImpl implements ProdutoGateway {
     public Optional<Produto> buscarPorId(Long id) {
         return produtoRepository.findById(id)
                 .map(ProdutoMapper::toDomain);
+    }
+
+    @Override
+    public Optional<Produto> buscarPorNome(String nomeProduto) {
+        return produtoRepository.findByNomeProduto(nomeProduto)
+                .map(ProdutoMapper::toDomain);
+    }
+
+    @Override
+    public List<Produto> buscarPorNomeContendo(String nomeProduto) {
+        return produtoRepository.findByNomeProdutoContainingIgnoreCase(nomeProduto)
+                .stream()
+                .map(ProdutoMapper::toDomain)
+                .collect(Collectors.toList());
     }
 
     @Override

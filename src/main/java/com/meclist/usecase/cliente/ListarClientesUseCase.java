@@ -20,7 +20,7 @@ public class ListarClientesUseCase {
         this.clienteGateway = clienteGateway;
     }
 
-    public List<ClienteResponse> executar() {
+    public List<ClienteResponse> listar() {
         return clienteGateway.buscarTodos()
         .stream()
         .map(ClienteMapper::toResponse)

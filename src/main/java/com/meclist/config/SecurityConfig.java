@@ -33,6 +33,7 @@ public class SecurityConfig {
                 .requestMatchers("/clientes", "/clientes/**").permitAll() // manter aberto por enquanto
                 .requestMatchers("/veiculos/**", "/categorias-veiculo/**").permitAll() // manter aberto por enquanto
                 .requestMatchers("/itens", "/itens/**").permitAll() // Permitir acesso aos itens
+                .requestMatchers("/mecanicos").permitAll()
                 // Demais precisam de autenticação
                 .anyRequest().authenticated()
             )

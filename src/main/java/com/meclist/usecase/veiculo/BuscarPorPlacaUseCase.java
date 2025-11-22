@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.meclist.domain.Veiculo;
+
 import com.meclist.dto.veiculo.VeiculoResponse;
 import com.meclist.interfaces.VeiculoGateway;
 import com.meclist.mapper.VeiculoMapper;

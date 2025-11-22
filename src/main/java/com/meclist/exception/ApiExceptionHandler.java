@@ -1,120 +1,143 @@
 package com.meclist.exception;
 
+import com.meclist.response.ApiResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
 
-
-import java.time.LocalDateTime;
-import java.util.HashMap;
+import java.io.IOException;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+/**
+ * Tratamento centralizado de exceções da API.
+ * Consolida todos os handlers em um único ponto com respostas padronizadas em ApiResponse.
+ */
 @ControllerAdvice
 public class ApiExceptionHandler {
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Object> handleIllegalArgument(IllegalArgumentException ex, WebRequest request) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.BAD_REQUEST.value());
-        response.put("error", "ValidationError");
-        response.put("message", ex.getMessage());
-        response.put("path", extractPath(request));
+    private static final Logger log = LoggerFactory.getLogger(ApiExceptionHandler.class);
 
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiResponse<Void>> handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest request) {
+        log.warn("Argumento inválido: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(HttpStatus.BAD_REQUEST, ex.getMessage(), request.getRequestURI()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Object> handleValidationExceptions(MethodArgumentNotValidException ex, WebRequest request) {
-        Map<String, String> fieldErrors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(error ->
-            fieldErrors.put(error.getField(), error.getDefaultMessage())
-        );
+    public ResponseEntity<ApiResponse<Object>> handleValidationExceptions(
+            MethodArgumentNotValidException ex, HttpServletRequest request) {
+        
+        Map<String, String> fieldErrors = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage));
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.BAD_REQUEST.value());
-        response.put("error", "ValidationError");
-        response.put("message", "Campos inválidos.");
-        response.put("errors", fieldErrors);
-        response.put("path", extractPath(request));
-
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        return ResponseEntity.badRequest()
+                .body(ApiResponse.error(HttpStatus.BAD_REQUEST.value(), "Erro de validação", request.getRequestURI(), (Object) fieldErrors));
     }
 
     @ExceptionHandler(CampoInvalidoException.class)
-    public ResponseEntity<Object> handleCampoInvalido(CampoInvalidoException ex, WebRequest request) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.BAD_REQUEST.value());
-        response.put("error", "ValidationError");
-        response.put("message", "Campos inválidos.");
-        response.put("errors", ex.getErros());
-        response.put("path", extractPath(request));
-
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<ApiResponse<Object>> handleCampoInvalido(CampoInvalidoException ex, HttpServletRequest request) {
+        log.warn("Campos inválidos: {}", ex.getErros());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(HttpStatus.BAD_REQUEST.value(), "Erro de validação", request.getRequestURI(), (Object) ex.getErros()));
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
-public ResponseEntity<Object> handleEntityNotFound(EntityNotFoundException ex, WebRequest request) {
-    Map<String, Object> response = new HashMap<>();
-    response.put("timestamp", LocalDateTime.now());
-    response.put("status", HttpStatus.NOT_FOUND.value()); // Código de status 404
-    response.put("error", "EntityNotFound");
-    response.put("message", ex.getMessage());
-    response.put("path", extractPath(request));
-
-    return new ResponseEntity<>(response, HttpStatus.NOT_FOUND); // Retorna o erro 404
-}
-
-
-    // Método utilitário para limpar a URI
-    private String extractPath(WebRequest request) {
-        return request.getDescription(false).replace("uri=", "");
+    public ResponseEntity<ApiResponse<Void>> handleEntityNotFound(EntityNotFoundException ex, HttpServletRequest request) {
+        log.warn("Entidade não encontrada: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI()));
     }
 
+    @ExceptionHandler(VeiculoJaCadastrado.class)
+    public ResponseEntity<ApiResponse<Void>> handleVeiculoJaCadastrado(VeiculoJaCadastrado ex, HttpServletRequest request) {
+        log.warn("Veículo já cadastrado: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(HttpStatus.CONFLICT, ex.getMessage(), request.getRequestURI()));
+    }
+
+    @ExceptionHandler(EmailJaCadastrado.class)
+    public ResponseEntity<ApiResponse<Void>> handleEmailJaCadastrado(EmailJaCadastrado ex, HttpServletRequest request) {
+        log.warn("Email já cadastrado: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(HttpStatus.CONFLICT, ex.getMessage(), request.getRequestURI()));
+    }
+
+    @ExceptionHandler(CpfJaCadastrado.class)
+    public ResponseEntity<ApiResponse<Void>> handleCpfJaCadastrado(CpfJaCadastrado ex, HttpServletRequest request) {
+        log.warn("CPF já cadastrado: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(HttpStatus.CONFLICT, ex.getMessage(), request.getRequestURI()));
+    }
+
+    @ExceptionHandler(CnpjJaCadastrado.class)
+    public ResponseEntity<ApiResponse<Void>> handleCnpjJaCadastrado(CnpjJaCadastrado ex, HttpServletRequest request) {
+        log.warn("CNPJ já cadastrado: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(HttpStatus.CONFLICT, ex.getMessage(), request.getRequestURI()));
+    }
 
     @ExceptionHandler(DuplicidadeException.class)
-    public ResponseEntity<Object> handleDuplicidade(DuplicidadeException ex, WebRequest request) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.CONFLICT.value());
-        response.put("error", "Duplicidade");
-        response.put("message", ex.getMessage());
-        response.put("path", extractPath(request));
-    
-        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    public ResponseEntity<ApiResponse<Void>> handleDuplicidade(DuplicidadeException ex, HttpServletRequest request) {
+        log.warn("Duplicidade: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(HttpStatus.CONFLICT, ex.getMessage(), request.getRequestURI()));
     }
-    
+
     @ExceptionHandler(MissingServletRequestParameterException.class)
-public ResponseEntity<Object> handleMissingParams(MissingServletRequestParameterException ex, WebRequest request) {
-    Map<String, Object> response = new HashMap<>();
-    response.put("timestamp", LocalDateTime.now());
-    response.put("status", HttpStatus.BAD_REQUEST.value());
-    response.put("error", "Parâmetro obrigatório ausente");
-    response.put("message", "O parâmetro '" + ex.getParameterName() + "' é obrigatório.");
-    response.put("path", extractPath(request));
+    public ResponseEntity<ApiResponse<Void>> handleMissingParams(MissingServletRequestParameterException ex, HttpServletRequest request) {
+        String message = "O parâmetro '" + ex.getParameterName() + "' é obrigatório.";
+        return ResponseEntity.badRequest()
+                .body(ApiResponse.error(HttpStatus.BAD_REQUEST, message, request.getRequestURI()));
+    }
 
-    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-}
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMissingPart(MissingServletRequestPartException ex, HttpServletRequest request) {
+        String message = "O campo '" + ex.getRequestPartName() + "' (arquivo) é obrigatório.";
+        return ResponseEntity.badRequest()
+                .body(ApiResponse.error(HttpStatus.BAD_REQUEST, message, request.getRequestURI()));
+    }
 
-@ExceptionHandler(MissingServletRequestPartException.class)
-public ResponseEntity<Object> handleMissingPart(MissingServletRequestPartException ex, WebRequest request) {
-    Map<String, Object> response = new HashMap<>();
-    response.put("timestamp", LocalDateTime.now());
-    response.put("status", HttpStatus.BAD_REQUEST.value());
-    response.put("error", "Parte obrigatória ausente");
-    response.put("message", "O campo '" + ex.getRequestPartName() + "' (arquivo) é obrigatório.");
-    response.put("path", extractPath(request));
+    @ExceptionHandler(IOException.class)
+    public ResponseEntity<ApiResponse<Void>> handleIOException(IOException ex, HttpServletRequest request) {
+        log.error("Erro de I/O ao processar arquivo", ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao processar arquivo enviado", request.getRequestURI()));
+    }
 
-    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-}
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMaxUpload(MaxUploadSizeExceededException ex, HttpServletRequest request) {
+        log.warn("Upload excedeu o tamanho máximo", ex);
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+                .body(ApiResponse.error(HttpStatus.PAYLOAD_TOO_LARGE, "Arquivo muito grande", request.getRequestURI()));
+    }
 
+    @ExceptionHandler(MultipartException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMultipart(MultipartException ex, HttpServletRequest request) {
+        log.warn("Erro ao processar multipart request", ex);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(HttpStatus.BAD_REQUEST, "Erro ao processar arquivo enviado", request.getRequestURI()));
+    }
 
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse<Void>> handleGeneric(Exception ex, HttpServletRequest request) {
+        log.error("Erro inesperado na API", ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Erro interno", request.getRequestURI()));
+    }
 }

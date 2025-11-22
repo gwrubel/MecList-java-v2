@@ -1,16 +1,15 @@
 package com.meclist.controller;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 
-
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,22 +20,25 @@ import com.meclist.dto.adm.AdmRequest;
 import com.meclist.dto.mecanico.AtualizarMecanicoRequest;
 import com.meclist.dto.mecanico.MecanicoRequest;
 import com.meclist.dto.mecanico.MecanicoResponse;
+import com.meclist.response.ApiResponse;
 import com.meclist.usecase.mecanico.CadastrarMecanicoUseCase;
 import com.meclist.usecase.mecanico.AtualizarDadosMecanico;
 import com.meclist.usecase.mecanico.AuthMecanicoUseCase;
 import com.meclist.usecase.mecanico.BuscarPorSituacaoMecanicoUseCase;
 import com.meclist.usecase.mecanico.ListarMecanicosUseCase;
 
-import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.GetMapping;
-
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-
-
+/**
+ * Controller para gerenciar Mecânicos.
+ * 
+ * Endpoints:
+ * - POST   /mecanicos              - Cadastra novo mecânico
+ * - GET    /mecanicos              - Lista mecânicos (com filtro opcional de situação)
+ * - PUT    /mecanicos/{id}         - Atualiza dados do mecânico
+ * - POST   /mecanicos/login        - Autentica mecânico
+ */
 @RestController
 @RequestMapping("/mecanicos")
-public class MecanicoController {
+public class MecanicoController extends BaseController {
 
     private final CadastrarMecanicoUseCase cadastrarMecanicoUseCase;
     private final ListarMecanicosUseCase listarMecanicosUseCase;
@@ -44,7 +46,8 @@ public class MecanicoController {
     private final AtualizarDadosMecanico atualizarDadosMecanicoUseCase;
     private final AuthMecanicoUseCase authMecanicoUseCase;
 
-    public MecanicoController(CadastrarMecanicoUseCase cadastrarMecanicoUseCase,
+    public MecanicoController(
+            CadastrarMecanicoUseCase cadastrarMecanicoUseCase,
             ListarMecanicosUseCase listarMecanicosUseCase,
             AtualizarDadosMecanico atualizarDadosMecanicoUseCase,
             BuscarPorSituacaoMecanicoUseCase buscarPorSituacaoMecanicoUseCase,
@@ -56,57 +59,66 @@ public class MecanicoController {
         this.authMecanicoUseCase = authMecanicoUseCase;
     }
 
+    /**
+     * Cadastra um novo mecânico.
+     * 
+     * @param request Dados do mecânico a cadastrar
+     * @param servletRequest HttpServletRequest
+     * @return Resposta padronizada 201 CREATED
+     */
     @PostMapping
-    public ResponseEntity<Map<String, Object>> cadastrar(@RequestBody @Valid MecanicoRequest request, HttpServletRequest servletRequest) {
+    public ResponseEntity<ApiResponse<Void>> cadastrar(
+            @RequestBody @Valid MecanicoRequest request,
+            HttpServletRequest servletRequest) {
         cadastrarMecanicoUseCase.cadastrarMecanico(request);
-    
-        Map<String, Object> resposta = new HashMap<>();
-        resposta.put("timestamp", LocalDateTime.now());
-        resposta.put("status", HttpStatus.CREATED.value());
-        resposta.put("message", "Mecânico cadastrado com sucesso!");
-        resposta.put("path", servletRequest.getRequestURI());
-    
-        return ResponseEntity.status(HttpStatus.CREATED).body(resposta);
+        return created("Mecânico cadastrado com sucesso!", null, servletRequest);
     }
-    
 
-  @GetMapping
-public List<MecanicoResponse> listarMecanicos(@RequestParam(required = false) Situacao situacao) {
-    if (situacao != null) {
-        return buscarPorSituacaoMecanicoUseCase.buscarPorSituacao(situacao);
-    } else {
-        return listarMecanicosUseCase.listarTodos();
+    /**
+     * Lista mecânicos, opcionalmente filtrados por situação.
+     * 
+     * @param situacao Situação opcional para filtro
+     * @param servletRequest HttpServletRequest
+     * @return Lista de mecânicos
+     */
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<MecanicoResponse>>> listarMecanicos(
+            @RequestParam(required = false) Situacao situacao,
+            HttpServletRequest servletRequest) {
+        
+        List<MecanicoResponse> mecanicos = situacao != null
+            ? buscarPorSituacaoMecanicoUseCase.buscarPorSituacao(situacao)
+            : listarMecanicosUseCase.listarTodos();
+        
+        return success("Mecânicos listados com sucesso!", mecanicos, servletRequest);
     }
-}
 
+    /**
+     * Atualiza dados de um mecânico.
+     * 
+     * @param id ID do mecânico
+     * @param request Dados a atualizar
+     * @param servletRequest HttpServletRequest
+     * @return Resposta padronizada de sucesso
+     */
     @PutMapping("/{id}")
-public ResponseEntity<Map<String, Object>> atualizar(
-    @PathVariable Long id,
-    @RequestBody @Valid AtualizarMecanicoRequest request,
-    HttpServletRequest servletRequest 
-) {
-    atualizarDadosMecanicoUseCase.atualizarDados(request, id);
-
-    Map<String, Object> resposta = new HashMap<>();
-    resposta.put("timestamp", LocalDateTime.now());
-    resposta.put("status", HttpStatus.OK.value());
-    resposta.put("message", "Mecânico atualizado com sucesso!");
-    resposta.put("path", servletRequest.getRequestURI());
-
-    return ResponseEntity.ok(resposta);
-}
-
-    
-// @GetMapping("/situacao/{situacao}")
-// public List<MecanicoResponse> listarPorSituacao(@PathVariable Situacao situacao) {
-//     return buscarPorSituacaoMecanicoUseCase.buscarPorSituacao(situacao);
-// }
-
-
-    @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(@RequestBody AdmRequest request) {
-        String token = authMecanicoUseCase.autenticar(request.email(), request.senha());
-        return ResponseEntity.ok(Map.of("token", token));
+    public ResponseEntity<ApiResponse<Void>> atualizar(
+            @PathVariable Long id,
+            @RequestBody @Valid AtualizarMecanicoRequest request,
+            HttpServletRequest servletRequest) {
+        atualizarDadosMecanicoUseCase.atualizarDados(request, id);
+        return updated("Mecânico atualizado com sucesso!", null, servletRequest);
     }
 
+    /**
+     * Autentica um mecânico.
+     * 
+     * @param request Credenciais de login
+     * @return Token de autenticação
+     */
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<String>> login(@RequestBody AdmRequest request) {
+        String token = authMecanicoUseCase.autenticar(request.email(), request.senha());
+        return ResponseEntity.ok(ApiResponse.success("Login realizado com sucesso!", null, token));
+    }
 }
