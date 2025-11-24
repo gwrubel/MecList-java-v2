@@ -12,7 +12,11 @@ public record ItemResponse(
     String imagemIlustrativa,
     LocalDateTime criadoEm,
     LocalDateTime atualizadoEm
-) {}
+) {
+    public ItemResponse(Long id, String nome, CategoriaParteVeiculo parteDoVeiculo, String imagemIlustrativa) {
+        this(id, nome, parteDoVeiculo, imagemIlustrativa, null, null);
+    }
+}
 
 
 
