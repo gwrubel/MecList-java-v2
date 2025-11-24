@@ -11,13 +11,14 @@ import org.springframework.web.multipart.MultipartFile;
 import com.meclist.domain.Item;
 import com.meclist.domain.ItemProduto;
 import com.meclist.domain.enums.CategoriaParteVeiculo;
-import com.meclist.dto.checklist.ItemsPorCategoriaResponse;
 import com.meclist.dto.item.CadastrarItemRequest;
+import com.meclist.dto.item.ItemsPorCategoriaResponse;
 import com.meclist.dto.itemProduto.ItemProdutoResponse;
 import com.meclist.dto.produto.ProdutoRequest;
 import com.meclist.response.ApiResponse;
 import com.meclist.usecase.item.CadastrarItemUseCase;
 import com.meclist.usecase.item.ListarItensPorCategoriaUseCase;
+import com.meclist.usecase.item.ListarTodosItensUseCase;
 import com.meclist.usecase.item.ListarItensAgrupadosUseCase; 
 import com.meclist.usecase.itemProduto.CadastrarProdutoUseCase;
 import com.meclist.usecase.itemProduto.ListarProdutosPorItemUseCase;
@@ -43,23 +44,26 @@ public class ItemController extends BaseController {
     private static final Logger log = LoggerFactory.getLogger(ItemController.class);
 
     private final ListarItensPorCategoriaUseCase listarItensPorCategoriaUseCase;
-    private final ListarItensAgrupadosUseCase listarItensAgrupadosUseCase;  
+    // private final ListarItensAgrupadosUseCase listarItensAgrupadosUseCase;  
     private final CadastrarItemUseCase cadastrarItemUseCase;
     private final CadastrarProdutoUseCase cadastrarProdutoUseCase;
     private final ListarProdutosPorItemUseCase listarProdutosPorItemUseCase;
+    private final ListarTodosItensUseCase listarTodosItensUseCase;
 
     public ItemController(
             ListarItensPorCategoriaUseCase listarItensPorCategoriaUseCase,
             ListarItensAgrupadosUseCase listarItensAgrupadosUseCase,  
             CadastrarItemUseCase cadastrarItemUseCase,
             CadastrarProdutoUseCase cadastrarProdutoUseCase,
-            ListarProdutosPorItemUseCase listarProdutosPorItemUseCase) {
+            ListarProdutosPorItemUseCase listarProdutosPorItemUseCase,
+            ListarTodosItensUseCase listarTodosItensUseCase) {
         
         this.listarItensPorCategoriaUseCase = listarItensPorCategoriaUseCase;
-        this.listarItensAgrupadosUseCase = listarItensAgrupadosUseCase; 
+        // this.listarItensAgrupadosUseCase = listarItensAgrupadosUseCase; 
         this.cadastrarItemUseCase = cadastrarItemUseCase;
         this.cadastrarProdutoUseCase = cadastrarProdutoUseCase;
         this.listarProdutosPorItemUseCase = listarProdutosPorItemUseCase;
+        this.listarTodosItensUseCase = listarTodosItensUseCase;
     }
 
     /**
@@ -74,7 +78,7 @@ public class ItemController extends BaseController {
         
         List<?> itens = categoria != null 
             ? listarItensPorCategoriaUseCase.executar(categoria)
-            : List.of();
+            : listarTodosItensUseCase.executar();
         
         return ResponseEntity.ok(
             ApiResponse.success("Itens listados com sucesso", null, itens)
@@ -86,18 +90,18 @@ public class ItemController extends BaseController {
      * 
      * @return Itens agrupados por categoria
      */
-    @GetMapping("/agrupados")
-    public ResponseEntity<ApiResponse<List<ItemsPorCategoriaResponse>>> listarAgrupados() {
-        List<ItemsPorCategoriaResponse> itensAgrupados = listarItensAgrupadosUseCase.executar();
+    // @GetMapping("/agrupados")
+    // public ResponseEntity<ApiResponse<List<ItemsPorCategoriaResponse>>> listarAgrupados() {
+    //     List<ItemsPorCategoriaResponse> itensAgrupados = listarItensAgrupadosUseCase.executar();
         
-        return ResponseEntity.ok(
-            ApiResponse.success(
-                "Itens listados e agrupados com sucesso", 
-                null, 
-                itensAgrupados
-            )
-        );
-    }
+    //     return ResponseEntity.ok(
+    //         ApiResponse.success(
+    //             "Itens listados e agrupados com sucesso", 
+    //             null, 
+    //             itensAgrupados
+    //         )
+    //     );
+    // }
 
     /**
      * Cadastra um novo item com imagem.

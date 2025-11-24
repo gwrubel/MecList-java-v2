@@ -6,21 +6,21 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.meclist.domain.Item;
-import com.meclist.domain.enums.CategoriaParteVeiculo;
 import com.meclist.dto.item.ItemResponse;
 import com.meclist.interfaces.ItemGateway;
 
+
 @Service
-public class ListarItensPorCategoriaUseCase {
+public class ListarTodosItensUseCase {
+      private final ItemGateway itemGateway;
 
-    private final ItemGateway itemGateway;
-
-    public ListarItensPorCategoriaUseCase(ItemGateway itemGateway) {
+    public ListarTodosItensUseCase(ItemGateway itemGateway) {
         this.itemGateway = itemGateway;
     }
 
-    public List<ItemResponse> executar(CategoriaParteVeiculo categoria) {
-        List<Item> itens = itemGateway.buscarPorCategoria(categoria);
+
+    public List<ItemResponse> executar() {
+        List<Item> itens = itemGateway.buscarTodos();
         
         return itens.stream()
                 .map(item -> new ItemResponse(

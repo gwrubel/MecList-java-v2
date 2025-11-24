@@ -27,10 +27,15 @@ public class CadastrarClienteUseCase {
         ValidatorUtils.validarEmail(request.email());
         ValidatorUtils.validarSenha(request.senha());
 
+        System.out.println(request.documento());
+
+        String documentoLimpo = request.documento().replaceAll("\\D", "");
+
         if (request.tipoDocumento() == TipoDocumento.CPF) {
-            ValidatorUtils.validarCpf(request.documento());
+            ValidatorUtils.validarCpf(documentoLimpo);
         } else if (request.tipoDocumento() == TipoDocumento.CNPJ) {
-            ValidatorUtils.validarCnpj(request.documento());
+            System.out.println(documentoLimpo+"CNPJ");
+            ValidatorUtils.validarCnpj(documentoLimpo);
         }
 
         if (clienteGateway.buscarPorEmail(request.email()).isPresent()) {
