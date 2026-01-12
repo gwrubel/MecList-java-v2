@@ -9,12 +9,12 @@ import com.meclist.domain.enums.Situacao;
 
 public interface MecanicoGateway {
 
-    public void salvar(Mecanico mecanico);
+    public Mecanico salvar(Mecanico mecanico);
     public Optional<Mecanico> buscarPorEmail(String email);
     public Optional<Mecanico> buscarPorCpf(String cpf);
     List <Mecanico> buscarTodos();
     public Optional <Mecanico> bucarPorId(Long id);
-    public void atualizarMecanico(Mecanico mecanico);
+    public Mecanico atualizarMecanico(Mecanico mecanico);
     List<Mecanico> buscarPorSituacao(Situacao situacao);
 
 }

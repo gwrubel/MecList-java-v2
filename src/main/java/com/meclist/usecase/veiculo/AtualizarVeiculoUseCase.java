@@ -2,9 +2,12 @@ package com.meclist.usecase.veiculo;
 
 import org.springframework.stereotype.Service;
 
+import com.meclist.domain.Veiculo;
 import com.meclist.dto.veiculo.AtualizarVeiculoRequestDTO;
+import com.meclist.dto.veiculo.VeiculoResponse;
 import com.meclist.exception.VeiculoJaCadastrado;
 import com.meclist.interfaces.VeiculoGateway;
+import com.meclist.mapper.VeiculoMapper;
 import com.meclist.validator.ValidatorUtils;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -18,7 +21,7 @@ public class AtualizarVeiculoUseCase {
         this.veiculoGateway = veiculoGateway;
     }
 
-    public void atualizarVeiculo(Long idCliente, Long idVeiculo, AtualizarVeiculoRequestDTO request) {
+    public VeiculoResponse atualizarVeiculo(Long idCliente, Long idVeiculo, AtualizarVeiculoRequestDTO request) {
         var veiculo = veiculoGateway.buscarVeiculoPorId(idVeiculo)
                 .orElseThrow(() -> new EntityNotFoundException("Veículo com ID " + idVeiculo + " não encontrado!"));
 
@@ -48,6 +51,8 @@ public class AtualizarVeiculoUseCase {
         if (request.quilometragem() != 0)
             veiculo.atualizarQuilometragem(veiculo.getQuilometragem(), request.quilometragem());
 
-        veiculoGateway.atualizarVeiculo(veiculo);
+        Veiculo veiculoAtualizado = veiculoGateway.atualizarVeiculo(veiculo);
+
+        return VeiculoMapper.toResponse(veiculoAtualizado);
     }
 }

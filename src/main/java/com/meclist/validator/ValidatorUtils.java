@@ -28,7 +28,8 @@ public class ValidatorUtils {
     }
 
     public static void validarCpf(String cpf) {
-        if (!isCpfValido(cpf)) {
+        var cpfLimpo = cpf.replaceAll("\\D", "");
+        if (!isCpfValido(cpfLimpo)) {
             throw new CampoInvalidoException(
                     Map.of("cpf", "CPF inválido."));
         }
@@ -60,8 +61,8 @@ public class ValidatorUtils {
     }
 
     public static void validarCnpj(String cnpj) {
-        System.out.println(cnpj + "validarCnpj");
-        if (!isCnpjValido(cnpj)) {
+        var cnpjLimpo = cnpj.replaceAll("\\D", "");
+        if (!isCnpjValido(cnpjLimpo)) {
             throw new CampoInvalidoException(
                     Map.of("cnpj", "CNPJ inválido."));
         }
@@ -99,23 +100,7 @@ public class ValidatorUtils {
         return dig2 == Character.getNumericValue(cnpj.charAt(13));
     }
 
-    public static void validarCpfOuCnpj(String documento) {
-        if (documento == null) {
-            throw new CampoInvalidoException(
-                    Map.of("documento", "Documento não pode ser nulo."));
-        }
 
-        String limpo = documento.replaceAll("\\D", "");
-
-        if (limpo.length() == 11) {
-            validarCpf(limpo);
-        } else if (limpo.length() == 14) {
-            validarCnpj(limpo);
-        } else {
-            throw new CampoInvalidoException(
-                    Map.of("documento", "Documento deve ter 11 dígitos (CPF) ou 14 dígitos (CNPJ)."));
-        }
-    }
 
     public static void validarPlaca(String placa) {
         if (placa == null || placa.isBlank()) {

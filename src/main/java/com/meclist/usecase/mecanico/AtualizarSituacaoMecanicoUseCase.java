@@ -2,6 +2,7 @@ package com.meclist.usecase.mecanico;
 
 import org.springframework.stereotype.Service;
 
+import com.meclist.domain.Mecanico;
 import com.meclist.interfaces.MecanicoGateway;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -14,23 +15,23 @@ public class AtualizarSituacaoMecanicoUseCase {
         this.mecanicoGateway = mecanicoGateway;
     }
 
-    public void desativar(Long id) {
+    public Mecanico desativar(Long id) {
         var mecanico = mecanicoGateway.bucarPorId(id)
                 .orElseThrow(() -> new EntityNotFoundException("Mecânico não encontrado"));
 
         mecanico.desativar(); 
 
-        mecanicoGateway.salvar(mecanico); 
+       return mecanicoGateway.salvar(mecanico); 
 
     }
 
-    public void ativar(Long id) {
+    public Mecanico ativar(Long id) {
         var mecanico = mecanicoGateway.bucarPorId(id)
                 .orElseThrow(() -> new EntityNotFoundException("Mecânico não encontrado"));
 
         mecanico.ativar(); 
 
-        mecanicoGateway.salvar(mecanico); 
+       return mecanicoGateway.salvar(mecanico); 
 
     }
 

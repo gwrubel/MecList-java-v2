@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 
 import com.meclist.domain.Veiculo;
 import com.meclist.dto.veiculo.VeiculoRequestDTO;
+import com.meclist.dto.veiculo.VeiculoResponse;
 import com.meclist.exception.VeiculoJaCadastrado;
 import com.meclist.interfaces.VeiculoGateway;
 import com.meclist.mapper.ClienteMapper;
@@ -25,7 +26,7 @@ public class CadastrarVeiculoUseCase {
         this.clienteRepository = clienteRepository;
     }
 
-    public void cadastarVeiculo(Long clienteId, VeiculoRequestDTO request) {
+    public VeiculoResponse cadastarVeiculo(Long clienteId, VeiculoRequestDTO request) {
         ClienteEntity clienteEntity = clienteRepository.findById(clienteId)
                 .orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado"));
 
@@ -37,6 +38,8 @@ public class CadastrarVeiculoUseCase {
 
         Veiculo veiculo = VeiculoMapper.toDomain(request, ClienteMapper.toDomain(clienteEntity));
 
-        veiculoGateway.salvarVeiculo(veiculo);
+        var veiculoResponse = veiculoGateway.salvarVeiculo(veiculo);
+
+        return VeiculoMapper.toResponse(veiculoResponse);
     }
 }

@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import com.meclist.domain.Cliente;
 import com.meclist.domain.Veiculo;
+import com.meclist.dto.cliente.ClienteListResponse;
 import com.meclist.dto.cliente.ClienteResponse;
 import com.meclist.dto.veiculo.VeiculoResponse;
 import com.meclist.persistence.entity.ClienteEntity;
@@ -94,6 +95,23 @@ public static ClienteResponse toResponse(Cliente cliente) {
         cliente.getCriadoEm(),
         cliente.getAtualizadoEm(),
         veiculosResponse
+    );
+}
+
+public static ClienteListResponse toListResponse(Cliente cliente) {
+    return new ClienteListResponse(
+        cliente.getId(),
+        cliente.getNome(),
+        cliente.getEmail(),
+        cliente.getDocumento(),
+        cliente.getTipoDocumento(),
+        cliente.getTelefone(),
+        cliente.getEndereco(),
+        cliente.getTipoDeUsuario(),
+        cliente.getSituacao(),
+        cliente.getCriadoEm(),
+        cliente.getAtualizadoEm(),
+        cliente.getVeiculos() != null ? cliente.getVeiculos().size() : 0
     );
 }
 

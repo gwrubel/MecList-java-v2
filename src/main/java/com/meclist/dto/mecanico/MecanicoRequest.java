@@ -24,7 +24,6 @@ public record MecanicoRequest(
     String telefone,
     
     @NotBlank(message = "O CPF é obrigatório")
-    @Pattern(regexp = "\\d{11}", message = "CPF inválido! Deve conter 11 dígitos")
     String cpf,
     
     Situacao situacao

@@ -4,10 +4,13 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
+import com.meclist.domain.Mecanico;
 import com.meclist.dto.mecanico.AtualizarMecanicoRequest;
+import com.meclist.dto.mecanico.MecanicoResponse;
 import com.meclist.exception.CampoInvalidoException;
 import com.meclist.exception.EmailJaCadastrado;
 import com.meclist.interfaces.MecanicoGateway;
+import com.meclist.mapper.MecanicoMapper;
 import com.meclist.validator.ValidatorUtils;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -21,7 +24,7 @@ public class AtualizarDadosMecanico {
         this.mecanicoGateway = mecanicoGateway;
     }
 
-    public void atualizarDados(AtualizarMecanicoRequest request, Long id) {
+    public MecanicoResponse atualizarDados(AtualizarMecanicoRequest request, Long id) {
 
         var mecanico = mecanicoGateway.bucarPorId(id)
                 .orElseThrow(() -> new EntityNotFoundException("Mecânico com ID " + id + " não encontrado!"));
@@ -66,5 +69,7 @@ public class AtualizarDadosMecanico {
         }
 
         mecanicoGateway.atualizarMecanico(mecanico);
+
+        return MecanicoMapper.toResponse(mecanico);
     }
 }

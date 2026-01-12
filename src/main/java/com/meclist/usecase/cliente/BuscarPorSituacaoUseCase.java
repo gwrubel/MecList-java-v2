@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.meclist.domain.enums.Situacao;
-import com.meclist.dto.cliente.ClienteResponse;
+import com.meclist.dto.cliente.ClienteListResponse;
 import com.meclist.interfaces.ClienteGateway;
 import com.meclist.mapper.ClienteMapper;
 
@@ -19,10 +19,10 @@ public class BuscarPorSituacaoUseCase {
     }
 
 
-    public List <ClienteResponse> buscarPorSituacao(Situacao situacao) {
+    public List <ClienteListResponse> buscarPorSituacao(Situacao situacao) {
         return clienteGateway.buscarPorSituacao(situacao)
                 .stream()
-                .map(ClienteMapper::toResponse)
+                .map(ClienteMapper::toListResponse)
                 .toList();
     }
 }

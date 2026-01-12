@@ -1,6 +1,7 @@
 package com.meclist.controller;
 
 import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -8,35 +9,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.meclist.domain.Item;
-import com.meclist.domain.ItemProduto;
+
 import com.meclist.domain.enums.CategoriaParteVeiculo;
 import com.meclist.dto.item.CadastrarItemRequest;
-import com.meclist.dto.item.ItemsPorCategoriaResponse;
-import com.meclist.dto.itemProduto.ItemProdutoResponse;
-import com.meclist.dto.produto.ProdutoRequest;
+import com.meclist.dto.item.ItemResponse;
 import com.meclist.response.ApiResponse;
 import com.meclist.usecase.item.CadastrarItemUseCase;
+import com.meclist.usecase.item.ExcluirItemUseCase;
 import com.meclist.usecase.item.ListarItensPorCategoriaUseCase;
 import com.meclist.usecase.item.ListarTodosItensUseCase;
-import com.meclist.usecase.item.ListarItensAgrupadosUseCase; 
-import com.meclist.usecase.itemProduto.CadastrarProdutoUseCase;
-import com.meclist.usecase.itemProduto.ListarProdutosPorItemUseCase;
 
-import java.io.IOException;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
-/**
- * Controller para gerenciar Itens e Produtos associados.
- * 
- * Endpoints:
- * - GET    /itens              - Lista itens (com filtro opcional)
- * - GET    /itens/agrupados    - Lista itens agrupados por categoria
- * - POST   /itens              - Cadastra novo item com imagem
- * - POST   /itens/{id}/produtos - Cadastra produto em um item
- * - GET    /itens/{id}/produtos - Lista produtos de um item
- */
+
 @RestController
 @RequestMapping("/itens")
 public class ItemController extends BaseController {
@@ -44,143 +31,111 @@ public class ItemController extends BaseController {
     private static final Logger log = LoggerFactory.getLogger(ItemController.class);
 
     private final ListarItensPorCategoriaUseCase listarItensPorCategoriaUseCase;
-    // private final ListarItensAgrupadosUseCase listarItensAgrupadosUseCase;  
-    private final CadastrarItemUseCase cadastrarItemUseCase;
-    private final CadastrarProdutoUseCase cadastrarProdutoUseCase;
-    private final ListarProdutosPorItemUseCase listarProdutosPorItemUseCase;
     private final ListarTodosItensUseCase listarTodosItensUseCase;
+    private final CadastrarItemUseCase cadastrarItemUseCase;
+    private final ExcluirItemUseCase excluirItemUseCase;
 
     public ItemController(
             ListarItensPorCategoriaUseCase listarItensPorCategoriaUseCase,
-            ListarItensAgrupadosUseCase listarItensAgrupadosUseCase,  
+            ListarTodosItensUseCase listarTodosItensUseCase,
             CadastrarItemUseCase cadastrarItemUseCase,
-            CadastrarProdutoUseCase cadastrarProdutoUseCase,
-            ListarProdutosPorItemUseCase listarProdutosPorItemUseCase,
-            ListarTodosItensUseCase listarTodosItensUseCase) {
+            ExcluirItemUseCase excluirItemUseCase) {
         
         this.listarItensPorCategoriaUseCase = listarItensPorCategoriaUseCase;
-        // this.listarItensAgrupadosUseCase = listarItensAgrupadosUseCase; 
-        this.cadastrarItemUseCase = cadastrarItemUseCase;
-        this.cadastrarProdutoUseCase = cadastrarProdutoUseCase;
-        this.listarProdutosPorItemUseCase = listarProdutosPorItemUseCase;
         this.listarTodosItensUseCase = listarTodosItensUseCase;
+        this.cadastrarItemUseCase = cadastrarItemUseCase;
+        this.excluirItemUseCase = excluirItemUseCase;
     }
 
     /**
-     * Lista itens, opcionalmente filtrados por categoria.
+     * Lista todos os itens do checklist, com opção de filtro por categoria.
      * 
-     * @param categoria Categoria opcional para filtro
-     * @return Lista de itens como responses
+     * Se nenhuma categoria for informada, retorna todos os itens.
+     * Se uma categoria for fornecida, retorna apenas os itens dessa categoria.
+     * 
+     * @param categoria Categoria opcional para filtrar os itens (ex: MOTOR, SUSPENSAO)
+     * @return Lista de itens encontrados
+     * 
+     * Exemplos:
+     * GET /itens                          → Retorna todos os itens
+     * GET /itens?categoria=DENTRO_DO_VEICULO          → Retorna apenas itens da categoria DENTRO_DO_VEICULO
      */
-    @GetMapping
-    public ResponseEntity<ApiResponse<List<?>>> listarPorCategoria(
-            @RequestParam(required = false) CategoriaParteVeiculo categoria) {
+   @GetMapping
+    public ResponseEntity<ApiResponse<List<ItemResponse>>> listarItens(
+            @RequestParam(required = false) CategoriaParteVeiculo categoria,
+            HttpServletRequest request) {
         
-        List<?> itens = categoria != null 
+        log.debug("Listando itens: categoria={}", categoria != null ? categoria : "TODOS");
+        
+        List<ItemResponse> itens = categoria != null 
             ? listarItensPorCategoriaUseCase.executar(categoria)
             : listarTodosItensUseCase.executar();
         
-        return ResponseEntity.ok(
-            ApiResponse.success("Itens listados com sucesso", null, itens)
-        );
+        log.info("Itens listados: quantidade={}, categoria={}", 
+                 itens.size(), categoria != null ? categoria : "TODOS");
+        
+        return success("Itens listados com sucesso!", itens, request);
     }
 
     /**
-     * Lista todos os itens agrupados por categoria.
+     * Cadastra um novo item no checklist com sua imagem ilustrativa.
      * 
-     * @return Itens agrupados por categoria
-     */
-    // @GetMapping("/agrupados")
-    // public ResponseEntity<ApiResponse<List<ItemsPorCategoriaResponse>>> listarAgrupados() {
-    //     List<ItemsPorCategoriaResponse> itensAgrupados = listarItensAgrupadosUseCase.executar();
-        
-    //     return ResponseEntity.ok(
-    //         ApiResponse.success(
-    //             "Itens listados e agrupados com sucesso", 
-    //             null, 
-    //             itensAgrupados
-    //         )
-    //     );
-    // }
-
-    /**
-     * Cadastra um novo item com imagem.
-     * 
-     * @param nome Nome do item
+     * @param nome Nome descritivo do item
      * @param parteDoVeiculo Categoria/parte do veículo
-     * @param imagem Arquivo de imagem
-     * @param request HttpServletRequest para obter informações da requisição
-     * @return Item criado
-     */
-@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-public ResponseEntity<ApiResponse<Item>> cadastrarItem(
-        @RequestParam String nome,
-        @RequestParam CategoriaParteVeiculo parteDoVeiculo,
-        @RequestPart("imagem") MultipartFile imagem,
-        HttpServletRequest request) throws IOException {
-
-    log.debug("Recebido request para cadastrar item: nome={}, categoria={}", nome, parteDoVeiculo);
-
-    CadastrarItemRequest cadastroRequest = new CadastrarItemRequest(nome, parteDoVeiculo);
-    Item item = cadastrarItemUseCase.executar(cadastroRequest, imagem.getBytes());
-
-    log.info("Item cadastrado com sucesso: id={}, nome={}", item.getId(), nome);
-
-    return created("Item cadastrado com sucesso!", item, request);
-
-}
-
-    /**
-     * Cadastra um produto associado a um item.
+     * @param imagem Arquivo de imagem ilustrativa
+     * @param force Permite cadastrar mesmo se já existir item com mesmo nome e categoria
+     * @param request HttpServletRequest para construir URI
+     * @return ItemResponse com dados do item cadastrado
      * 
-     * @param idItem ID do item
-     * @param request Dados do produto a cadastrar
-     * @param servletRequest HttpServletRequest
-     * @return ItemProduto criado
+     * Exemplo de uso (form-data):
+     * POST /itens
+     * nome: "Filtro de óleo"
+     * parteDoVeiculo: MOTOR
+     * imagem: [arquivo]
+     * 
+     * POST /itens?force=true  (para forçar cadastro de duplicata)
      */
-    @PostMapping("/{idItem}/produtos")
-    public ResponseEntity<ApiResponse<ItemProduto>> cadastrarProdutoNoItem(
-            @PathVariable Long idItem,
-            @RequestBody @Valid ProdutoRequest request,
-            HttpServletRequest servletRequest) {
-        
-        log.debug("Cadastrando produto no item: idItem={}, produtoNome={}", 
-                  idItem, request.nomeProduto());
-        
-        ItemProduto itemProduto = cadastrarProdutoUseCase.executar(idItem, request);
-        
-        log.info("Produto cadastrado no item: idItem={}, idProduto={}", 
-                 idItem, itemProduto.getId());
-        
-        return created(
-            "Produto cadastrado e associado ao item com sucesso!", 
-            itemProduto, 
-            servletRequest
-        );
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<ItemResponse>> cadastrarItem(
+            @RequestParam @NotBlank(message = "Nome é obrigatório") String nome,
+            @RequestParam @NotNull(message = "Parte do veículo é obrigatória") CategoriaParteVeiculo parteDoVeiculo,
+            @RequestPart("imagem") @NotNull(message = "Imagem é obrigatória") MultipartFile imagem,
+            @RequestParam(required = false, defaultValue = "false") boolean force,
+            HttpServletRequest request) {
+
+        log.debug("Cadastrando novo item: nome={}, categoria={}, force={}, tamanhoImagem={}bytes", 
+                  nome, parteDoVeiculo, force, imagem.getSize());
+
+        CadastrarItemRequest cadastroRequest = new CadastrarItemRequest(nome, parteDoVeiculo);
+        ItemResponse itemResponse = cadastrarItemUseCase.executar(cadastroRequest, imagem, force);
+
+        log.info("Item cadastrado com sucesso: nome={}, force={}", nome, force);
+
+        return created("Item cadastrado com sucesso!", itemResponse, request);
     }
 
     /**
-     * Lista todos os produtos associados a um item.
+     * Exclui um item do checklist pelo seu ID.
      * 
-     * @param idItem ID do item
-     * @param servletRequest HttpServletRequest
-     * @return Lista de produtos
+     * Também remove a imagem ilustrativa associada ao item do sistema de arquivos.
+     * 
+     * @param idItem ID do item a ser excluído
+     * @param request HttpServletRequest para logs e auditoria
+     * @return Resposta sem conteúdo (204 No Content)
+     * 
+     * Exemplo de uso:
+     * DELETE /itens/123
      */
-    @GetMapping("/{idItem}/produtos")
-    public ResponseEntity<ApiResponse<List<ItemProdutoResponse>>> listarProdutosPorItem(
+    @DeleteMapping("/{idItem}")
+    public ResponseEntity<ApiResponse<Void>> deletarItem(
             @PathVariable Long idItem,
-            HttpServletRequest servletRequest) {
+            HttpServletRequest request) {
         
-        log.debug("Listando produtos do item: idItem={}", idItem);
         
-        List<ItemProdutoResponse> produtos = listarProdutosPorItemUseCase.executar(idItem);
+        excluirItemUseCase.executar(idItem);
         
-        log.info("Produtos listados: idItem={}, quantidade={}", idItem, produtos.size());
+        log.info("Item deletado com sucesso: idItem={}", idItem);
         
-        return success(
-            "Produtos listados com sucesso!", 
-            produtos, 
-            servletRequest
-        );
+        return noContent();
     }
 }

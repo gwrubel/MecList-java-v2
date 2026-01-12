@@ -3,12 +3,14 @@ package com.meclist.dto.cliente;
 import com.meclist.domain.enums.Situacao;
 import com.meclist.domain.enums.TipoDocumento;
 import com.meclist.domain.enums.TipoDeUsuario;
-import com.meclist.dto.veiculo.VeiculoResponse;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
-public record ClienteResponse(
+/**
+ * DTO simplificado para listagem de clientes.
+ * Retorna apenas a quantidade de veículos, não a lista completa.
+ */
+public record ClienteListResponse(
     Long id,
     String nome,
     String email,
@@ -20,7 +22,6 @@ public record ClienteResponse(
     Situacao situacao,
     LocalDateTime criadoEm,
     LocalDateTime atualizadoEm,
-    List<VeiculoResponse> veiculos
+    int quantidadeVeiculos
 ) {
-    
 }

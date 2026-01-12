@@ -10,7 +10,6 @@ import com.meclist.interfaces.ClienteGateway;
 import com.meclist.mapper.ClienteMapper;
 import com.meclist.persistence.repository.ClienteRepository;
 
-import jakarta.persistence.EntityNotFoundException;
 
 @Component
 public class ClienteGatewayImpl implements ClienteGateway{
@@ -21,8 +20,8 @@ public class ClienteGatewayImpl implements ClienteGateway{
     }
 
     @Override
-    public void salvar(Cliente cliente) {
-        repository.save(ClienteMapper.toEntity(cliente));
+    public Cliente salvar(Cliente cliente) {
+       return ClienteMapper.toDomain(repository.save(ClienteMapper.toEntity(cliente)));
     }
 
     @Override
@@ -49,12 +48,8 @@ public class ClienteGatewayImpl implements ClienteGateway{
     }
 
     @Override
-    public void atualizarCliente(Cliente cliente) {
-        if (!repository.existsById(cliente.getId())) {
-            throw new EntityNotFoundException("Cliente não encontrado");
-        }
-
-        repository.save(ClienteMapper.toEntity(cliente));
+    public Cliente atualizarCliente(Cliente cliente) {
+       return ClienteMapper.toDomain(repository.save(ClienteMapper.toEntity(cliente)));
     }
 
     @Override

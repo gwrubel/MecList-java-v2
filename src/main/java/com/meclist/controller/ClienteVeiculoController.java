@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.meclist.dto.veiculo.AtualizarVeiculoRequestDTO;
 import com.meclist.dto.veiculo.VeiculoRequestDTO;
+import com.meclist.dto.veiculo.VeiculoResponse;
 import com.meclist.response.ApiResponse;
 import com.meclist.usecase.veiculo.AtualizarVeiculoUseCase;
 import com.meclist.usecase.veiculo.CadastrarVeiculoUseCase;
@@ -17,13 +18,7 @@ import com.meclist.usecase.veiculo.CadastrarVeiculoUseCase;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
-/**
- * Controller para gerenciar Veículos de um Cliente específico.
- * 
- * Endpoints:
- * - POST   /clientes/{idCliente}/veiculos           - Cadastra novo veículo
- * - PUT    /clientes/{idCliente}/veiculos/{idVeiculo} - Atualiza veículo
- */
+
 @RestController
 @RequestMapping("/clientes/{idCliente}/veiculos")
 public class ClienteVeiculoController extends BaseController {
@@ -47,12 +42,12 @@ public class ClienteVeiculoController extends BaseController {
      * @return Resposta padronizada 201 CREATED
      */
     @PostMapping
-    public ResponseEntity<ApiResponse<Void>> cadastrarVeiculo(
+    public ResponseEntity<ApiResponse<VeiculoResponse>> cadastrarVeiculo(
             @PathVariable Long idCliente,
             @Valid @RequestBody VeiculoRequestDTO request,
             HttpServletRequest servletRequest) {
-        cadastrarVeiculoUseCase.cadastarVeiculo(idCliente, request);
-        return created("Veículo cadastrado com sucesso!", null, servletRequest);
+        var veiculo = cadastrarVeiculoUseCase.cadastarVeiculo(idCliente, request);
+        return created("Veículo cadastrado com sucesso!", veiculo, servletRequest);
     }
 
     /**
@@ -65,12 +60,12 @@ public class ClienteVeiculoController extends BaseController {
      * @return Resposta padronizada de sucesso
      */
     @PutMapping("/{idVeiculo}")
-    public ResponseEntity<ApiResponse<Void>> atualizarVeiculo(
+    public ResponseEntity<ApiResponse<VeiculoResponse>> atualizarVeiculo(
             @PathVariable Long idCliente,
             @PathVariable Long idVeiculo,
             @Valid @RequestBody AtualizarVeiculoRequestDTO request,
             HttpServletRequest servletRequest) {
-        atualizarVeiculoUseCase.atualizarVeiculo(idCliente, idVeiculo, request);
-        return updated("Veículo atualizado com sucesso!", null, servletRequest);
+        var veiculo = atualizarVeiculoUseCase.atualizarVeiculo(idCliente, idVeiculo, request);
+        return updated("Veículo atualizado com sucesso!", veiculo, servletRequest);
     }
 }

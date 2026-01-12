@@ -3,7 +3,9 @@ package com.meclist.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+
 import com.meclist.dto.adm.AdmRequest;
+import com.meclist.dto.adm.AdmResponse;
 import com.meclist.response.ApiResponse;
 import com.meclist.usecase.adm.AutenticarAdmUseCase;
 import com.meclist.usecase.adm.CadastroAdmUseCase;
@@ -39,13 +41,13 @@ public class AdmController extends BaseController {
      * @return Resposta de sucesso com status 201 CREATED
      */
     @PostMapping
-    public ResponseEntity<ApiResponse<Void>> cadastrar(
+    public ResponseEntity<ApiResponse<AdmResponse>> cadastrar(
             @RequestBody @Valid AdmRequest request,
             HttpServletRequest servletRequest) {
         
-        cadastroAdmUseCase.cadastrarAdm(request);
+       var adm = cadastroAdmUseCase.cadastrarAdm(request);
         
-        return created("Administrador cadastrado com sucesso!", null, servletRequest);
+        return created("Administrador cadastrado com sucesso!", adm, servletRequest);
     }
 
     /**

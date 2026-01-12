@@ -54,7 +54,12 @@ public class ApiExceptionHandler {
     public ResponseEntity<ApiResponse<Object>> handleCampoInvalido(CampoInvalidoException ex, HttpServletRequest request) {
         log.warn("Campos inválidos: {}", ex.getErros());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.error(HttpStatus.BAD_REQUEST.value(), "Erro de validação", request.getRequestURI(), (Object) ex.getErros()));
+                .body(ApiResponse.error(
+                        HttpStatus.BAD_REQUEST.value(),
+                        "Erro de validação",
+                        request.getRequestURI(),
+                        Map.of("errors", ex.getErros())
+                ));
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
@@ -64,40 +69,7 @@ public class ApiExceptionHandler {
                 .body(ApiResponse.error(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI()));
     }
 
-    @ExceptionHandler(VeiculoJaCadastrado.class)
-    public ResponseEntity<ApiResponse<Void>> handleVeiculoJaCadastrado(VeiculoJaCadastrado ex, HttpServletRequest request) {
-        log.warn("Veículo já cadastrado: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(ApiResponse.error(HttpStatus.CONFLICT, ex.getMessage(), request.getRequestURI()));
-    }
 
-    @ExceptionHandler(EmailJaCadastrado.class)
-    public ResponseEntity<ApiResponse<Void>> handleEmailJaCadastrado(EmailJaCadastrado ex, HttpServletRequest request) {
-        log.warn("Email já cadastrado: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(ApiResponse.error(HttpStatus.CONFLICT, ex.getMessage(), request.getRequestURI()));
-    }
-
-    @ExceptionHandler(CpfJaCadastrado.class)
-    public ResponseEntity<ApiResponse<Void>> handleCpfJaCadastrado(CpfJaCadastrado ex, HttpServletRequest request) {
-        log.warn("CPF já cadastrado: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(ApiResponse.error(HttpStatus.CONFLICT, ex.getMessage(), request.getRequestURI()));
-    }
-
-    @ExceptionHandler(CnpjJaCadastrado.class)
-    public ResponseEntity<ApiResponse<Void>> handleCnpjJaCadastrado(CnpjJaCadastrado ex, HttpServletRequest request) {
-        log.warn("CNPJ já cadastrado: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(ApiResponse.error(HttpStatus.CONFLICT, ex.getMessage(), request.getRequestURI()));
-    }
-
-    @ExceptionHandler(DuplicidadeException.class)
-    public ResponseEntity<ApiResponse<Void>> handleDuplicidade(DuplicidadeException ex, HttpServletRequest request) {
-        log.warn("Duplicidade: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(ApiResponse.error(HttpStatus.CONFLICT, ex.getMessage(), request.getRequestURI()));
-    }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<ApiResponse<Void>> handleMissingParams(MissingServletRequestParameterException ex, HttpServletRequest request) {
@@ -134,10 +106,33 @@ public class ApiExceptionHandler {
                 .body(ApiResponse.error(HttpStatus.BAD_REQUEST, "Erro ao processar arquivo enviado", request.getRequestURI()));
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Void>> handleGeneric(Exception ex, HttpServletRequest request) {
-        log.error("Erro inesperado na API", ex);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Erro interno", request.getRequestURI()));
+        @ExceptionHandler(CustomException.class)
+        public ResponseEntity<ApiResponse<Void>> handleCustom(CustomException ex, HttpServletRequest request) {
+                ApiResponse<Void> response = ApiResponse.error(
+                                ex.getStatus(),
+                                ex.getMessage(),
+                                request.getRequestURI(),
+                                null
+                );
+                return ResponseEntity.status(ex.getStatus()).body(response);
+        }
+
+        
+    @ExceptionHandler(ItemNaoEncontradoException.class)
+    public ResponseEntity<ApiResponse<Void>> handleItemNaoEncontrado(ItemNaoEncontradoException ex, HttpServletRequest request) {
+        log.warn("Item não encontrado: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI()));
     }
+
+        @ExceptionHandler(Exception.class)
+        public ResponseEntity<ApiResponse<Void>> handleGeneric(Exception ex, HttpServletRequest request) {
+                log.error("Erro inesperado na API", ex);
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Erro interno", request.getRequestURI()));
+        }
+
+
+
+
 }
