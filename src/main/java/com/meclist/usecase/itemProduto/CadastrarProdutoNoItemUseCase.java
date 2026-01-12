@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import com.meclist.interfaces.ProdutoGateway;
 import com.meclist.domain.Produto;
 import com.meclist.dto.produto.ProdutoRequest;
+import com.meclist.exception.ProdutoJaExisteException;
 import com.meclist.interfaces.ItemGateway;
 import com.meclist.interfaces.ItemProdutoGateway;
 import com.meclist.domain.ItemProduto;
@@ -13,12 +14,12 @@ import java.util.Optional;
 
 
 @Service
-public class CadastrarProdutoUseCase {
+public class CadastrarProdutoNoItemUseCase {
     private final ItemGateway itemGateway;
     private final ProdutoGateway produtoGateway;
     private final ItemProdutoGateway itemProdutoGateway;
     
-    public CadastrarProdutoUseCase(ItemGateway itemGateway, ProdutoGateway produtoGateway, ItemProdutoGateway itemProdutoGateway) {
+    public CadastrarProdutoNoItemUseCase(ItemGateway itemGateway, ProdutoGateway produtoGateway, ItemProdutoGateway itemProdutoGateway) {
         this.itemGateway = itemGateway;
         this.produtoGateway = produtoGateway;
         this.itemProdutoGateway = itemProdutoGateway;
@@ -35,7 +36,7 @@ public class CadastrarProdutoUseCase {
         
         // 3. Verificar se já existe associação
         if (itemProdutoGateway.existeRelacionamento(item.getId(), produto.getId())) {
-            throw new RuntimeException("Produto já está associado a este item");
+            throw new ProdutoJaExisteException("Produto já está associado a este item");
         }
         
         // 4. Criar associação ItemProduto

@@ -1,7 +1,9 @@
 package com.meclist.controller;
 
+
 import com.meclist.domain.enums.Situacao;
 import com.meclist.dto.cliente.AtualizarClienteRequest;
+import com.meclist.dto.cliente.ClienteListResponse;
 import com.meclist.dto.cliente.ClienteRequest;
 import com.meclist.dto.cliente.ClienteResponse;
 import com.meclist.response.ApiResponse;
@@ -19,19 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * Controller para gerenciar operações relacionadas a Clientes.
- *
- * Endpoints principais:
- * - POST   /clientes            : Cadastra um novo cliente
- * - GET    /clientes            : Lista clientes (opcionalmente filtrando por situação)
- * - GET    /clientes/{id}       : Busca cliente por ID
- * - PUT    /clientes/{id}       : Atualiza dados do cliente
- *
- * Observações:
- * - Respostas são padronizadas usando `BaseController` e `ApiResponse`.
- * - Em métodos que retornam dados, incluí `HttpServletRequest` para preencher `path` no `ApiResponse`.
- */
+
 @RestController
 @RequestMapping("/clientes")
 public class ClienteController extends BaseController {
@@ -66,11 +56,12 @@ public class ClienteController extends BaseController {
      * Body: { "nome": "João", "cpf": "000.000.000-00", ... }
      */
     @PostMapping
-    public ResponseEntity<ApiResponse<Void>> cadastrarCliente(
+    public ResponseEntity<ApiResponse<ClienteResponse>> cadastrarCliente(
             @RequestBody @Valid ClienteRequest request,
             HttpServletRequest servletRequest) {
-        cadastrarClienteUseCase.cadastrarCliente(request);
-        return created("Cliente cadastrado com sucesso!", null, servletRequest);
+
+        var cliente = cadastrarClienteUseCase.cadastrarCliente(request);
+        return created("Cliente cadastrado com sucesso!", cliente, servletRequest);
     }
 
     /**
@@ -79,17 +70,18 @@ public class ClienteController extends BaseController {
      * Parâmetros:
      * - `situacao` (opcional): filtra por `Situacao` (ex.: ATIVO, INATIVO)
      *
-     * Retorno: 200 OK com `ApiResponse<List<ClienteResponse>>`.
+     * Retorno: 200 OK com `ApiResponse<List<ClienteListResponse>>`.
+     * Retorna apenas a quantidade de veículos, não a lista completa, para melhor performance.
      *
      * Observação: aqui mantivemos retorno simples sem paginação; se desejar,
      * é recomendado adicionar `Pageable` e devolver `page(...)`.
      */
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ClienteResponse>>> listarClientes(
+    public ResponseEntity<ApiResponse<List<ClienteListResponse>>> listarClientes(
             @RequestParam(required = false) Situacao situacao,
             HttpServletRequest request) {
 
-        List<ClienteResponse> clientes;
+        List<ClienteListResponse> clientes;
         if (situacao != null) {
             clientes = buscarPorSituacaoUseCase.buscarPorSituacao(situacao);
         } else {
@@ -109,12 +101,13 @@ public class ClienteController extends BaseController {
      * Retorno: 200 OK com resposta padronizada (`ApiResponse<Void>`).
      */
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> atualizarCliente(
+    public ResponseEntity<ApiResponse<ClienteResponse>> atualizarCliente(
             @RequestBody @Valid AtualizarClienteRequest request,
             @PathVariable Long id,
             HttpServletRequest servletRequest) {
-        atualizarDadosClienteUseCase.atualizarDados(request, id);
-        return updated("Cliente atualizado com sucesso!", null, servletRequest);
+
+        var cliente = atualizarDadosClienteUseCase.atualizarDados(request, id);
+        return updated("Cliente atualizado com sucesso!", cliente, servletRequest);
     }
 
     /**

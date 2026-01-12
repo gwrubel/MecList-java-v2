@@ -6,7 +6,7 @@ import com.meclist.domain.Adm;
 
 public interface AdmGateway {
     
-    public void cadastrarAdm(Adm adm);
+    public Adm cadastrarAdm(Adm adm);
     Optional <Adm> buscarPorEmail(String email);
     
 }

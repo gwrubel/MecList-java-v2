@@ -12,7 +12,6 @@ import com.meclist.interfaces.MecanicoGateway;
 import com.meclist.mapper.MecanicoMapper;
 import com.meclist.persistence.repository.MecanicoRepository;
 
-import jakarta.persistence.EntityNotFoundException;
 
 @Component
 public class MecanicoGatewayImpl implements MecanicoGateway {
@@ -23,8 +22,8 @@ public class MecanicoGatewayImpl implements MecanicoGateway {
     }
 
     @Override
-    public void salvar(Mecanico mecanico) {
-        repository.save(MecanicoMapper.toEntity(mecanico));
+    public Mecanico salvar(Mecanico mecanico) {
+        return MecanicoMapper.toDomain(repository.save(MecanicoMapper.toEntity(mecanico)));
     }
 
     @Override
@@ -51,12 +50,9 @@ public class MecanicoGatewayImpl implements MecanicoGateway {
     }
 
     @Override
-    public void atualizarMecanico(Mecanico mecanico) {
-        if (!repository.existsById(mecanico.getId())) {
-            throw new EntityNotFoundException("Mecânico não encontrado");
-        }
-
-        repository.save(MecanicoMapper.toEntity(mecanico));
+    public Mecanico atualizarMecanico(Mecanico mecanico) {
+        
+        return MecanicoMapper.toDomain(repository.save(MecanicoMapper.toEntity(mecanico)));
     }
 
     @Override

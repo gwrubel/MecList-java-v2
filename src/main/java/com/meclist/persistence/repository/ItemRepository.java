@@ -13,4 +13,7 @@ public interface ItemRepository extends JpaRepository<ItemEntity, Long> {
     
     @Query("SELECT i FROM ItemEntity i WHERE i.parteDoVeiculo = :categoria")
     List<ItemEntity> findByCategoria(@Param("categoria") CategoriaParteVeiculo categoria);
+
+
+    boolean existsByNomeItem(String nomeItem);
 }

@@ -49,4 +49,14 @@ public class ItemGatewayImpl implements ItemGateway {
                 .map(ItemMapper::toDomain)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public boolean existeComMesmoNome(String nome) {
+        return itemRepository.existsByNomeItem(nome);
+    }
+
+    @Override
+    public void excluir (Long id) {
+        itemRepository.deleteById(id);
+    }
 }

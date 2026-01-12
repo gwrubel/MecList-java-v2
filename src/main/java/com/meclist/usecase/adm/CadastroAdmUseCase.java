@@ -2,6 +2,8 @@ package com.meclist.usecase.adm;
 
 import com.meclist.domain.Adm;
 import com.meclist.dto.adm.AdmRequest;
+import com.meclist.dto.adm.AdmResponse;
+import com.meclist.exception.EmailJaCadastrado;
 import com.meclist.interfaces.AdmGateway;
 import com.meclist.interfaces.PasswordEncrypter;
 import com.meclist.validator.ValidatorUtils;
@@ -18,19 +20,21 @@ public class CadastroAdmUseCase {
         this.encrypter = encrypter;
     }
 
-   public void cadastrarAdm(AdmRequest request) {
-    ValidatorUtils.validarEmail(request.email());
-    ValidatorUtils.validarSenha(request.senha());
+    public AdmResponse cadastrarAdm(AdmRequest request) {
+        ValidatorUtils.validarEmail(request.email());
+        ValidatorUtils.validarSenha(request.senha());
 
-    if (gateway.buscarPorEmail(request.email()).isPresent()) {
-        throw new IllegalArgumentException("Já existe um administrador com esse e-mail.");
+        if (gateway.buscarPorEmail(request.email()).isPresent()) {
+            throw new EmailJaCadastrado("Já existe um administrador com esse e-mail.");
+        }
+
+        String senhaHash = encrypter.hash(request.senha());
+
+        Adm novoAdm = Adm.novoCadastro(request.nome(), request.email(), senhaHash);
+
+        Adm admSalvo = gateway.cadastrarAdm(novoAdm);
+
+        return AdmResponse.fromEntity(admSalvo);
     }
-
-    String senhaHash = encrypter.hash(request.senha());
-
-    Adm novoAdm = Adm.novoCadastro(request.nome(), request.email(), senhaHash);
-
-    gateway.cadastrarAdm(novoAdm);
-}
 
 }

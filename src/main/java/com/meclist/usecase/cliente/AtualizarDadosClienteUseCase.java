@@ -1,14 +1,16 @@
 package com.meclist.usecase.cliente;
 
-import java.util.Map;
-
 import org.springframework.stereotype.Service;
 
+import com.meclist.domain.Cliente;
 import com.meclist.domain.enums.TipoDocumento;
 import com.meclist.dto.cliente.AtualizarClienteRequest;
-import com.meclist.exception.CampoInvalidoException;
+import com.meclist.dto.cliente.ClienteResponse;
+import com.meclist.exception.CnpjJaCadastrado;
+import com.meclist.exception.CpfJaCadastrado;
 import com.meclist.exception.EmailJaCadastrado;
 import com.meclist.interfaces.ClienteGateway;
+import com.meclist.mapper.ClienteMapper;
 import com.meclist.validator.ValidatorUtils;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -22,7 +24,7 @@ public class AtualizarDadosClienteUseCase {
         this.clienteGateway = clienteGateway;
     }
 
-    public void atualizarDados(AtualizarClienteRequest request, Long id) {
+    public ClienteResponse atualizarDados(AtualizarClienteRequest request, Long id) {
         var cliente = clienteGateway.buscarPorId(id)
                 .orElseThrow(() -> new EntityNotFoundException("Cliente com ID " + id + " não encontrado!"));
 
@@ -41,7 +43,7 @@ public class AtualizarDadosClienteUseCase {
             if (!cliente.getEmail().equals(request.email())) {
                 var clienteComMesmoEmail = clienteGateway.buscarPorEmail(request.email());
                 if (clienteComMesmoEmail.isPresent() && !clienteComMesmoEmail.get().getId().equals(id)) {
-                    throw new EmailJaCadastrado("O e-mail '" + request.email() + "' já está cadastrado para outro cliente");
+                    throw new EmailJaCadastrado("O e-mail já está cadastrado para outro cliente");
                 }
             }
             
@@ -49,20 +51,26 @@ public class AtualizarDadosClienteUseCase {
         }
 
         if (request.documento() != null && request.tipoDocumento() != null) {
+            String documentoLimpo = request.documento().replaceAll("\\D", "");
+            
             if (request.tipoDocumento() == TipoDocumento.CPF) {
-                ValidatorUtils.validarCpf(request.documento());
+                ValidatorUtils.validarCpf(documentoLimpo);
             } else if (request.tipoDocumento() == TipoDocumento.CNPJ) {
-                ValidatorUtils.validarCnpj(request.documento());
+                ValidatorUtils.validarCnpj(documentoLimpo);
             }
             
-            if (!cliente.getDocumento().equals(request.documento())) {
-                var clienteComMesmoDocumento = clienteGateway.buscarPorDocumento(request.documento());
+            if (!cliente.getDocumento().equals(documentoLimpo)) {
+                var clienteComMesmoDocumento = clienteGateway.buscarPorDocumento(documentoLimpo);
                 if (clienteComMesmoDocumento.isPresent() && !clienteComMesmoDocumento.get().getId().equals(id)) {
-                    throw new CampoInvalidoException(Map.of("documento", "Documento já cadastrado!"));
+                    if (request.tipoDocumento() == TipoDocumento.CPF) {
+                        throw new CpfJaCadastrado(documentoLimpo);
+                    } else {
+                        throw new CnpjJaCadastrado(documentoLimpo);
+                    }
                 }
             }
             
-            cliente.atualizarDocumento(request.documento(), request.tipoDocumento());
+            cliente.atualizarDocumento(documentoLimpo, request.tipoDocumento());
         }
 
         if (request.situacao() != null) {
@@ -73,6 +81,8 @@ public class AtualizarDadosClienteUseCase {
             cliente.atualizarEndereco(request.endereco());
         }
 
-        clienteGateway.atualizarCliente(cliente);
+       Cliente clienteAtualizado = clienteGateway.atualizarCliente(cliente);
+
+         return ClienteMapper.toResponse(clienteAtualizado);
     }
 }

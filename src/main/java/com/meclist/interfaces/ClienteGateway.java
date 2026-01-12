@@ -7,7 +7,7 @@ import com.meclist.domain.Cliente;
 import com.meclist.domain.enums.Situacao;
 
 public interface ClienteGateway {
-    public void salvar(Cliente cliente);
+    public Cliente salvar(Cliente cliente);
 
     public Optional<Cliente> buscarPorEmail(String email);
 
@@ -17,7 +17,7 @@ public interface ClienteGateway {
 
     List<Cliente> buscarTodos();
 
-    public void atualizarCliente(Cliente cliente);
+    public Cliente atualizarCliente(Cliente cliente);
 
     List<Cliente> buscarPorSituacao(Situacao situacao);
 }

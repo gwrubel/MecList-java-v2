@@ -15,7 +15,6 @@ public record AtualizarMecanicoRequest(
     @Pattern(regexp = "\\d{10,11}", message = "Telefone inválido! Deve conter 10 ou 11 dígitos")
     String telefone,
 
-    @Pattern(regexp = "\\d{11}", message = "CPF inválido! Deve conter 11 dígitos")
     String cpf,
 
     Situacao situacao,

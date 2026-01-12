@@ -60,4 +60,11 @@ public class ProdutoGatewayImpl implements ProdutoGateway {
     public void excluir(Long id) {
         produtoRepository.deleteById(id);
     }
+
+    @Override
+    public Produto atualizar(Produto produto) {
+        ProdutoEntity entity = ProdutoMapper.toEntity(produto);
+        entity = produtoRepository.save(entity);
+        return ProdutoMapper.toDomain(entity);
+    }
 }

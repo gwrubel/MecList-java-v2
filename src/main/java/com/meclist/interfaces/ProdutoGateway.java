@@ -12,4 +12,5 @@ public interface ProdutoGateway {
     Optional<Produto> buscarPorNome(String nomeProduto);
     List<Produto> buscarPorNomeContendo(String nomeProduto);
     void excluir(Long id);
+    Produto atualizar(Produto produto);
 }

@@ -18,8 +18,8 @@ public class AdmGatewayImpl implements AdmGateway {
     }
 
     @Override
-    public void cadastrarAdm(Adm adm) {
-        repository.save(AdmMapper.toEntity(adm));
+    public Adm cadastrarAdm(Adm adm) {
+        return AdmMapper.toDomain(repository.save(AdmMapper.toEntity(adm)));
     }
 
     @Override

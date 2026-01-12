@@ -32,11 +32,13 @@ public class ItemProdutoGatewayImpl implements ItemProdutoGateway {
 
     @Override
     public ItemProduto salvar(ItemProduto itemProduto) {
-        ItemEntity itemEntity = itemRepository.findById(itemProduto.getItem().getId())
-                .orElseThrow(() -> new RuntimeException("Item não encontrado"));
+        ItemEntity itemEntity = itemRepository.getReferenceById(
+            itemProduto.getItem().getId()
+        );
         
-        ProdutoEntity produtoEntity = produtoRepository.findById(itemProduto.getProduto().getId())
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+        ProdutoEntity produtoEntity = produtoRepository.getReferenceById(
+            itemProduto.getProduto().getId()
+        );
         
         ItemProdutoEntity entity = ItemProdutoMapper.toEntity(itemProduto, itemEntity, produtoEntity);
         entity = itemProdutoRepository.save(entity);

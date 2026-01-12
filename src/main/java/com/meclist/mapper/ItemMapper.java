@@ -2,9 +2,12 @@ package com.meclist.mapper;
 
 import java.util.List;
 
+
 import com.meclist.domain.Item;
 import com.meclist.domain.Produto;
+import com.meclist.dto.item.ItemResponse;
 import com.meclist.persistence.entity.ItemEntity;
+
 
 public class ItemMapper {
 
@@ -59,5 +62,10 @@ public class ItemMapper {
         }
         
         return item;
+    }
+
+
+    public static ItemResponse toResponse(Item item) {
+        return new ItemResponse(item.getId(), item.getNome(), item.getParteDoVeiculo(), item.getImagemIlustrativa(), item.getCriadoEm(), item.getAtualizadoEm());
     }
 }

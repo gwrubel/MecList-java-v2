@@ -3,7 +3,7 @@ package com.meclist.usecase.cliente;
 
 
 
-import com.meclist.dto.cliente.ClienteResponse;
+import com.meclist.dto.cliente.ClienteListResponse;
 import com.meclist.interfaces.ClienteGateway;
 import com.meclist.mapper.ClienteMapper;
 
@@ -20,10 +20,10 @@ public class ListarClientesUseCase {
         this.clienteGateway = clienteGateway;
     }
 
-    public List<ClienteResponse> listar() {
+    public List<ClienteListResponse> listar() {
         return clienteGateway.buscarTodos()
         .stream()
-        .map(ClienteMapper::toResponse)
+        .map(ClienteMapper::toListResponse)
         .toList();
                 
     }

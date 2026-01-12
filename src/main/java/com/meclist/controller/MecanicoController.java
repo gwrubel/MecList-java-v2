@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+
 import com.meclist.domain.enums.Situacao;
 import com.meclist.dto.adm.AdmRequest;
 import com.meclist.dto.mecanico.AtualizarMecanicoRequest;
@@ -27,15 +28,7 @@ import com.meclist.usecase.mecanico.AuthMecanicoUseCase;
 import com.meclist.usecase.mecanico.BuscarPorSituacaoMecanicoUseCase;
 import com.meclist.usecase.mecanico.ListarMecanicosUseCase;
 
-/**
- * Controller para gerenciar Mecânicos.
- * 
- * Endpoints:
- * - POST   /mecanicos              - Cadastra novo mecânico
- * - GET    /mecanicos              - Lista mecânicos (com filtro opcional de situação)
- * - PUT    /mecanicos/{id}         - Atualiza dados do mecânico
- * - POST   /mecanicos/login        - Autentica mecânico
- */
+
 @RestController
 @RequestMapping("/mecanicos")
 public class MecanicoController extends BaseController {
@@ -67,11 +60,12 @@ public class MecanicoController extends BaseController {
      * @return Resposta padronizada 201 CREATED
      */
     @PostMapping
-    public ResponseEntity<ApiResponse<Void>> cadastrar(
+    public ResponseEntity<ApiResponse<MecanicoResponse>> cadastrar(
             @RequestBody @Valid MecanicoRequest request,
             HttpServletRequest servletRequest) {
-        cadastrarMecanicoUseCase.cadastrarMecanico(request);
-        return created("Mecânico cadastrado com sucesso!", null, servletRequest);
+
+        MecanicoResponse mecanico = cadastrarMecanicoUseCase.cadastrarMecanico(request);
+        return created("Mecânico cadastrado com sucesso!", mecanico, servletRequest);
     }
 
     /**
@@ -102,12 +96,12 @@ public class MecanicoController extends BaseController {
      * @return Resposta padronizada de sucesso
      */
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> atualizar(
+    public ResponseEntity<ApiResponse<MecanicoResponse>> atualizar(
             @PathVariable Long id,
             @RequestBody @Valid AtualizarMecanicoRequest request,
             HttpServletRequest servletRequest) {
-        atualizarDadosMecanicoUseCase.atualizarDados(request, id);
-        return updated("Mecânico atualizado com sucesso!", null, servletRequest);
+        MecanicoResponse mecanico = atualizarDadosMecanicoUseCase.atualizarDados(request, id);
+        return updated("Mecânico atualizado com sucesso!", mecanico, servletRequest);
     }
 
     /**
