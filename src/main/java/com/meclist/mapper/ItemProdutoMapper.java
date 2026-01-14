@@ -3,6 +3,7 @@ package com.meclist.mapper;
 import com.meclist.domain.Item;
 import com.meclist.domain.ItemProduto;
 import com.meclist.domain.Produto;
+import com.meclist.dto.itemProduto.ItemProdutoResponse;
 import com.meclist.persistence.entity.ItemEntity;
 import com.meclist.persistence.entity.ItemProdutoEntity;
 import com.meclist.persistence.entity.ProdutoEntity;
@@ -38,6 +39,19 @@ public class ItemProdutoMapper {
                 produto,
                 entity.getCriadoEm(),
                 entity.getAtualizadoEm()
+        );
+    }
+
+    public static ItemProdutoResponse toResponse(ItemProduto itemProduto) {
+        if (itemProduto == null) {
+            return null;
+        }
+        return new ItemProdutoResponse(
+            itemProduto.getId(),
+            itemProduto.getItem().getId(),
+            itemProduto.getProduto().getId(),
+            itemProduto.getProduto().getNomeProduto()
+            
         );
     }
 }

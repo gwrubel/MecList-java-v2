@@ -11,9 +11,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 import com.meclist.domain.enums.CategoriaParteVeiculo;
+import com.meclist.dto.item.AtualizarItemRequest;
 import com.meclist.dto.item.CadastrarItemRequest;
 import com.meclist.dto.item.ItemResponse;
 import com.meclist.response.ApiResponse;
+import com.meclist.usecase.item.AtualizarItemUseCase;
 import com.meclist.usecase.item.CadastrarItemUseCase;
 import com.meclist.usecase.item.ExcluirItemUseCase;
 import com.meclist.usecase.item.ListarItensPorCategoriaUseCase;
@@ -34,17 +36,20 @@ public class ItemController extends BaseController {
     private final ListarTodosItensUseCase listarTodosItensUseCase;
     private final CadastrarItemUseCase cadastrarItemUseCase;
     private final ExcluirItemUseCase excluirItemUseCase;
+    private final AtualizarItemUseCase atualizarItemUseCase;
 
     public ItemController(
             ListarItensPorCategoriaUseCase listarItensPorCategoriaUseCase,
             ListarTodosItensUseCase listarTodosItensUseCase,
             CadastrarItemUseCase cadastrarItemUseCase,
-            ExcluirItemUseCase excluirItemUseCase) {
+            ExcluirItemUseCase excluirItemUseCase,
+            AtualizarItemUseCase atualizarItemUseCase) {
         
         this.listarItensPorCategoriaUseCase = listarItensPorCategoriaUseCase;
         this.listarTodosItensUseCase = listarTodosItensUseCase;
         this.cadastrarItemUseCase = cadastrarItemUseCase;
         this.excluirItemUseCase = excluirItemUseCase;
+        this.atualizarItemUseCase = atualizarItemUseCase;
     }
 
     /**
@@ -138,4 +143,47 @@ public class ItemController extends BaseController {
         
         return noContent();
     }
+
+   
+
+    /**
+     * Atualiza um item existente do checklist.
+     * 
+     * Permite atualizar o nome, categoria e imagem ilustrativa do item.
+     * Se nenhuma imagem for fornecida, mantém a imagem atual.
+     * Se uma nova imagem for fornecida, deleta a antiga e faz upload da nova.
+     * 
+     * @param idItem ID do item a ser atualizado
+     * @param nome Novo nome do item
+     * @param parteDoVeiculo Nova categoria/parte do veículo
+     * @param imagem Novo arquivo de imagem ilustrativa (opcional)
+     * @param servletRequest HttpServletRequest para logs
+     * @return ItemResponse com dados do item atualizado
+     * 
+     * Exemplo de uso (form-data):
+     * PUT /itens/123
+     * nome: "Filtro de ar"
+     * parteDoVeiculo: MOTOR
+     * imagem: [arquivo] (opcional)
+     */
+    @PutMapping(value = "/{idItem}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<ItemResponse>> atualizarItem(
+            @PathVariable @NotNull(message = "ID do item é obrigatório") Long idItem,
+            @RequestParam @NotBlank(message = "Nome é obrigatório") String nome,
+            @RequestParam @NotNull(message = "Parte do veículo é obrigatória") CategoriaParteVeiculo parteDoVeiculo,
+            @RequestPart(value = "imagem", required = false) MultipartFile imagem,
+            HttpServletRequest servletRequest) {
+        
+        log.debug("Atualizando item: id={}, nome={}, categoria={}, temImagem={}", 
+                  idItem, nome, parteDoVeiculo, imagem != null && !imagem.isEmpty());
+        
+        AtualizarItemRequest atualizarRequest = new AtualizarItemRequest(nome, parteDoVeiculo);
+        ItemResponse itemResponse = atualizarItemUseCase.executar(idItem, atualizarRequest, imagem);
+        
+        log.info("Item atualizado com sucesso: id={}, nome={}", idItem, nome);
+        
+        return success("Item atualizado com sucesso!", itemResponse, servletRequest);
+    }
+
+
 }

@@ -6,7 +6,9 @@ import java.util.List;
 import com.meclist.domain.enums.CategoriaParteVeiculo;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
@@ -14,7 +16,10 @@ import java.util.ArrayList;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
+
 @Table(name = "item")
 public class ItemEntity {
 

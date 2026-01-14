@@ -1,6 +1,7 @@
 package com.meclist.persistence.gateway;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
@@ -23,8 +24,8 @@ public class ItemProdutoGatewayImpl implements ItemProdutoGateway {
     private final ProdutoRepository produtoRepository;
 
     public ItemProdutoGatewayImpl(ItemProdutoRepository itemProdutoRepository,
-                                 ItemRepository itemRepository,
-                                 ProdutoRepository produtoRepository) {
+            ItemRepository itemRepository,
+            ProdutoRepository produtoRepository) {
         this.itemProdutoRepository = itemProdutoRepository;
         this.itemRepository = itemRepository;
         this.produtoRepository = produtoRepository;
@@ -33,13 +34,11 @@ public class ItemProdutoGatewayImpl implements ItemProdutoGateway {
     @Override
     public ItemProduto salvar(ItemProduto itemProduto) {
         ItemEntity itemEntity = itemRepository.getReferenceById(
-            itemProduto.getItem().getId()
-        );
-        
+                itemProduto.getItem().getId());
+
         ProdutoEntity produtoEntity = produtoRepository.getReferenceById(
-            itemProduto.getProduto().getId()
-        );
-        
+                itemProduto.getProduto().getId());
+
         ItemProdutoEntity entity = ItemProdutoMapper.toEntity(itemProduto, itemEntity, produtoEntity);
         entity = itemProdutoRepository.save(entity);
         return ItemProdutoMapper.toDomain(entity);
@@ -76,5 +75,10 @@ public class ItemProdutoGatewayImpl implements ItemProdutoGateway {
         itemProdutoRepository.findByItemIdAndProdutoId(idItem, idProduto)
                 .ifPresent(itemProdutoRepository::delete);
     }
-}
 
+    @Override
+    public Optional<ItemProduto> buscarPorItemEProduto(Long idItem, Long idProduto) {
+        return itemProdutoRepository.findByItemIdAndProdutoId(idItem, idProduto)
+                .map(ItemProdutoMapper::toDomain);
+    }
+}

@@ -3,11 +3,15 @@ package com.meclist.persistence.entity;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "item_produto", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"id_item", "id_produto"})

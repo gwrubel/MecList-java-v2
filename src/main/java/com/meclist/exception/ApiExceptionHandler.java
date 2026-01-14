@@ -50,17 +50,13 @@ public class ApiExceptionHandler {
                 .body(ApiResponse.error(HttpStatus.BAD_REQUEST.value(), "Erro de validação", request.getRequestURI(), (Object) fieldErrors));
     }
 
-    @ExceptionHandler(CampoInvalidoException.class)
-    public ResponseEntity<ApiResponse<Object>> handleCampoInvalido(CampoInvalidoException ex, HttpServletRequest request) {
-        log.warn("Campos inválidos: {}", ex.getErros());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.error(
-                        HttpStatus.BAD_REQUEST.value(),
-                        "Erro de validação",
-                        request.getRequestURI(),
-                        Map.of("errors", ex.getErros())
-                ));
-    }
+
+@ExceptionHandler(CampoInvalidoException.class)
+public ResponseEntity<ApiResponse<Void>> handleCampoInvalido(CampoInvalidoException ex, HttpServletRequest request) {
+    log.warn("Campo inválido: {} - {}", ex.getCampo(), ex.getMensagem());
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(ApiResponse.error(HttpStatus.BAD_REQUEST, ex.getMensagem(), request.getRequestURI()));
+}
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleEntityNotFound(EntityNotFoundException ex, HttpServletRequest request) {
@@ -132,7 +128,12 @@ public class ApiExceptionHandler {
                                 .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Erro interno", request.getRequestURI()));
         }
 
-
+        @ExceptionHandler(AssociacaoProdutoItemNaoEncontradaException.class)
+        public ResponseEntity<ApiResponse<Void>> handleAssociacaoProdutoItemNaoEncontrada(AssociacaoProdutoItemNaoEncontradaException ex, HttpServletRequest request) {
+                log.warn("Associação produto-item não encontrada: {}", ex.getMessage());
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body(ApiResponse.error(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI()));
+        }
 
 
 }

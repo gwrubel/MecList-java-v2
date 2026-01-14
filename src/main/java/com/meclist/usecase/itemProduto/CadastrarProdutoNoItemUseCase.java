@@ -2,8 +2,11 @@ package com.meclist.usecase.itemProduto;
 
 import org.springframework.stereotype.Service;
 import com.meclist.interfaces.ProdutoGateway;
+import com.meclist.mapper.ItemProdutoMapper;
 import com.meclist.domain.Produto;
+import com.meclist.dto.itemProduto.ItemProdutoResponse;
 import com.meclist.dto.produto.ProdutoRequest;
+import com.meclist.exception.ItemNaoEncontradoException;
 import com.meclist.exception.ProdutoJaExisteException;
 import com.meclist.interfaces.ItemGateway;
 import com.meclist.interfaces.ItemProdutoGateway;
@@ -26,10 +29,10 @@ public class CadastrarProdutoNoItemUseCase {
     }
 
     @Transactional
-    public ItemProduto executar(Long idItem, ProdutoRequest request) {
+    public ItemProdutoResponse executar(Long idItem, ProdutoRequest request) {
         // 1. Buscar Item (validar se existe)
         Item item = itemGateway.buscarPorId(idItem)
-            .orElseThrow(() -> new RuntimeException("Item não encontrado"));
+            .orElseThrow(() -> new ItemNaoEncontradoException("Item não encontrado"));
         
         // 2. Buscar ou criar Produto
         Produto produto = buscarOuCriarProduto(request.nomeProduto());
@@ -43,7 +46,8 @@ public class CadastrarProdutoNoItemUseCase {
         ItemProduto itemProduto = ItemProduto.novo(item, produto);
         
         // 5. Salvar associação
-        return itemProdutoGateway.salvar(itemProduto);
+        var itemProdutoSalvo = itemProdutoGateway.salvar(itemProduto);
+        return ItemProdutoMapper.toResponse(itemProdutoSalvo);
     }
 
     private Produto buscarOuCriarProduto(String nomeProduto) {

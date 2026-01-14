@@ -28,13 +28,6 @@ public class ProdutoEntity {
     @Column(name = "atualizado_em")
     private LocalDateTime atualizadoEm;
 
-    // Relacionamento com itens (template/sugestão)
-    @OneToMany(mappedBy = "produto", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ItemProdutoEntity> itensSugeridos = new ArrayList<>();
-
-    // Relacionamento com checklists (execução/orçamento)
-    @OneToMany(mappedBy = "produto", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ChecklistProdutoEntity> checklistProdutos = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {

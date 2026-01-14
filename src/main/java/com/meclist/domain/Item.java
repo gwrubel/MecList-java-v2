@@ -47,4 +47,11 @@ public class Item {
     public String getImagemIlustrativa() { return imagemIlustrativa; }
     public LocalDateTime getCriadoEm() { return criadoEm; }
     public LocalDateTime getAtualizadoEm() { return atualizadoEm; }
+
+    public void atualizarItem(String nome, CategoriaParteVeiculo parteDoVeiculo, String imagemIlustrativa) {
+        this.nome = nome;
+        this.parteDoVeiculo = parteDoVeiculo;
+        this.imagemIlustrativa = imagemIlustrativa;
+        this.atualizadoEm = LocalDateTime.now();
+    }
 }

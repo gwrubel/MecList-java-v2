@@ -9,7 +9,8 @@ import org.springframework.web.bind.annotation.*;
 
 import com.meclist.domain.ItemProduto;
 import com.meclist.domain.Produto;
-import com.meclist.dto.itemProduto.ProdutosDoItem;
+import com.meclist.dto.itemProduto.ItemProdutoResponse;
+import com.meclist.dto.itemProduto.ProdutosDoItemResponse;
 import com.meclist.dto.produto.ProdutoRequest;
 import com.meclist.response.ApiResponse;
 import com.meclist.usecase.itemProduto.AtualizarNomeDoProdutoUseCase;
@@ -54,7 +55,7 @@ public class ItemProdutoController extends BaseController {
      * 
      */
     @PostMapping
-    public ResponseEntity<ApiResponse<ItemProduto>> cadastrarProduto(
+    public ResponseEntity<ApiResponse<ItemProdutoResponse>> cadastrarProduto(
             @PathVariable Long idItem,
             @RequestBody @Valid ProdutoRequest request,
             HttpServletRequest servletRequest) {
@@ -62,10 +63,10 @@ public class ItemProdutoController extends BaseController {
         log.debug("Cadastrando produto no item: idItem={}, nomeProduto={}", 
                   idItem, request.nomeProduto());
         
-        ItemProduto itemProduto = cadastrarProdutoNoItemUseCase.executar(idItem, request);
+        ItemProdutoResponse itemProduto = cadastrarProdutoNoItemUseCase.executar(idItem, request);
         
         log.info("Produto cadastrado no item com sucesso: idItem={}, idProduto={}, nomeProduto={}", 
-                 idItem, itemProduto.getProduto().getId(), request.nomeProduto());
+                 idItem, itemProduto.idProduto(), request.nomeProduto());
         
         return created(
             "Produto cadastrado e associado ao item com sucesso!", 
@@ -91,13 +92,13 @@ public class ItemProdutoController extends BaseController {
      * 
      */
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ProdutosDoItem>>> listarProdutos(
+    public ResponseEntity<ApiResponse<List<ProdutosDoItemResponse>>> listarProdutos(
             @PathVariable Long idItem,
             HttpServletRequest servletRequest) {
         
         log.debug("Listando produtos do item: idItem={}", idItem);
         
-        List<ProdutosDoItem> produtos = listarProdutosPorItemUseCase.executar(idItem);
+        List<ProdutosDoItemResponse> produtos = listarProdutosPorItemUseCase.executar(idItem);
         
         log.info("Produtos listados com sucesso: idItem={}, quantidade={}", 
                  idItem, produtos.size());
@@ -128,16 +129,18 @@ public class ItemProdutoController extends BaseController {
      
      */
     @PutMapping("/{idProduto}")
-    public ResponseEntity<ApiResponse<Produto>> atualizarProduto(
+    public ResponseEntity<ApiResponse<ItemProdutoResponse>> atualizarProduto(
             
             @PathVariable Long idProduto,
+            @PathVariable Long idItem,
             @RequestBody @Valid ProdutoRequest request,
-            HttpServletRequest servletRequest) {
+            HttpServletRequest servletRequest
+        ) {
         
         log.debug("Atualizando produto: idProduto={}, novoNome={}", 
                    idProduto, request.nomeProduto());
         
-        Produto produto = atualizarNomeDoProdutoUseCase.executar(idProduto, request);
+        ItemProdutoResponse produto = atualizarNomeDoProdutoUseCase.executar(idProduto, request, idItem);
         
         
         return success(

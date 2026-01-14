@@ -9,21 +9,21 @@ public class ValidatorUtils {
     public static void validarSenha(String senha) {
         if (senha == null || senha.length() < 6) {
             throw new CampoInvalidoException(
-                    Map.of("senha", "A senha deve ter no mínimo 6 caracteres."));
+                    "senha", "A senha deve ter pelo menos 6 caracteres.");
         }
     }
 
     public static void validarEmail(String email) {
         if (email == null || !email.contains("@")) {
             throw new CampoInvalidoException(
-                    Map.of("email", "E-mail inválido."));
+                    "email", "E-mail inválido.");
         }
     }
 
     public static void validarTelefone(String telefone) {
         if (telefone == null || !telefone.matches("\\d{10,11}")) {
             throw new CampoInvalidoException(
-                    Map.of("telefone", "Telefone inválido."));
+                    "telefone", "Telefone inválido. Deve conter apenas números e ter 10 ou 11 dígitos.");
         }
     }
 
@@ -31,7 +31,7 @@ public class ValidatorUtils {
         var cpfLimpo = cpf.replaceAll("\\D", "");
         if (!isCpfValido(cpfLimpo)) {
             throw new CampoInvalidoException(
-                    Map.of("cpf", "CPF inválido."));
+                    "cpf", "CPF inválido.");
         }
     }
 
@@ -64,7 +64,7 @@ public class ValidatorUtils {
         var cnpjLimpo = cnpj.replaceAll("\\D", "");
         if (!isCnpjValido(cnpjLimpo)) {
             throw new CampoInvalidoException(
-                    Map.of("cnpj", "CNPJ inválido."));
+                    "cnpj", "CNPJ inválido.");
         }
     }
 
@@ -105,12 +105,12 @@ public class ValidatorUtils {
     public static void validarPlaca(String placa) {
         if (placa == null || placa.isBlank()) {
             throw new CampoInvalidoException(
-                    Map.of("placa", "A placa não pode ser vazia."));
+                    "placa", "A placa do veículo é obrigatória.");
         }
 
         if (!placa.matches("^[A-Z]{3}\\d{4}$")) {
             throw new CampoInvalidoException(
-                    Map.of("placa", "Placa inválida. Formato esperado: ABC1234."));
+                    "placa", "Placa de veículo inválida. Deve seguir o formato ABC1234.");
         }
     }
 }

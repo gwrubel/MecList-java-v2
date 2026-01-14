@@ -5,9 +5,10 @@ import org.springframework.stereotype.Service;
 import com.meclist.interfaces.ItemGateway;
 import com.meclist.interfaces.ItemProdutoGateway;
 
-import jakarta.persistence.EntityNotFoundException;
 
-import com.meclist.dto.itemProduto.ProdutosDoItem;
+import com.meclist.dto.itemProduto.ProdutosDoItemResponse;
+import com.meclist.exception.ItemNaoEncontradoException;
+
 import java.util.List;
 
 @Service
@@ -23,15 +24,15 @@ public class ListarProdutosPorItemUseCase {
         this.itemGateway = itemGateway;
     }
 
-public List<ProdutosDoItem> executar(Long idItem) {
+public List<ProdutosDoItemResponse> executar(Long idItem) {
     itemGateway.buscarPorId(idItem)
-        .orElseThrow(() -> new EntityNotFoundException(
+        .orElseThrow(() -> new ItemNaoEncontradoException(
             "Item com ID " + idItem + " não encontrado"
         ));
     
     return itemProdutoGateway.buscarPorItem(idItem)
         .stream()
-        .map(ProdutosDoItem::from) 
+        .map(ProdutosDoItemResponse::from) 
         .toList();
 }
 }
