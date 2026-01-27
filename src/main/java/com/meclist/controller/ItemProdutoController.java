@@ -69,7 +69,7 @@ public class ItemProdutoController extends BaseController {
                  idItem, itemProduto.idProduto(), request.nomeProduto());
         
         return created(
-            "Produto cadastrado e associado ao item com sucesso!", 
+            "Produto cadastrado com sucesso!", 
             itemProduto, 
             servletRequest
         );

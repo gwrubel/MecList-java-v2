@@ -10,11 +10,12 @@ public record ItemResponse(
     String nome,
     CategoriaParteVeiculo parteDoVeiculo,
     String imagemIlustrativa,
+    Integer quantidadeProdutos,
     LocalDateTime criadoEm,
     LocalDateTime atualizadoEm
 ) {
-    public ItemResponse(Long id, String nome, CategoriaParteVeiculo parteDoVeiculo, String imagemIlustrativa) {
-        this(id, nome, parteDoVeiculo, imagemIlustrativa, null, null);
+    public ItemResponse(Long id, String nome, CategoriaParteVeiculo parteDoVeiculo, String imagemIlustrativa, Integer quantidadeProdutos) {
+        this(id, nome, parteDoVeiculo, imagemIlustrativa, quantidadeProdutos, null, null);
     }
 }
 

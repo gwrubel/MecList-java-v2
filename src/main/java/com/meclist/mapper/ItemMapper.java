@@ -55,6 +55,8 @@ public class ItemMapper {
             entity.getCriadoEm(),
             entity.getAtualizadoEm()
         );
+
+        
         
         // Adicionar produtos diretamente
         if (produtos != null) {
@@ -66,6 +68,6 @@ public class ItemMapper {
 
 
     public static ItemResponse toResponse(Item item) {
-        return new ItemResponse(item.getId(), item.getNome(), item.getParteDoVeiculo(), item.getImagemIlustrativa(), item.getCriadoEm(), item.getAtualizadoEm());
+        return new ItemResponse(item.getId(), item.getNome(), item.getParteDoVeiculo(), item.getImagemIlustrativa(), item.getProdutos().size(), item.getCriadoEm(), item.getAtualizadoEm());
     }
 }

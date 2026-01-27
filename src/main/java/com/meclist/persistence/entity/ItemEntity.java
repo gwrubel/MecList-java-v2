@@ -44,11 +44,7 @@ public class ItemEntity {
     @Column(name = "atualizado_em")
     private LocalDateTime atualizadoEm;
     
-    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ItemChecklistEntity> itensChecklist;
-    
-    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ItemProdutoEntity> produtosSugeridos = new ArrayList<>();
+   
 
     @PrePersist
     protected void onCreate() {

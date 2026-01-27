@@ -28,6 +28,7 @@ public class ListarTodosItensUseCase {
                         item.getNome(),
                         item.getParteDoVeiculo(),
                         item.getImagemIlustrativa(),
+                        item.getProdutos().size(),
                         item.getCriadoEm(),
                         item.getAtualizadoEm()
                 ))

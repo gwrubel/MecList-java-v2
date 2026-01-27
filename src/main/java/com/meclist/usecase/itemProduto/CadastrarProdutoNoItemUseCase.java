@@ -39,7 +39,7 @@ public class CadastrarProdutoNoItemUseCase {
         
         // 3. Verificar se já existe associação
         if (itemProdutoGateway.existeRelacionamento(item.getId(), produto.getId())) {
-            throw new ProdutoJaExisteException("Produto já está associado a este item");
+            throw new ProdutoJaExisteException("Produto com esse nome já está associado a esse item");
         }
         
         // 4. Criar associação ItemProduto

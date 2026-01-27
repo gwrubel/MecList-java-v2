@@ -17,13 +17,13 @@ public class Item {
 
     public void adicionarProduto(Produto produto) {
         if (this.produtos == null) {
-            this.produtos = new ArrayList<>();
+            this.produtos = new ArrayList<Produto>();
         }
         this.produtos.add(produto);
     }
     
-    public List<Produto> getProdutosSugeridos() {
-        return produtos != null ? produtos : new ArrayList<>();
+    public List<Produto> getProdutos() {
+        return produtos != null ? produtos : new ArrayList<Produto>();
     }
 
     public Item(Long id, String nome, CategoriaParteVeiculo parteDoVeiculo, String imagemIlustrativa,
