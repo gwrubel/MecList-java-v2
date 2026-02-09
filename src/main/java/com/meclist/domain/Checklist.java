@@ -4,13 +4,15 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.meclist.domain.enums.StatusProcesso;
+
 public class Checklist {
     private Long id;
     private Veiculo veiculo;
     private Mecanico mecanico;
     private Float quilometragem;
     private String descricao;
-    private Status status;
+    private StatusProcesso status;
     private LocalDateTime criadoEm;
     private LocalDateTime atualizadoEm;
     
@@ -23,20 +25,10 @@ public class Checklist {
     // Lista de orçamentos
     private List<Orcamento> orcamentos = new ArrayList<>();
 
-    // Construtor original mantido para compatibilidade
-    public Checklist(Long id, Long idVeiculo, Long idMecanico, Float quilometragem, String descricao,
-                     Long idStatus, LocalDateTime criadoEm, LocalDateTime atualizadoEm) {
-        this.id = id;
-        this.quilometragem = quilometragem;
-        this.descricao = descricao;
-        this.criadoEm = criadoEm;
-        this.atualizadoEm = atualizadoEm;
-        // Os IDs serão convertidos para objetos posteriormente pelo mapper
-    }
-
+   
     // Novo construtor com objetos de domínio
     public Checklist(Long id, Veiculo veiculo, Mecanico mecanico, Float quilometragem, String descricao,
-                     Status status, LocalDateTime criadoEm, LocalDateTime atualizadoEm) {
+                     StatusProcesso status, LocalDateTime criadoEm, LocalDateTime atualizadoEm) {
         this.id = id;
         this.veiculo = veiculo;
         this.mecanico = mecanico;
@@ -48,8 +40,8 @@ public class Checklist {
     }
 
     // Construtor com todas as listas
-    public Checklist(Long id, Veiculo veiculo, Mecanico mecanico, Float quilometragem, String descricao,
-                     Status status, List<ItemChecklist> itensChecklist, List<Servico> servicos, 
+     public Checklist(Long id, Veiculo veiculo, Mecanico mecanico, Float quilometragem, String descricao,
+                     StatusProcesso status, List<ItemChecklist> itensChecklist, List<Servico> servicos, 
                      List<Orcamento> orcamentos, LocalDateTime criadoEm, LocalDateTime atualizadoEm) {
         this.id = id;
         this.veiculo = veiculo;
@@ -64,9 +56,9 @@ public class Checklist {
         this.atualizadoEm = atualizadoEm;
     }
 
-    public static Checklist novo(Long idVeiculo, Long idMecanico, Float quilometragem, String descricao, Long idStatus) {
+  public static Checklist novo(Veiculo veiculo, Mecanico mecanico, Float quilometragem, String descricao, StatusProcesso status) {
         LocalDateTime agora = LocalDateTime.now();
-        return new Checklist(null, idVeiculo, idMecanico, quilometragem, descricao, idStatus, agora, agora);
+        return new Checklist(null, veiculo, mecanico, quilometragem, descricao, status, agora, agora);
     }
 
     // Métodos para gerenciar itens do checklist
@@ -121,7 +113,7 @@ public class Checklist {
     // Novos getters para objetos de domínio
     public Veiculo getVeiculo() { return veiculo; }
     public Mecanico getMecanico() { return mecanico; }
-    public Status getStatus() { return status; }
+    public StatusProcesso getStatus() { return status; }
     public List<ItemChecklist> getItensChecklist() { 
         return itensChecklist != null ? itensChecklist : new ArrayList<>(); 
     }
@@ -138,7 +130,10 @@ public class Checklist {
     public void setMecanico(Mecanico mecanico) { this.mecanico = mecanico; }
     public void setQuilometragem(Float quilometragem) { this.quilometragem = quilometragem; }
     public void setDescricao(String descricao) { this.descricao = descricao; }
-    public void setStatus(Status status) { this.status = status; }
+    public void setStatus(StatusProcesso status) { 
+        this.status = status;
+        this.atualizadoEm = LocalDateTime.now();
+    }
     public void setCriadoEm(LocalDateTime criadoEm) { this.criadoEm = criadoEm; }
     public void setAtualizadoEm(LocalDateTime atualizadoEm) { this.atualizadoEm = atualizadoEm; }
     public void setItensChecklist(List<ItemChecklist> itensChecklist) { 
@@ -160,9 +155,7 @@ public class Checklist {
         return mecanico != null ? mecanico.getId() : null; 
     }
     
-    public Long getIdStatus() { 
-        return status != null ? status.getId() : null; 
-    }
+    
 }
 
 

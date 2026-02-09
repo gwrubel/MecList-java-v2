@@ -89,7 +89,7 @@ public class ItemGatewayImpl implements ItemGateway {
                         .map(ip -> ProdutoMapper.toDomain(ip.getProduto()))
                         .collect(Collectors.toList());
 
-                        System.out.println("produtos "+ produtos);
+                       
                     return ItemMapper.ItemComProdutosToDomain(entity, produtos);
                 })
                 .collect(Collectors.toList());

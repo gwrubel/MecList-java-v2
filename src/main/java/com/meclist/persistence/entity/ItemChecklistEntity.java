@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.meclist.domain.enums.StatusItem;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,9 +29,9 @@ public class ItemChecklistEntity {
     @JoinColumn(name = "id_item", nullable = false)
     private ItemEntity item;
 
-    @ManyToOne
-    @JoinColumn(name = "id_status_item", nullable = false)
-    private StatusItemEntity statusItem;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status_item", nullable = false)
+    private StatusItem statusItem;
 
     @Column(name = "criado_em")
     private LocalDateTime criadoEm;

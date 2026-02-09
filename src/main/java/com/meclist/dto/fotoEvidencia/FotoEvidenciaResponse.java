@@ -6,4 +6,7 @@ public record FotoEvidenciaResponse(
     Long id,
     String urlFoto,
     LocalDateTime criadoEm
-) {}
+) {
+
+    
+}

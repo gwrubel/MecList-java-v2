@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.meclist.dto.veiculo.VeiculoBuscaResponse;
+import com.meclist.dto.veiculo.VeiculoResponse;
 import com.meclist.response.ApiResponse;
 import com.meclist.usecase.veiculo.BuscarPorPlacaUseCase;
 
@@ -39,10 +41,10 @@ public class VeiculoController extends BaseController {
      * @return Lista de placas encontradas
      */
     @GetMapping("/placas/busca")
-    public ResponseEntity<ApiResponse<List<String>>> buscarPlacasPorTermo(
+    public ResponseEntity<ApiResponse<List<VeiculoBuscaResponse>>> buscarPlacasPorTermo(
             @RequestParam String termo,
             HttpServletRequest servletRequest) {
-        List<String> placas = buscarPorPlacaUseCase.executar(termo);
+        List<VeiculoBuscaResponse> placas = buscarPorPlacaUseCase.buscarPlacaPorTermo(termo);
         return success("Placas encontradas com sucesso!", placas, servletRequest);
     }
 
@@ -54,7 +56,7 @@ public class VeiculoController extends BaseController {
      * @return Dados do veículo encontrado
      */
     @GetMapping("/placa/{placa}")
-    public ResponseEntity<ApiResponse<Object>> buscarPorPlaca(
+    public ResponseEntity<ApiResponse<VeiculoResponse>> buscarPorPlaca(
             @PathVariable String placa,
             HttpServletRequest servletRequest) {
         var veiculoResponse = buscarPorPlacaUseCase.buscarPorPlaca(placa);

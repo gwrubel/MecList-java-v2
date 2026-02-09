@@ -3,6 +3,8 @@ package com.meclist.persistence.entity;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.meclist.domain.enums.StatusProcesso;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -29,9 +31,9 @@ public class ChecklistEntity {
     @Column(name = "quilometragem")
     private Float quilometragem;
 
-    @ManyToOne
-    @JoinColumn(name = "id_status", nullable = false)
-    private StatusEntity status;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private StatusProcesso status;
 
     private String descricao;
 

@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
+import com.meclist.domain.enums.StatusProcesso;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -30,9 +32,10 @@ public class ServicoEntity {
     @Column(name = "data_realizacao")
     private Date dataRealizacao;
 
-    @ManyToOne
-    @JoinColumn(name = "id_status", nullable = false)
-    private StatusEntity status;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private StatusProcesso status;
 
     @Column(name = "criado_em")
     private LocalDateTime criadoEm;

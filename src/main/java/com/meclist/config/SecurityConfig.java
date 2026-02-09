@@ -34,6 +34,7 @@ public class SecurityConfig {
                 .requestMatchers("/veiculos/**", "/categorias-veiculo/**").permitAll() // manter aberto por enquanto
                 .requestMatchers("/itens", "/itens/**").permitAll() // Permitir acesso aos itens
                 .requestMatchers("/mecanicos", "/mecanicos/**").permitAll()
+                .requestMatchers("/checklists", "/checklists/**").permitAll()
 
                  .requestMatchers("/uploads/**").permitAll()
                 // Demais precisam de autenticação
@@ -48,7 +49,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:5174")); // Seu front-end
+        configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:5174", "http://192.168.18.13:5173")); // Seu front-end
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true); // Se estiver usando cookies ou autenticação

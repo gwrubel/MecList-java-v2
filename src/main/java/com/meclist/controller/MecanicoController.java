@@ -1,6 +1,7 @@
 package com.meclist.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -111,8 +112,11 @@ public class MecanicoController extends BaseController {
      * @return Token de autenticação
      */
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<String>> login(@RequestBody AdmRequest request) {
+    public ResponseEntity<ApiResponse<Map<String, String>>>  login(
+        @RequestBody AdmRequest request,
+        HttpServletRequest servletRequest
+    ) {
         String token = authMecanicoUseCase.autenticar(request.email(), request.senha());
-        return ResponseEntity.ok(ApiResponse.success("Login realizado com sucesso!", null, token));
+       return success("Autenticação realizada com sucesso!", Map.of("token", token), servletRequest);
     }
 }

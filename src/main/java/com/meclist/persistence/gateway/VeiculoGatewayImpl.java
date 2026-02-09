@@ -7,12 +7,14 @@ import org.springframework.stereotype.Component;
 
 import com.meclist.domain.Cliente;
 import com.meclist.domain.Veiculo;
+import com.meclist.domain.enums.StatusProcesso;
 import com.meclist.interfaces.VeiculoGateway;
 import com.meclist.mapper.ClienteMapper;
 import com.meclist.mapper.VeiculoMapper;
 import com.meclist.persistence.entity.ClienteEntity;
 import com.meclist.persistence.entity.VeiculoEntity;
 import com.meclist.persistence.repository.ClienteRepository;
+import com.meclist.persistence.repository.ServicoRepository;
 import com.meclist.persistence.repository.VeiculoRepository;
 
 @Component
@@ -20,11 +22,14 @@ public class VeiculoGatewayImpl implements VeiculoGateway {
 
     private final VeiculoRepository repository;
     private final ClienteRepository clienteRepository;
+    private final ServicoRepository servicoRepository;
 
     public VeiculoGatewayImpl(VeiculoRepository repository,
-                              ClienteRepository clienteRepository) {
+            ClienteRepository clienteRepository,
+            ServicoRepository servicoRepository) {
         this.repository = repository;
         this.clienteRepository = clienteRepository;
+        this.servicoRepository = servicoRepository;
     }
 
     @Override
@@ -49,8 +54,7 @@ public class VeiculoGatewayImpl implements VeiculoGateway {
         return repository.findById(id)
                 .map(entity -> VeiculoMapper.toDomain(
                         entity,
-                        ClienteMapper.toDomain(entity.getCliente())
-                ));
+                        ClienteMapper.toDomain(entity.getCliente())));
     }
 
     @Override
@@ -61,19 +65,31 @@ public class VeiculoGatewayImpl implements VeiculoGateway {
     }
 
     @Override
-    public List<String> buscarPlacasPorTrecho(String trecho) {
+    public List<Veiculo> buscarPlacasPorTrecho(String trecho) {
         return repository.findTop10ByPlacaContainingIgnoreCase(trecho)
                 .stream()
-                .map(VeiculoEntity::getPlaca)
+                .map(this::mapearVeiculoComUltimaRevisao)
                 .toList();
     }
 
     @Override
     public Optional<Veiculo> buscarPorPlaca(String placa) {
         return repository.findByPlaca(placa)
-                .map(entity -> VeiculoMapper.toDomain(
-                        entity,
-                        ClienteMapper.toDomain(entity.getCliente())
-                ));
+                .map(this::mapearVeiculoComUltimaRevisao);
     }
+
+    private Veiculo mapearVeiculoComUltimaRevisao(VeiculoEntity entity) {
+        Veiculo veiculo = VeiculoMapper.toDomain(entity, ClienteMapper.toDomain(entity.getCliente()));
+
+        servicoRepository.encontrarUltimaRevisao(entity.getId(), StatusProcesso.CONCLUIDO)
+                .ifPresent(servico -> {
+                    veiculo.atualizarDataUltimaRevisao(
+                            servico.getDataRealizacao().toInstant()
+                                    .atZone(java.time.ZoneId.systemDefault())
+                                    .toLocalDate());
+                });
+
+        return veiculo;
+    }
+
 }
