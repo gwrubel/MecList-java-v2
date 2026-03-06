@@ -102,16 +102,12 @@ public ResponseEntity<ApiResponse<Void>> handleCampoInvalido(CampoInvalidoExcept
                 .body(ApiResponse.error(HttpStatus.BAD_REQUEST, "Erro ao processar arquivo enviado", request.getRequestURI()));
     }
 
-        @ExceptionHandler(CustomException.class)
-        public ResponseEntity<ApiResponse<Void>> handleCustom(CustomException ex, HttpServletRequest request) {
-                ApiResponse<Void> response = ApiResponse.error(
-                                ex.getStatus(),
-                                ex.getMessage(),
-                                request.getRequestURI(),
-                                null
-                );
-                return ResponseEntity.status(ex.getStatus()).body(response);
-        }
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<ApiResponse<Void>> handleCustomException(CustomException ex, HttpServletRequest request) {
+        log.warn("Erro de domínio [{}]: {}", ex.getCode(), ex.getMessage());
+        return ResponseEntity.status(ex.getStatus())
+                .body(ApiResponse.error(ex.getStatus(), ex.getMessage(), request.getRequestURI()));
+    }
 
         
     @ExceptionHandler(ItemNaoEncontradoException.class)
@@ -135,5 +131,11 @@ public ResponseEntity<ApiResponse<Void>> handleCampoInvalido(CampoInvalidoExcept
                                 .body(ApiResponse.error(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI()));
         }
 
+        @ExceptionHandler(QuilometragemMenorQueAtual.class)
+        public ResponseEntity<ApiResponse<Void>> handleQuilometragemMenorQueAtual(QuilometragemMenorQueAtual ex, HttpServletRequest request) {
+                log.warn("Quilometragem menor que atual: {}", ex.getMessage());
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                .body(ApiResponse.error(HttpStatus.BAD_REQUEST, ex.getMessage(), request.getRequestURI()));
+        }
 
 }

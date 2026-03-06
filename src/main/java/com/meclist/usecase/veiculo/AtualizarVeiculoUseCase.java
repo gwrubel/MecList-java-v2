@@ -29,6 +29,7 @@ public class AtualizarVeiculoUseCase {
             throw new RuntimeException("Veículo não pertence ao cliente informado.");
         }
 
+       
         if (request.placa() != null) {
             ValidatorUtils.validarPlaca(request.placa());
             

@@ -1,8 +1,8 @@
 package com.meclist.persistence.entity;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+
+import com.meclist.domain.enums.Situacao;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -21,6 +21,10 @@ public class ProdutoEntity {
 
     @Column(name = "nome_produto", nullable = false)
     private String nomeProduto;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "situacao", nullable = false)
+    private Situacao situacao;
 
     @Column(name = "criado_em")
     private LocalDateTime criadoEm;

@@ -1,11 +1,9 @@
 package com.meclist.exception;
 
-public class CpfJaCadastrado extends CustomException {
-    public CpfJaCadastrado(String cpf) {
-        super(
-            "CPF já está cadastrado.",
-            409
-        );
+public class CpfJaCadastrado extends DuplicidadeException {
+
+    public CpfJaCadastrado(String message) {
+        super("CPF_JA_CADASTRADO", message);
     }
 }
 

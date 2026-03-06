@@ -6,7 +6,7 @@ import com.meclist.domain.Cliente;
 import com.meclist.domain.enums.TipoDocumento;
 import com.meclist.dto.cliente.ClienteRequest;
 import com.meclist.dto.cliente.ClienteResponse;
-import com.meclist.exception.CnpjJaCadastrado;
+import com.meclist.exception.CnpjJaCadastradoException;
 import com.meclist.exception.CpfJaCadastrado;
 import com.meclist.exception.EmailJaCadastrado;
 import com.meclist.interfaces.ClienteGateway;
@@ -46,7 +46,7 @@ public class CadastrarClienteUseCase {
             if (request.tipoDocumento() == TipoDocumento.CPF) {
                 throw new CpfJaCadastrado(documentoLimpo);
             } else {
-                throw new CnpjJaCadastrado(documentoLimpo);
+                throw new CnpjJaCadastradoException(documentoLimpo);
             }
         }
 

@@ -13,7 +13,7 @@ import com.meclist.dto.itemChecklist.ItemChecklistResponse;
 
 
 public record ChecklistResponse(
-        Long id,
+        Long checklistId,
         Long veiculoId,
         StatusProcesso status,
         LocalDateTime criadoEm,

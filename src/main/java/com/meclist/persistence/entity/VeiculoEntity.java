@@ -41,7 +41,7 @@ public class VeiculoEntity {
     @Column(name = "atualizado_em")
     private LocalDateTime atualizadoEm;
     
-    @OneToMany(mappedBy = "veiculo", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "veiculo")
     private List<ChecklistEntity> checklists;
 
     @ManyToOne

@@ -54,35 +54,43 @@ public class IniciarChecklistUseCase {
         // 2. Valida se o mecânico existe
         Mecanico mecanico = mecanicoGateway.bucarPorId(request.idMecanico())
                 .orElseThrow(() -> new MecanicoNaoEncontradoException("Mecânico não encontrado: " + request.idMecanico()));
-        // 3. Cria o checklist de dominio 
+
+        // 3. Atualiza e persiste a quilometragem do veículo
+        veiculo.atualizarQuilometragem(veiculo.getQuilometragem(), request.quilometragem());
+        Veiculo veiculoAtualizado = veiculoGateway.atualizarVeiculo(veiculo);
+
+        // 4. Cria o checklist de domínio já associado ao veículo com KM atualizada
         Checklist checklist = Checklist.novo(
-                veiculo,
+                veiculoAtualizado,
                 mecanico,
                 request.quilometragem(),
                 request.descricao(),
                 StatusProcesso.EM_ANDAMENTO
         );
 
-        // 4. Salva o checklist
+        // 5. Salva o checklist
         Checklist checklistSalvo = checklistGateway.salvar(checklist);
 
-        // 5. Busca TODOS os itens do catálogo
+        // 6. Busca TODOS os itens do catálogo
         List<Item> todosItens = itemGateway.buscarTodos();
 
-        // 6. Cria um ItemChecklist para cada Item (status inicial: PENDENTE)
-        for (Item item : todosItens) {
-            ItemChecklist itemChecklist = ItemChecklist.novo(checklistSalvo, item);
-            itemChecklistGateway.salvar(itemChecklist);
-        }
+        //revisar salvamento em lote para evitar loop de chamadas ao banco
+       // 7. Prepara a lista de itens para inserção em lote
+List<ItemChecklist> itensParaSalvar = todosItens.stream()
+        .map(item -> ItemChecklist.novo(checklistSalvo, item))
+        .toList();
 
-        // 7. Busca o checklist completo com os itens criados
+// 7.1. Salva todos de uma vez (o Gateway deve suportar salvar uma lista)
+itemChecklistGateway.salvarTodos(itensParaSalvar);
+
+        // 8. Busca o checklist completo com os itens criados
         Checklist checklistCompleto = checklistGateway.buscarPorId(checklistSalvo.getId())
                 .orElseThrow(() -> new ItemNaoEncontradoException("Erro ao buscar checklist criado"));
 
         
                 
 
-        // 8. Retorna o response agrupado por categoria
+                // 9. Retorna o response agrupado por categoria
         return ChecklistMapper.toResponse(checklistCompleto);
     }
 }

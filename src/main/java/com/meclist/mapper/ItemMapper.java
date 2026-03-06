@@ -21,6 +21,7 @@ public class ItemMapper {
         entity.setNomeItem(item.getNome());
         entity.setParteDoVeiculo(item.getParteDoVeiculo());
         entity.setImagemIlustrativa(item.getImagemIlustrativa());
+        entity.setSituacao(item.getSituacao());
         entity.setCriadoEm(item.getCriadoEm());
         entity.setAtualizadoEm(item.getAtualizadoEm());
         
@@ -33,12 +34,13 @@ public class ItemMapper {
         }
 
         return new Item(
-                entity.getId(),
-                entity.getNomeItem(),
-                entity.getParteDoVeiculo(),
-                entity.getImagemIlustrativa(),
-                entity.getCriadoEm(),
-                entity.getAtualizadoEm()             
+            entity.getId(),
+            entity.getNomeItem(),
+            entity.getParteDoVeiculo(),
+            entity.getImagemIlustrativa(),
+            entity.getCriadoEm(),
+            entity.getAtualizadoEm(),
+            entity.getSituacao()         
         );
     }
 
@@ -53,7 +55,8 @@ public class ItemMapper {
             entity.getParteDoVeiculo(),
             entity.getImagemIlustrativa(),
             entity.getCriadoEm(),
-            entity.getAtualizadoEm()
+            entity.getAtualizadoEm(),
+            entity.getSituacao()
         );
 
         
@@ -68,6 +71,19 @@ public class ItemMapper {
 
 
     public static ItemResponse toResponse(Item item) {
-        return new ItemResponse(item.getId(), item.getNome(), item.getParteDoVeiculo(), item.getImagemIlustrativa(), item.getProdutos().size(), item.getCriadoEm(), item.getAtualizadoEm());
+        return new ItemResponse(item.getId(), item.getNome(), item.getParteDoVeiculo(), item.getImagemIlustrativa(), item.getSituacao(), item.getProdutos().size(), item.getCriadoEm(), item.getAtualizadoEm());
     }
+
+    // Método para copiar os dados de um Item para um ItemEntity existente (útil para atualizações)
+    public static void copyToEntity(Item item, ItemEntity entity) {
+        entity.setNomeItem(item.getNome());
+        entity.setParteDoVeiculo(item.getParteDoVeiculo());
+        entity.setImagemIlustrativa(item.getImagemIlustrativa());
+        entity.setSituacao(item.getSituacao());
+        entity.setAtualizadoEm(item.getAtualizadoEm());
+        if (entity.getCriadoEm() == null) {
+            entity.setCriadoEm(item.getCriadoEm());
+        }
+    }
+
 }

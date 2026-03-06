@@ -37,10 +37,7 @@ public class ItemGatewayImpl implements ItemGateway {
             entity.setCriadoEm(item.getCriadoEm());
         }
 
-        entity.setNomeItem(item.getNome());
-        entity.setParteDoVeiculo(item.getParteDoVeiculo());
-        entity.setImagemIlustrativa(item.getImagemIlustrativa());
-        entity.setAtualizadoEm(item.getAtualizadoEm());
+       ItemMapper.copyToEntity(item, entity);
 
         ItemEntity salvo = itemRepository.save(entity);
         return ItemMapper.toDomain(salvo);

@@ -7,15 +7,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.meclist.domain.ItemProduto;
-import com.meclist.domain.Produto;
+
 import com.meclist.dto.itemProduto.ItemProdutoResponse;
 import com.meclist.dto.itemProduto.ProdutosDoItemResponse;
 import com.meclist.dto.produto.ProdutoRequest;
 import com.meclist.response.ApiResponse;
 import com.meclist.usecase.itemProduto.AtualizarNomeDoProdutoUseCase;
 import com.meclist.usecase.itemProduto.CadastrarProdutoNoItemUseCase;
-import com.meclist.usecase.itemProduto.ExcluirProdutoDoItemUseCase;
+import com.meclist.usecase.itemProduto.AlterarSituacaoDoProdutoPorItemUseCase;
 import com.meclist.usecase.itemProduto.ListarProdutosPorItemUseCase;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,18 +30,18 @@ public class ItemProdutoController extends BaseController {
     private final CadastrarProdutoNoItemUseCase cadastrarProdutoNoItemUseCase;
     private final ListarProdutosPorItemUseCase listarProdutosPorItemUseCase;
     private final AtualizarNomeDoProdutoUseCase atualizarNomeDoProdutoUseCase;
-    private final ExcluirProdutoDoItemUseCase excluirProdutoDoItemUseCase;
+    private final AlterarSituacaoDoProdutoPorItemUseCase alterarSituacaoDoProdutoPorItemUseCase;
 
     public ItemProdutoController(
             CadastrarProdutoNoItemUseCase cadastrarProdutoNoItemUseCase,
             ListarProdutosPorItemUseCase listarProdutosPorItemUseCase,
             AtualizarNomeDoProdutoUseCase atualizarNomeDoProdutoUseCase,
-            ExcluirProdutoDoItemUseCase excluirProdutoDoItemUseCase) {
+            AlterarSituacaoDoProdutoPorItemUseCase alterarSituacaoDoProdutoPorItemUseCase) {
         
         this.cadastrarProdutoNoItemUseCase = cadastrarProdutoNoItemUseCase;
         this.listarProdutosPorItemUseCase = listarProdutosPorItemUseCase;
         this.atualizarNomeDoProdutoUseCase = atualizarNomeDoProdutoUseCase;
-        this.excluirProdutoDoItemUseCase = excluirProdutoDoItemUseCase;
+        this.alterarSituacaoDoProdutoPorItemUseCase = alterarSituacaoDoProdutoPorItemUseCase;
     }
 
     /**
@@ -65,8 +64,8 @@ public class ItemProdutoController extends BaseController {
         
         ItemProdutoResponse itemProduto = cadastrarProdutoNoItemUseCase.executar(idItem, request);
         
-        log.info("Produto cadastrado no item com sucesso: idItem={}, idProduto={}, nomeProduto={}", 
-                 idItem, itemProduto.idProduto(), request.nomeProduto());
+        log.info("Produto cadastrado no item com sucesso: idItem={}, produtoId={}, nomeProduto={}", 
+                 idItem, itemProduto.produtoId(), request.nomeProduto());
         
         return created(
             "Produto cadastrado com sucesso!", 
@@ -128,19 +127,19 @@ public class ItemProdutoController extends BaseController {
      * 
      
      */
-    @PutMapping("/{idProduto}")
+    @PutMapping("/{produtoId}")
     public ResponseEntity<ApiResponse<ItemProdutoResponse>> atualizarProduto(
             
-            @PathVariable Long idProduto,
+            @PathVariable Long produtoId,
             @PathVariable Long idItem,
             @RequestBody @Valid ProdutoRequest request,
             HttpServletRequest servletRequest
         ) {
         
-        log.debug("Atualizando produto: idProduto={}, novoNome={}", 
-                   idProduto, request.nomeProduto());
+        log.debug("Atualizando produto: produtoId={}, novoNome={}", 
+                   produtoId, request.nomeProduto());
         
-        ItemProdutoResponse produto = atualizarNomeDoProdutoUseCase.executar(idProduto, request, idItem);
+        ItemProdutoResponse produto = atualizarNomeDoProdutoUseCase.executar(produtoId, request, idItem);
         
         
         return success(
@@ -150,38 +149,28 @@ public class ItemProdutoController extends BaseController {
         );
     }
 
-    /**
-     * Remove a associação de um produto com um item específico.
-     * 
-     * Este endpoint remove o produto do catálogo do item. O produto em si
-     * não é deletado do sistema, apenas sua associação com este item específico.
-     * 
-     * 
-     * Exemplo: Remover "Óleo 10W40" do item "Troca de óleo" se a oficina
-     * não trabalha mais com este tipo de óleo.
-     * 
-     * @param idItem ID do item de onde o produto será removido
-     * @param idProduto ID do produto a ser dissociado
-     * @param servletRequest HttpServletRequest para logs
-     * @return Resposta 204 No Content em caso de sucesso
-     * 
-     * Exemplo de uso:
-     * DELETE /itens/1/produtos/5
-     */
-    @DeleteMapping("/{idProduto}")
-    public ResponseEntity<ApiResponse<Void>> excluirProduto(
-            @PathVariable Long idItem,
-            @PathVariable Long idProduto,
-            HttpServletRequest servletRequest) {
-        
-        log.debug("Removendo produto do item: idItem={}, idProduto={}", 
-                  idItem, idProduto);
-        
-        excluirProdutoDoItemUseCase.executar(idItem, idProduto);
-        
-        log.info("Produto removido do item com sucesso: idItem={}, idProduto={}", 
-                 idItem, idProduto);
-        
+   @PatchMapping("/{produtoId}/desativar")
+    public ResponseEntity<ApiResponse<Void>> desativarProduto(
+        @PathVariable Long produtoId,
+        @PathVariable Long idItem,
+        HttpServletRequest request
+    ){
+        alterarSituacaoDoProdutoPorItemUseCase.desativar(produtoId, idItem);
+        log.info("Produto desativado com sucesso: produtoId={}, idItem={}", produtoId, idItem);
+
         return noContent();
     }
+
+    @PatchMapping("/{produtoId}/ativar")
+    public ResponseEntity<ApiResponse<Void>> ativarProduto(
+        @PathVariable Long produtoId,
+        @PathVariable Long idItem,
+        HttpServletRequest request
+    ){
+        alterarSituacaoDoProdutoPorItemUseCase.ativar(produtoId, idItem);
+        log.info("Produto ativado com sucesso: produtoId={}, idItem={}", produtoId, idItem);
+
+        return noContent();
+     }
+ 
 }

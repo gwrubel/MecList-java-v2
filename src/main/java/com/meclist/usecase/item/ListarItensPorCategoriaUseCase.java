@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.meclist.domain.Item;
 import com.meclist.domain.enums.CategoriaParteVeiculo;
+import com.meclist.domain.enums.Situacao;
 import com.meclist.dto.item.ItemResponse;
 import com.meclist.interfaces.ItemGateway;
 
@@ -19,8 +20,14 @@ public class ListarItensPorCategoriaUseCase {
         this.itemGateway = itemGateway;
     }
 
-    public List<ItemResponse> executar(CategoriaParteVeiculo categoria) {
-        List<Item> itens = itemGateway.buscarPorCategoria(categoria);
+    public List<ItemResponse> executar(CategoriaParteVeiculo categoria, Situacao situacao) {
+           List<Item> itens = itemGateway.buscarPorCategoria(categoria);
+
+        if (situacao != null) {
+            itens = itens.stream()
+                    .filter(item -> situacao.equals(item.getSituacao()))
+                    .collect(Collectors.toList());
+        }
         
         return itens.stream()
                 .map(item -> new ItemResponse(
@@ -28,6 +35,7 @@ public class ListarItensPorCategoriaUseCase {
                         item.getNome(),
                         item.getParteDoVeiculo(),
                         item.getImagemIlustrativa(),
+                        item.getSituacao(),
                         item.getProdutos().size(),
                         item.getCriadoEm(),
                         item.getAtualizadoEm()

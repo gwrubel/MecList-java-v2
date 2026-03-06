@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.meclist.domain.Item;
+import com.meclist.domain.enums.Situacao;
 import com.meclist.dto.item.AtualizarItemRequest;
 import com.meclist.dto.item.ItemResponse;
 import com.meclist.exception.ItemNaoEncontradoException;

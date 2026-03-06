@@ -50,8 +50,8 @@ public class ItemProdutoMapper {
             itemProduto.getId(),
             itemProduto.getItem().getId(),
             itemProduto.getProduto().getId(),
-            itemProduto.getProduto().getNomeProduto()
-            
+            itemProduto.getProduto().getNomeProduto(),
+            itemProduto.getProduto().getSituacao()
         );
     }
 }

@@ -2,6 +2,7 @@ package com.meclist.persistence.gateway;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
@@ -66,5 +67,13 @@ public class ProdutoGatewayImpl implements ProdutoGateway {
         ProdutoEntity entity = ProdutoMapper.toEntity(produto);
         entity = produtoRepository.save(entity);
         return ProdutoMapper.toDomain(entity);
+    }
+
+    @Override
+    public List<Produto> buscarPorIds(Set<Long> ids) {
+        return produtoRepository.findAllById(ids)
+                .stream()
+                .map(ProdutoMapper::toDomain)
+                .collect(Collectors.toList());
     }
 }

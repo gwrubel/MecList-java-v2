@@ -62,6 +62,21 @@ public class ItemChecklist {
         this.atualizadoEm = LocalDateTime.now();
     }
 
+    public void adicionarFotosEvidencia(List<FotoEvidencia> fotos) {
+        if (this.fotosEvidencia == null) {
+            this.fotosEvidencia = new ArrayList<>();
+        }
+        this.fotosEvidencia.addAll(fotos);
+        this.atualizadoEm = LocalDateTime.now();
+    }
+
+    public void limparFotosEvidencia() {
+        if (this.fotosEvidencia != null) {
+            this.fotosEvidencia.clear();
+        }
+        this.atualizadoEm = LocalDateTime.now();
+    }
+
     public void adicionarProdutoOrcado(ChecklistProduto produto) {
         if (this.produtosOrcados == null) {
             this.produtosOrcados = new ArrayList<>();
@@ -69,9 +84,26 @@ public class ItemChecklist {
         this.produtosOrcados.add(produto);
         this.atualizadoEm = LocalDateTime.now();
     }
+
+    public void adicionarProdutosOrcados(List<ChecklistProduto> produtos) {
+        if (this.produtosOrcados == null) {
+            this.produtosOrcados = new ArrayList<>();
+        }
+        this.produtosOrcados.addAll(produtos);
+        this.atualizadoEm = LocalDateTime.now();
+    }
+
+    public void limparProdutosOrcados() {
+        if (this.produtosOrcados != null) {
+            this.produtosOrcados.clear();
+        }
+        this.atualizadoEm = LocalDateTime.now();
+    }
+
+    public void setAtualizadoEm(LocalDateTime dataAtualizacao) {
+        this.atualizadoEm = dataAtualizacao;
+    }
        
-    
-   
 }
 
 

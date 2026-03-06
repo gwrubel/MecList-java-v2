@@ -20,8 +20,8 @@ public class FotoEvidenciaEntity {
     @JoinColumn(name = "id_item_checklist", nullable = false)
     private ItemChecklistEntity itemChecklist;
 
-    @Column(name = "url_foto", nullable = false)
-    private String urlFoto;
+    @Column(name = "path_foto", nullable = false)
+    private String pathFoto;
 
     @Column(name = "criado_em")
     private LocalDateTime criadoEm;

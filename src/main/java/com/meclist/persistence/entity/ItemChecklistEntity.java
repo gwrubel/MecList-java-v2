@@ -42,7 +42,7 @@ public class ItemChecklistEntity {
     @OneToMany(mappedBy = "itemChecklist", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FotoEvidenciaEntity> fotosEvidencia = new ArrayList<>();
     
-    @OneToMany(mappedBy = "itemChecklist", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "itemChecklist")
     private List<ChecklistProdutoEntity> produtosOrcados = new ArrayList<>();
 
     @PrePersist

@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import com.meclist.domain.enums.CategoriaParteVeiculo;
+import com.meclist.domain.enums.Situacao;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -44,7 +45,9 @@ public class ItemEntity {
     @Column(name = "atualizado_em")
     private LocalDateTime atualizadoEm;
     
-   
+    @Enumerated(EnumType.STRING)
+    @Column(name = "situacao", nullable = false)
+    private Situacao situacao; 
 
     @PrePersist
     protected void onCreate() {

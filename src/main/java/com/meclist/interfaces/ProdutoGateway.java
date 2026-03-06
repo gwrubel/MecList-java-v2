@@ -2,6 +2,7 @@ package com.meclist.interfaces;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import com.meclist.domain.Produto;
 
@@ -13,4 +14,5 @@ public interface ProdutoGateway {
     List<Produto> buscarPorNomeContendo(String nomeProduto);
     void excluir(Long id);
     Produto atualizar(Produto produto);
+    List<Produto> buscarPorIds(Set<Long> ids);
 }

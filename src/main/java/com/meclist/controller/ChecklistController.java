@@ -2,13 +2,19 @@ package com.meclist.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import com.meclist.domain.enums.CategoriaParteVeiculo;
 import com.meclist.dto.checklist.ChecklistResponse;
 import com.meclist.dto.checklist.IniciarChecklistRequest;
+import com.meclist.dto.checklist.SalvarItensPorCategoriaRequest;
 import com.meclist.response.ApiResponse;
+import com.meclist.usecase.checklist.AtualizarItensPorCategoriaUseCase;
 import com.meclist.usecase.checklist.IniciarChecklistUseCase;
+import com.meclist.usecase.checklist.BuscarChecklistPorIdUseCase;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -20,9 +26,16 @@ public class ChecklistController extends BaseController {
     private static final Logger log = LoggerFactory.getLogger(ChecklistController.class);
 
     private final IniciarChecklistUseCase iniciarChecklistUseCase;
+    private final AtualizarItensPorCategoriaUseCase atualizarItensPorCategoriaUseCase;
+    private final BuscarChecklistPorIdUseCase buscarChecklistPorIdUseCase;
 
-    public ChecklistController(IniciarChecklistUseCase iniciarChecklistUseCase) {
+    public ChecklistController(
+            IniciarChecklistUseCase iniciarChecklistUseCase,
+            AtualizarItensPorCategoriaUseCase atualizarItensPorCategoriaUseCase,
+            BuscarChecklistPorIdUseCase buscarChecklistPorIdUseCase) {
         this.iniciarChecklistUseCase = iniciarChecklistUseCase;
+        this.atualizarItensPorCategoriaUseCase = atualizarItensPorCategoriaUseCase;
+        this.buscarChecklistPorIdUseCase = buscarChecklistPorIdUseCase;
     }
 
     /**
@@ -64,19 +77,53 @@ public class ChecklistController extends BaseController {
         ChecklistResponse checklist = iniciarChecklistUseCase.executar(requestComVeiculo);
 
         log.info("Checklist iniciado com sucesso: id={}, veiculoId={}, itens={}", 
-                 checklist.id(), idVeiculo, checklist.itensPorCategoria().size());
+                 checklist.checklistId(), idVeiculo, checklist.itensPorCategoria().size());
 
         return created("Checklist iniciado com sucesso!", checklist, servletRequest);
     }
 
 
-    @PutMapping("/{checklistId}/categoria/{categoriaParteVeiculo}")
+    @PatchMapping(value = "/{checklistId}/categorias/{categoriaParteVeiculo}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponse<ChecklistResponse>> atualizarCategoriaChecklist(
             @PathVariable Long checklistId,
-            @PathVariable String categoriaParteVeiculo,
+            @PathVariable CategoriaParteVeiculo categoriaParteVeiculo,
+            @Valid @RequestBody SalvarItensPorCategoriaRequest request,
+             HttpServletRequest servletRequest) {
+
+            ChecklistResponse checklistResponse = atualizarItensPorCategoriaUseCase.executar(checklistId, categoriaParteVeiculo, request);
+            log.info("Itens da categoria {} atualizados com sucesso no checklist: id={}", 
+                     categoriaParteVeiculo, checklistId);
+
+            return updated("Itens atualizados com sucesso!", checklistResponse, servletRequest);
+    }
+
+            @PatchMapping(value = "/{checklistId}/categorias/{categoriaParteVeiculo}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+            public ResponseEntity<ApiResponse<ChecklistResponse>> atualizarCategoriaChecklistMultipart(
+                @PathVariable Long checklistId,
+                @PathVariable CategoriaParteVeiculo categoriaParteVeiculo,
+                @Valid @RequestPart("dados") SalvarItensPorCategoriaRequest request,
+                MultipartHttpServletRequest servletRequest) {
+
+            ChecklistResponse checklistResponse = atualizarItensPorCategoriaUseCase.executar(
+                checklistId,
+                categoriaParteVeiculo,
+                request,
+                servletRequest.getFileMap());
+
+            log.info("Itens da categoria {} atualizados com sucesso no checklist (multipart): id={}, arquivos={}",
+                categoriaParteVeiculo,
+                checklistId,
+                servletRequest.getFileMap().size());
+
+            return updated("Itens atualizados com sucesso!", checklistResponse, servletRequest);
+            }
+
+    @GetMapping("/{checklistId}")
+    public ResponseEntity<ApiResponse<ChecklistResponse>> buscarPorId(
+            @PathVariable Long checklistId,
             HttpServletRequest servletRequest) {
 
-        // Implementação futura
-        return ResponseEntity.ok().build();
+        ChecklistResponse checklist = buscarChecklistPorIdUseCase.executar(checklistId);
+        return success("Checklist encontrado com sucesso!", checklist, servletRequest);
     }
 }

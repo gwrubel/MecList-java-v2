@@ -4,25 +4,49 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.meclist.domain.Checklist;
 import com.meclist.domain.ItemChecklist;
 import com.meclist.dto.fotoEvidencia.FotoEvidenciaResponse;
 import com.meclist.dto.itemChecklist.ItemChecklistResponse;
-import com.meclist.dto.produto.ProdutoResponse;
+import com.meclist.dto.produto.ProdutoAdicionado;
+
+import com.meclist.persistence.entity.ChecklistEntity;
 import com.meclist.persistence.entity.ItemChecklistEntity;
+import com.meclist.persistence.entity.ItemEntity;
 
 public class ItemChecklistMapper {
 
     public static ItemChecklist toDomain(ItemChecklistEntity entity) {
         if (entity == null) return null;
 
-        return new ItemChecklist(
+        Checklist checklist = entity.getChecklist() != null 
+            ? ChecklistMapper.toDomain(entity.getChecklist())
+            : null;
+            
+        ItemChecklist ic = new ItemChecklist(
             entity.getId(),
-            null,
+            checklist,
             ItemMapper.toDomain(entity.getItem()),
             entity.getStatusItem(),
             entity.getCriadoEm(),
             entity.getAtualizadoEm()
         );
+
+        // 🔹 Fotos evidência
+        if (entity.getFotosEvidencia() != null) {
+            entity.getFotosEvidencia().stream()
+                .map(FotoEvidenciaMapper::toDomain)
+                .forEach(ic::adicionarFotoEvidencia);
+        }
+
+        // 🔹 Produtos orçados
+        if (entity.getProdutosOrcados() != null) {
+            entity.getProdutosOrcados().stream()
+                .map(ChecklistProdutoMapper::toDomain)
+                .forEach(ic::adicionarProdutoOrcado);
+        }
+
+        return ic;
     }
 
     public static ItemChecklistResponse toResponse(ItemChecklist ic) {
@@ -31,17 +55,17 @@ public class ItemChecklistMapper {
         List<FotoEvidenciaResponse> fotos = ic.getFotosEvidencia() == null
                 ? Collections.emptyList()
                 : ic.getFotosEvidencia().stream()
-                    .map(f -> new FotoEvidenciaResponse(f.getId(), f.getUrlFoto(), f.getCriadoEm()))
+                    .map(f -> new FotoEvidenciaResponse(f.getId(), f.getPathFoto(), f.getCriadoEm()))
                     .collect(Collectors.toList());
 
 
          
-        List<ProdutoResponse> produtos = ic.getProdutosOrcados() == null
+        List<ProdutoAdicionado> produtos = ic.getProdutosOrcados() == null
                 ? Collections.emptyList()
                 : ic.getProdutosOrcados().stream()
                     .map(po -> po.getProduto() == null
                             ? null
-                            : new ProdutoResponse(po.getProduto().getId(), po.getProduto().getNomeProduto()))
+                            : new ProdutoAdicionado(po.getProduto().getId(), po.getProduto().getNomeProduto(), po.getQuantidade()))
                     .filter(p -> p != null)
                     .collect(Collectors.toList());
       
@@ -65,5 +89,32 @@ public class ItemChecklistMapper {
         return list.stream()
                    .map(ItemChecklistMapper::toResponse)
                    .collect(Collectors.toList());
+    }
+
+    public static ItemChecklistEntity toEntity(ItemChecklist ic) {
+        if (ic == null) return null;
+
+        ItemChecklistEntity entity = new ItemChecklistEntity();
+        entity.setId(ic.getId());
+
+        // Referência "seca" ao checklist, só com ID
+        if (ic.getChecklist() != null && ic.getChecklist().getId() != null) {
+            ChecklistEntity checklistEntity = new ChecklistEntity();
+            checklistEntity.setId(ic.getChecklist().getId());
+            entity.setChecklist(checklistEntity);
+        }
+
+        // Referência "seca" ao item, só com ID
+        if (ic.getItem() != null && ic.getItem().getId() != null) {
+            ItemEntity itemEntity = new ItemEntity();
+            itemEntity.setId(ic.getItem().getId());
+            entity.setItem(itemEntity);
+        }
+
+        entity.setStatusItem(ic.getStatusItem());
+        entity.setCriadoEm(ic.getCriadoEm());
+        entity.setAtualizadoEm(ic.getAtualizadoEm());
+
+        return entity;
     }
 }

@@ -42,11 +42,23 @@ public class VeiculoGatewayImpl implements VeiculoGateway {
 
     @Override
     public Veiculo atualizarVeiculo(Veiculo veiculo) {
-        ClienteEntity clienteEntity = clienteRepository.findById(veiculo.getCliente().getId()).get();
-        VeiculoEntity entity = VeiculoMapper.toEntity(veiculo, clienteEntity);
-        entity.setId(veiculo.getId());
-        repository.save(entity);
-        return VeiculoMapper.toDomain(entity, veiculo.getCliente());
+        VeiculoEntity entity = repository.findById(veiculo.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Veículo não encontrado: " + veiculo.getId()));
+
+        ClienteEntity clienteEntity = clienteRepository.findById(veiculo.getCliente().getId())
+                .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado: " + veiculo.getCliente().getId()));
+
+        
+        entity.setPlaca(veiculo.getPlaca());
+        entity.setMarca(veiculo.getMarca());
+        entity.setModelo(veiculo.getModelo());
+        entity.setAno(veiculo.getAno());
+        entity.setCor(veiculo.getCor());
+        entity.setQuilometragem(veiculo.getQuilometragem());
+        entity.setCliente(clienteEntity);
+
+        VeiculoEntity salvo = repository.save(entity);
+        return VeiculoMapper.toDomain(salvo, ClienteMapper.toDomain(salvo.getCliente()));
     }
 
     @Override

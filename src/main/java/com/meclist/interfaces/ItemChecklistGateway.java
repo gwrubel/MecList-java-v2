@@ -9,4 +9,5 @@ public interface ItemChecklistGateway {
     ItemChecklist salvar(ItemChecklist itemChecklist);
     Optional<ItemChecklist> buscarPorId(Long id);
     List<ItemChecklist> buscarPorChecklist(Long checklistId);
+    void salvarTodos(List<ItemChecklist> itensChecklist);
 }

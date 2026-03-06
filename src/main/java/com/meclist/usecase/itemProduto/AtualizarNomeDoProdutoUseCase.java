@@ -3,7 +3,7 @@ package com.meclist.usecase.itemProduto;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.meclist.domain.Item;
+
 import com.meclist.domain.ItemProduto;
 import com.meclist.domain.Produto;
 import com.meclist.dto.itemProduto.ItemProdutoResponse;

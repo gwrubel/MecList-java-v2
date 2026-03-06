@@ -30,7 +30,7 @@ public class CadastrarItemUseCase {
     }
 
     @Transactional
-    public ItemResponse executar(CadastrarItemRequest request, MultipartFile imagem, boolean force) {
+    public ItemResponse executar(CadastrarItemRequest request, MultipartFile imagem) {
         try {
             // Validações de imagem
             if (imagem.isEmpty()) {
@@ -48,11 +48,9 @@ public class CadastrarItemUseCase {
                 
             );
             
-            if (itemExiste && !force) {
+            if (itemExiste) {
                 throw new ItemDuplicado(
-                    "Já existe um item com o nome '" + request.nome() + 
-                    "' de categoria " + request.parteDoVeiculo() + 
-                    ". Use o parâmetro 'force=true' para cadastrar mesmo assim."
+                    "Já existe um item com o nome '" + request.nome() 
                 );
             }
 

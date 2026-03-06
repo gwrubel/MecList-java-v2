@@ -3,7 +3,7 @@ package com.meclist.domain;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import com.meclist.exception.CampoInvalidoException;
+import com.meclist.exception.QuilometragemMenorQueAtual;
 
 public class Veiculo {
 
@@ -63,7 +63,7 @@ public Veiculo(Long id, String placa, String marca, String modelo, Integer ano, 
 
     public void atualizarQuilometragem(float kmAtual, float novaKm) {
         if (novaKm < kmAtual) {
-            throw new CampoInvalidoException("quilometragem", "A quilometragem não pode ser menor que a atual.");
+            throw new QuilometragemMenorQueAtual("A quilometragem não pode ser menor que a atual.");
         }
         this.quilometragem = novaKm;
         this.atualizadoEm = LocalDateTime.now();

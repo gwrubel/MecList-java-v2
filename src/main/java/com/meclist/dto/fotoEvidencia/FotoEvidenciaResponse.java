@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 public record FotoEvidenciaResponse(
     Long id,
-    String urlFoto,
+    String url,
     LocalDateTime criadoEm
 ) {
 

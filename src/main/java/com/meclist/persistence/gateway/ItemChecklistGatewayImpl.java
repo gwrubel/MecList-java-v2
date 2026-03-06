@@ -14,21 +14,19 @@ import com.meclist.persistence.entity.ChecklistEntity;
 import com.meclist.persistence.entity.ItemChecklistEntity;
 import com.meclist.persistence.repository.ChecklistRepository;
 import com.meclist.persistence.repository.ItemChecklistRepository;
-import com.meclist.persistence.repository.ItemRepository;
 
 @Component
 public class ItemChecklistGatewayImpl implements ItemChecklistGateway {
 
     private final ItemChecklistRepository itemChecklistRepository;
     private final ChecklistRepository checklistRepository;
-    private final ItemRepository itemRepository;
+    
 
     public ItemChecklistGatewayImpl(ItemChecklistRepository itemChecklistRepository,
-                                    ChecklistRepository checklistRepository,
-                                    ItemRepository itemRepository) {
+                                    ChecklistRepository checklistRepository) {
         this.itemChecklistRepository = itemChecklistRepository;
         this.checklistRepository = checklistRepository;
-        this.itemRepository = itemRepository;
+        
     }
 
     @Override
@@ -69,4 +67,24 @@ public class ItemChecklistGatewayImpl implements ItemChecklistGateway {
                 .map(ItemChecklistMapper::toDomain)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public void salvarTodos(List<ItemChecklist> itensChecklist) {
+        List<ItemChecklistEntity> entities = itensChecklist.stream()
+                .map(itemChecklist -> {
+                    ItemChecklistEntity entity = new ItemChecklistEntity();
+                    entity.setCriadoEm(itemChecklist.getCriadoEm());
+                    ChecklistEntity checklistEntity = checklistRepository.findById(itemChecklist.getChecklist().getId())
+                            .orElseThrow(() -> new IllegalArgumentException("Checklist não encontrado"));
+                    entity.setChecklist(checklistEntity);
+                    entity.setItem(ItemMapper.toEntity(itemChecklist.getItem()));
+                    entity.setStatusItem(itemChecklist.getStatusItem());
+                    entity.setAtualizadoEm(itemChecklist.getAtualizadoEm());
+                    return entity;
+                })
+                .toList();
+
+        itemChecklistRepository.saveAll(entities);
+    }
+   
 }

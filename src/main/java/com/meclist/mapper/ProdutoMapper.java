@@ -13,6 +13,7 @@ public class ProdutoMapper {
         ProdutoEntity entity = new ProdutoEntity();
         entity.setId(produto.getId());
         entity.setNomeProduto(produto.getNomeProduto());
+        entity.setSituacao(produto.getSituacao());
         entity.setCriadoEm(produto.getCriadoEm());
         entity.setAtualizadoEm(produto.getAtualizadoEm());
         
@@ -27,6 +28,7 @@ public class ProdutoMapper {
         return new Produto(
                 entity.getId(),
                 entity.getNomeProduto(),
+                entity.getSituacao(),
                 entity.getCriadoEm(),
                 entity.getAtualizadoEm()
         );

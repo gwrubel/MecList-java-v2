@@ -10,4 +10,5 @@ public interface FotoEvidenciaGateway {
     Optional<FotoEvidencia> buscarPorId(Long id);
     List<FotoEvidencia> buscarPorItemChecklist(Long idItemChecklist);
     void deletar(Long id);
+    void deletarPorIds(List<Long> ids);
 }

@@ -1,11 +1,12 @@
 package com.meclist.exception;
 
-public class ItemNaoEncontradoException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class ItemNaoEncontradoException extends CustomException {
+
     public ItemNaoEncontradoException(String mensagem) {
-        super(mensagem);
+        super(HttpStatus.NOT_FOUND, "ITEM_NAO_ENCONTRADO", mensagem);
     }
     
-    public ItemNaoEncontradoException(Long id) {
-        super("Item não encontrado com ID: " + id);
-    }
+    
 }

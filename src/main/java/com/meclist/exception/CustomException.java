@@ -1,15 +1,23 @@
 package com.meclist.exception;
 
-public abstract class CustomException extends RuntimeException {
+import org.springframework.http.HttpStatus;
 
-    private final int status;
+public class CustomException extends RuntimeException {
 
-    public CustomException(String message, int status) {
+    private final HttpStatus status;
+    private final String code; // opcional, mas ajuda muito
+
+    public CustomException(HttpStatus status, String code, String message) {
         super(message);
         this.status = status;
+        this.code = code;
     }
 
-    public int getStatus() {
+    public HttpStatus getStatus() {
         return status;
+    }
+
+    public String getCode() {
+        return code;
     }
 }

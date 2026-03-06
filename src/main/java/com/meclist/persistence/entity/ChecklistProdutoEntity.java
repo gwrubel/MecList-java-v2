@@ -32,6 +32,9 @@ public class ChecklistProdutoEntity {
     @Column(name = "valor_uni", precision = 10, scale = 2)
     private BigDecimal valorUnitario;
 
+    @Column(name = "marca")
+    private String marca;
+
     @Column(name = "aprovado_cliente")
     private Boolean aprovadoCliente; // NULL = Pendente, TRUE = Aprovado, FALSE = Rejeitado
 
