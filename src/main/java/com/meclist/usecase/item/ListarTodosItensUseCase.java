@@ -9,14 +9,17 @@ import com.meclist.domain.Item;
 import com.meclist.domain.enums.Situacao;
 import com.meclist.dto.item.ItemResponse;
 import com.meclist.interfaces.ItemGateway;
+import com.meclist.interfaces.ItemProdutoGateway;
 
 
 @Service
 public class ListarTodosItensUseCase {
       private final ItemGateway itemGateway;
+      private final ItemProdutoGateway itemProdutoGateway;
 
-    public ListarTodosItensUseCase(ItemGateway itemGateway) {
+    public ListarTodosItensUseCase(ItemGateway itemGateway, ItemProdutoGateway itemProdutoGateway) {
         this.itemGateway = itemGateway;
+        this.itemProdutoGateway = itemProdutoGateway;
     }
 
 
@@ -31,7 +34,7 @@ public class ListarTodosItensUseCase {
                         item.getParteDoVeiculo(),
                         item.getImagemIlustrativa(),
                         item.getSituacao(),
-                        item.getProdutos().size(),
+                        (int) itemProdutoGateway.contarPorItem(item.getId()),
                         item.getCriadoEm(),
                         item.getAtualizadoEm()
                 ))

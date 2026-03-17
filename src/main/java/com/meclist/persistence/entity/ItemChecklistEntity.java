@@ -29,6 +29,9 @@ public class ItemChecklistEntity {
     @JoinColumn(name = "id_item", nullable = false)
     private ItemEntity item;
 
+    @Column(name = "nome_item_snapshot")
+    private String nomeItemSnapshot; // Para armazenar o nome do item no momento do checklist, caso o item seja alterado posteriormente
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status_item", nullable = false)
     private StatusItem statusItem;

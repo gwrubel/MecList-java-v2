@@ -10,6 +10,7 @@ public class ItemChecklist {
     private Long id;
     private Checklist checklist;
     private Item item;
+    private String nomeItemSnapshot; // Para armazenar o nome do item no momento do checklist, caso o item seja alterado posteriormente
     private StatusItem statusItem;
     private LocalDateTime criadoEm;
     private LocalDateTime atualizadoEm;
@@ -22,22 +23,22 @@ public class ItemChecklist {
     
 
     // Construtor completo
-    public ItemChecklist(Long id, Checklist checklist, Item item, StatusItem statusItem,
+    public ItemChecklist(Long id, Checklist checklist, Item item, String nomeItemSnapshot, StatusItem statusItem,
                          LocalDateTime criadoEm, LocalDateTime atualizadoEm) {
         this.id = id;
         this.checklist = checklist;
         this.item = item;
+        this.nomeItemSnapshot = nomeItemSnapshot;
         this.statusItem = statusItem != null ? statusItem : StatusItem.PENDENTE;
         this.criadoEm = criadoEm;
         this.atualizadoEm = atualizadoEm;
     }
 
     // Factory method para criar novo item de checklist
-    public static ItemChecklist novo(Checklist checklist, Item item) {
-        LocalDateTime agora = LocalDateTime.now();
-        return new ItemChecklist(null, checklist, item, StatusItem.PENDENTE, agora, agora);
-    }
-
+   public static ItemChecklist novo(Checklist checklist, Item item) {
+    LocalDateTime agora = LocalDateTime.now();
+    return new ItemChecklist(null, checklist, item, item.getNome(), StatusItem.PENDENTE, agora, agora);
+}
     // Getters
     public Long getId() { return id; }
     public Checklist getChecklist() { return checklist; }
@@ -47,6 +48,7 @@ public class ItemChecklist {
     public LocalDateTime getAtualizadoEm() { return atualizadoEm; }
     public List<FotoEvidencia> getFotosEvidencia() { return fotosEvidencia; }
     public List<ChecklistProduto> getProdutosOrcados() { return produtosOrcados; }
+    public String getNomeItemSnapshot() { return nomeItemSnapshot; }
 
     // Métodos de negócio
     public void atualizarStatus(StatusItem novoStatus) {

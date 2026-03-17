@@ -19,7 +19,7 @@ public class BuscarChecklistPorIdUseCase {
     public ChecklistResponse executar(Long checklistId) {
         var checklist = checklistGateway.buscarPorId(checklistId)
                 .orElseThrow(() ->
-                        new ChecklistNaoEncontradoException("Checklist não encontrado com ID: " + checklistId));
+                        new ChecklistNaoEncontradoException("Checklist não encontrado!"));
 
         return ChecklistMapper.toResponse(checklist);
     }

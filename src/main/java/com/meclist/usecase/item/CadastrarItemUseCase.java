@@ -68,7 +68,7 @@ public class CadastrarItemUseCase {
             Item item = Item.novo(request.nome(), request.parteDoVeiculo(), urlImagem);
             Item itemSalvo = itemGateway.salvar(item);
             
-            return ItemMapper.toResponse(itemSalvo);
+            return ItemMapper.toResponse(itemSalvo, 0);
             
         } catch (IOException e) {
             throw new RuntimeException("Erro ao processar imagem: " + e.getMessage(), e);

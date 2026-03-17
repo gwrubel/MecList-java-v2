@@ -9,4 +9,5 @@ public interface ChecklistGateway {
     Checklist salvar(Checklist checklist);
     Optional<Checklist> buscarPorId(Long id);
     List<Checklist> buscarPorMecanico(Long mecanicoId);
+    void atualizarStatus(Checklist checklist);
 }

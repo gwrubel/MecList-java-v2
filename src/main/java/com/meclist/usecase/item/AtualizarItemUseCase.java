@@ -17,6 +17,7 @@ import com.meclist.dto.item.AtualizarItemRequest;
 import com.meclist.dto.item.ItemResponse;
 import com.meclist.exception.ItemNaoEncontradoException;
 import com.meclist.interfaces.ItemGateway;
+import com.meclist.interfaces.ItemProdutoGateway;
 import com.meclist.interfaces.UploadImagemGateway;
 import com.meclist.mapper.ItemMapper;
 
@@ -24,13 +25,15 @@ import com.meclist.mapper.ItemMapper;
 public class AtualizarItemUseCase {
 
     private final ItemGateway itemGateway;
+    private final ItemProdutoGateway itemProdutoGateway;
     private final UploadImagemGateway uploadImagemGateway;
 
     @Value("${upload.path:uploads}")
     private String uploadPath;
 
-    public AtualizarItemUseCase(ItemGateway itemGateway, UploadImagemGateway uploadImagemGateway) {
+    public AtualizarItemUseCase(ItemGateway itemGateway, ItemProdutoGateway itemProdutoGateway, UploadImagemGateway uploadImagemGateway) {
         this.itemGateway = itemGateway;
+        this.itemProdutoGateway = itemProdutoGateway;
         this.uploadImagemGateway = uploadImagemGateway;
     }
 
@@ -67,7 +70,7 @@ public class AtualizarItemUseCase {
         item.atualizarItem(request.nome(), request.parteDoVeiculo(), imagemAtual);
 
         Item itemAtualizado = itemGateway.salvar(item);
-        return ItemMapper.toResponse(itemAtualizado);
+        return ItemMapper.toResponse(itemAtualizado, (int) itemProdutoGateway.contarPorItem(itemAtualizado.getId()));
     }
 
     private void excluirImagemFisica(String imagemIlustrativa, String parteDoVeiculo) {

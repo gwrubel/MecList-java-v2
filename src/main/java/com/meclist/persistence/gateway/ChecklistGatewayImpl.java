@@ -12,6 +12,8 @@ import com.meclist.mapper.ChecklistMapper;
 import com.meclist.persistence.repository.ChecklistRepository;
 import com.meclist.persistence.repository.ItemChecklistRepository;
 
+import jakarta.transaction.Transactional;
+
 @Component
 public class ChecklistGatewayImpl implements ChecklistGateway {
 
@@ -63,5 +65,21 @@ public class ChecklistGatewayImpl implements ChecklistGateway {
                     return ChecklistMapper.toDomain(entity, itens);
                 })
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void atualizarStatus(Checklist checklist) {
+        
+        var entity = checklistRepository.findById(checklist.getId())
+                .orElseThrow(() -> new RuntimeException("Checklist não encontrado: " + checklist.getId())); 
+        // Altera apenas o status e data
+    entity.setStatus(checklist.getStatus());
+    entity.setAtualizadoEm(checklist.getAtualizadoEm());
+    
+    // Salva (sem risco de transient)
+    checklistRepository.save(entity);
+        
+        
     }
 }

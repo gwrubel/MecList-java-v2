@@ -70,8 +70,8 @@ public class ItemMapper {
     }
 
 
-    public static ItemResponse toResponse(Item item) {
-        return new ItemResponse(item.getId(), item.getNome(), item.getParteDoVeiculo(), item.getImagemIlustrativa(), item.getSituacao(), item.getProdutos().size(), item.getCriadoEm(), item.getAtualizadoEm());
+    public static ItemResponse toResponse(Item item, int quantidadeProdutos) {
+        return new ItemResponse(item.getId(), item.getNome(), item.getParteDoVeiculo(), item.getImagemIlustrativa(), item.getSituacao(), quantidadeProdutos, item.getCriadoEm(), item.getAtualizadoEm());
     }
 
     // Método para copiar os dados de um Item para um ItemEntity existente (útil para atualizações)

@@ -13,5 +13,6 @@ public interface ItemProdutoGateway {
     boolean existeRelacionamento(Long idItem, Long idProduto);
     void excluir(Long id);
     void excluirPorItemEProduto(Long idItem, Long idProduto);
+    long contarPorItem(Long idItem);
 }
 

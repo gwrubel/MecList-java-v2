@@ -71,45 +71,47 @@ public class SupabaseStorageService implements StorageService {
             throw new RuntimeException("Erro ao deletar arquivo", e);
         }
     }
-@Override
-public String generateSignedUrl(String path, int expiresIn) {
 
-    try {
+    @Override
+    public String generateSignedUrl(String path, int expiresIn) {
 
-        String body = """
-            {
-              "expiresIn": %d
+        try {
+
+            String body = """
+                    {
+                      "expiresIn": %d
+                    }
+                    """.formatted(expiresIn);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(properties.getUrl()
+                            + "/storage/v1/object/sign/"
+                            + properties.getBucket()
+                            + "/"
+                            + path))
+                    .header("Authorization", "Bearer " + properties.getServiceKey())
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(body))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
+
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode node = mapper.readTree(response.body());
+                String signedPath = node.get("signedURL").asText();
+
+                String baseUrl = properties.getUrl().replaceAll("/$", "");
+
+                return baseUrl + "/storage/v1" + signedPath;
             }
-            """.formatted(expiresIn);
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(properties.getUrl()
-                        + "/storage/v1/object/sign/"
-                        + properties.getBucket()
-                        + "/"
-                        + path))
-                .header("Authorization", "Bearer " + properties.getServiceKey())
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(body))
-                .build();
+            throw new RuntimeException("Erro signed URL: " + response.body());
 
-        HttpResponse<String> response =
-                client.send(request, HttpResponse.BodyHandlers.ofString());
-
-        if (response.statusCode() >= 200 && response.statusCode() < 300) {
-
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode node = mapper.readTree(response.body());
-            String signedPath = node.get("signedURL").asText();
-
-            return properties.getUrl() + signedPath;
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao gerar signed URL", e);
         }
-
-        throw new RuntimeException("Erro signed URL: " + response.body());
-
-    } catch (Exception e) {
-        throw new RuntimeException("Erro ao gerar signed URL", e);
     }
-}
 
 }

@@ -2,6 +2,7 @@ package com.meclist.usecase.itemProduto;
 
 import org.springframework.stereotype.Service;
 
+import com.meclist.domain.enums.Situacao;
 import com.meclist.interfaces.ItemGateway;
 import com.meclist.interfaces.ItemProdutoGateway;
 
@@ -24,7 +25,7 @@ public class ListarProdutosPorItemUseCase {
         this.itemGateway = itemGateway;
     }
 
-public List<ProdutosDoItemResponse> executar(Long idItem) {
+public List<ProdutosDoItemResponse> executar(Long idItem, Situacao situacao) {
     itemGateway.buscarPorId(idItem)
         .orElseThrow(() -> new ItemNaoEncontradoException(
             "Item com ID " + idItem + " não encontrado"
@@ -32,6 +33,7 @@ public List<ProdutosDoItemResponse> executar(Long idItem) {
     
     return itemProdutoGateway.buscarPorItem(idItem)
         .stream()
+        .filter(ip -> situacao == null || situacao.equals(ip.getProduto().getSituacao()))
         .map(ProdutosDoItemResponse::from) 
         .toList();
 }

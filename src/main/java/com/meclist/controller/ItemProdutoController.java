@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import com.meclist.dto.itemProduto.ItemProdutoResponse;
 import com.meclist.dto.itemProduto.ProdutosDoItemResponse;
 import com.meclist.dto.produto.ProdutoRequest;
+import com.meclist.domain.enums.Situacao;
 import com.meclist.response.ApiResponse;
 import com.meclist.usecase.itemProduto.AtualizarNomeDoProdutoUseCase;
 import com.meclist.usecase.itemProduto.CadastrarProdutoNoItemUseCase;
@@ -93,11 +94,12 @@ public class ItemProdutoController extends BaseController {
     @GetMapping
     public ResponseEntity<ApiResponse<List<ProdutosDoItemResponse>>> listarProdutos(
             @PathVariable Long idItem,
+            @RequestParam(required = false) Situacao situacao,
             HttpServletRequest servletRequest) {
         
-        log.debug("Listando produtos do item: idItem={}", idItem);
+        log.debug("Listando produtos do item: idItem={}, situacao={}", idItem, situacao);
         
-        List<ProdutosDoItemResponse> produtos = listarProdutosPorItemUseCase.executar(idItem);
+        List<ProdutosDoItemResponse> produtos = listarProdutosPorItemUseCase.executar(idItem, situacao);
         
         log.info("Produtos listados com sucesso: idItem={}, quantidade={}", 
                  idItem, produtos.size());

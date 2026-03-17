@@ -27,6 +27,7 @@ public class ItemChecklistMapper {
             entity.getId(),
             checklist,
             ItemMapper.toDomain(entity.getItem()),
+            entity.getNomeItemSnapshot(),
             entity.getStatusItem(),
             entity.getCriadoEm(),
             entity.getAtualizadoEm()
@@ -73,7 +74,7 @@ public class ItemChecklistMapper {
         return new ItemChecklistResponse(
             ic.getId(),
             ic.getItem().getId(),
-            ic.getItem().getNome(),
+            ic.getNomeItemSnapshot(),
             ic.getItem().getParteDoVeiculo(),
             ic.getItem().getImagemIlustrativa(),
             ic.getStatusItem(),
@@ -114,6 +115,7 @@ public class ItemChecklistMapper {
         entity.setStatusItem(ic.getStatusItem());
         entity.setCriadoEm(ic.getCriadoEm());
         entity.setAtualizadoEm(ic.getAtualizadoEm());
+        entity.setNomeItemSnapshot(ic.getNomeItemSnapshot());
 
         return entity;
     }

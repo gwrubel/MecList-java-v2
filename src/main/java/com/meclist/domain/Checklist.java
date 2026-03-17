@@ -61,18 +61,10 @@ public class Checklist {
         return new Checklist(null, veiculo, mecanico, quilometragem, descricao, status, agora, agora);
     }
 
-    // Métodos para gerenciar itens do checklist
-    public void adicionarItem(ItemChecklist item) {
-        if (this.itensChecklist == null) {
-            this.itensChecklist = new ArrayList<>();
-        }
-        this.itensChecklist.add(item);
-    }
-
-    public void removerItem(ItemChecklist item) {
-        if (this.itensChecklist != null) {
-            this.itensChecklist.remove(item);
-        }
+    public Checklist atualizarStatus(StatusProcesso novoStatus) {
+        this.status = novoStatus;
+        this.atualizadoEm = LocalDateTime.now();
+        return this;
     }
 
     // Métodos para gerenciar serviços

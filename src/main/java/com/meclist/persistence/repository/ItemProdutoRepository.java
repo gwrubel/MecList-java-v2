@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import com.meclist.domain.enums.Situacao;
 import com.meclist.persistence.entity.ItemProdutoEntity;
 
 @Repository
@@ -14,5 +15,7 @@ public interface ItemProdutoRepository extends JpaRepository<ItemProdutoEntity, 
     List<ItemProdutoEntity> findByProdutoId(Long idProduto);
     Optional<ItemProdutoEntity> findByItemIdAndProdutoId(Long idItem, Long idProduto);
     boolean existsByItemIdAndProdutoId(Long idItem, Long idProduto);
+    List<ItemProdutoEntity> findByItemIdAndProdutoSituacao(Long idItem, Situacao situacao);
+    long countByItemId(Long idItem);
 }
 

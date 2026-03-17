@@ -81,4 +81,9 @@ public class ItemProdutoGatewayImpl implements ItemProdutoGateway {
         return itemProdutoRepository.findByItemIdAndProdutoId(idItem, idProduto)
                 .map(ItemProdutoMapper::toDomain);
     }
+
+    @Override
+    public long contarPorItem(Long idItem) {
+        return itemProdutoRepository.countByItemId(idItem);
+    }
 }

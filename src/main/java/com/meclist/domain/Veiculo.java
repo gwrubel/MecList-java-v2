@@ -61,8 +61,8 @@ public Veiculo(Long id, String placa, String marca, String modelo, Integer ano, 
 }
 
 
-    public void atualizarQuilometragem(float kmAtual, float novaKm) {
-        if (novaKm < kmAtual) {
+    public void atualizarQuilometragem(float novaKm) {
+        if (novaKm < this.quilometragem) {
             throw new QuilometragemMenorQueAtual("A quilometragem não pode ser menor que a atual.");
         }
         this.quilometragem = novaKm;

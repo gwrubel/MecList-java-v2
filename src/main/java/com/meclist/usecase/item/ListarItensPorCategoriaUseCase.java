@@ -10,14 +10,17 @@ import com.meclist.domain.enums.CategoriaParteVeiculo;
 import com.meclist.domain.enums.Situacao;
 import com.meclist.dto.item.ItemResponse;
 import com.meclist.interfaces.ItemGateway;
+import com.meclist.interfaces.ItemProdutoGateway;
 
 @Service
 public class ListarItensPorCategoriaUseCase {
 
     private final ItemGateway itemGateway;
+    private final ItemProdutoGateway itemProdutoGateway;
 
-    public ListarItensPorCategoriaUseCase(ItemGateway itemGateway) {
+    public ListarItensPorCategoriaUseCase(ItemGateway itemGateway, ItemProdutoGateway itemProdutoGateway) {
         this.itemGateway = itemGateway;
+        this.itemProdutoGateway = itemProdutoGateway;
     }
 
     public List<ItemResponse> executar(CategoriaParteVeiculo categoria, Situacao situacao) {
@@ -36,7 +39,7 @@ public class ListarItensPorCategoriaUseCase {
                         item.getParteDoVeiculo(),
                         item.getImagemIlustrativa(),
                         item.getSituacao(),
-                        item.getProdutos().size(),
+                        (int) itemProdutoGateway.contarPorItem(item.getId()),
                         item.getCriadoEm(),
                         item.getAtualizadoEm()
                 ))

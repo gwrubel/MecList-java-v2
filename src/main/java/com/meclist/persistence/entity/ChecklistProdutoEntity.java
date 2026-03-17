@@ -26,6 +26,9 @@ public class ChecklistProdutoEntity {
     @JoinColumn(name = "id_produto", nullable = false)
     private ProdutoEntity produto;
 
+    @Column(name = "nome_produto_snapshot")
+    private String nomeProdutoSnapshot; // Para armazenar o nome do produto no momento do orçamento, caso o produto seja alterado posteriormente
+
     @Column(name = "quantidade", nullable = false)
     private Integer quantidade;
 

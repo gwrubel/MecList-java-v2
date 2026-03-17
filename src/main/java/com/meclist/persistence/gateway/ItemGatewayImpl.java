@@ -8,22 +8,19 @@ import org.springframework.stereotype.Component;
 
 import com.meclist.domain.Item;
 import com.meclist.domain.enums.CategoriaParteVeiculo;
+import com.meclist.domain.enums.Situacao;
 import com.meclist.interfaces.ItemGateway;
 import com.meclist.mapper.ItemMapper;
-import com.meclist.mapper.ProdutoMapper;
 import com.meclist.persistence.entity.ItemEntity;
 import com.meclist.persistence.repository.ItemRepository;
-import com.meclist.persistence.repository.ItemProdutoRepository;
 
 @Component
 public class ItemGatewayImpl implements ItemGateway {
 
     private final ItemRepository itemRepository;
-    private final ItemProdutoRepository itemProdutoRepository;
 
-    public ItemGatewayImpl(ItemRepository itemRepository, ItemProdutoRepository itemProdutoRepository) {
+    public ItemGatewayImpl(ItemRepository itemRepository) {
         this.itemRepository = itemRepository;
-        this.itemProdutoRepository = itemProdutoRepository;
     }
 
     @Override
@@ -37,67 +34,49 @@ public class ItemGatewayImpl implements ItemGateway {
             entity.setCriadoEm(item.getCriadoEm());
         }
 
-       ItemMapper.copyToEntity(item, entity);
+        ItemMapper.copyToEntity(item, entity);
 
         ItemEntity salvo = itemRepository.save(entity);
         return ItemMapper.toDomain(salvo);
     }
 
-        @Override
+    @Override
     public List<Item> buscarPorCategoria(CategoriaParteVeiculo categoria) {
         return itemRepository.findByCategoria(categoria)
                 .stream()
-                .map(entity -> {
-                    var produtos = itemProdutoRepository.findByItemId(entity.getId())
-                        .stream()
-                        .map(ip -> ProdutoMapper.toDomain(ip.getProduto()))
-                        .collect(Collectors.toList());
-
-                
-                    
-                    return ItemMapper.ItemComProdutosToDomain(entity, produtos);
-                })
+                .map(ItemMapper::toDomain)
                 .collect(Collectors.toList());
     }
 
-     @Override
+    @Override
     public Optional<Item> buscarPorId(Long id) {
-        Optional<ItemEntity> itemEntity = itemRepository.findById(id);
-        if (itemEntity.isEmpty()) {
-            return Optional.empty();
-        }
-        
-        // Carrega os produtos associados
-        var produtos = itemProdutoRepository.findByItemId(itemEntity.get().getId())
-            .stream()
-            .map(ip -> ProdutoMapper.toDomain(ip.getProduto()))
-            .collect(Collectors.toList());
-        
-        return Optional.of(ItemMapper.ItemComProdutosToDomain(itemEntity.get(), produtos));
+        return itemRepository.findById(id)
+                .map(ItemMapper::toDomain);
     }
-    
-      @Override
+
+    @Override
     public List<Item> buscarTodos() {
         return itemRepository.findAll()
                 .stream()
-                .map(entity -> {
-                    var produtos = itemProdutoRepository.findByItemId(entity.getId())
-                        .stream()
-                        .map(ip -> ProdutoMapper.toDomain(ip.getProduto()))
-                        .collect(Collectors.toList());
-
-                       
-                    return ItemMapper.ItemComProdutosToDomain(entity, produtos);
-                })
+                .map(ItemMapper::toDomain)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<Item> buscarAtivos() {
+        return itemRepository.findBySituacao(Situacao.ATIVO)
+                .stream()
+                .map(ItemMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
     @Override
     public boolean existeComMesmoNome(String nome) {
         return itemRepository.existsByNomeItem(nome);
     }
 
     @Override
-    public void excluir (Long id) {
+    public void excluir(Long id) {
         itemRepository.deleteById(id);
     }
 }

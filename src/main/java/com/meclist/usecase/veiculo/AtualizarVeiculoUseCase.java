@@ -50,7 +50,7 @@ public class AtualizarVeiculoUseCase {
         if (request.cor() != null)
             veiculo.atualizarCor(request.cor());
         if (request.quilometragem() != 0)
-            veiculo.atualizarQuilometragem(veiculo.getQuilometragem(), request.quilometragem());
+            veiculo.atualizarQuilometragem(request.quilometragem());
 
         Veiculo veiculoAtualizado = veiculoGateway.atualizarVeiculo(veiculo);
 
