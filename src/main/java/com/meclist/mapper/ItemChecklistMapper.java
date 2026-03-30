@@ -8,6 +8,8 @@ import com.meclist.domain.Checklist;
 import com.meclist.domain.ItemChecklist;
 import com.meclist.dto.fotoEvidencia.FotoEvidenciaResponse;
 import com.meclist.dto.itemChecklist.ItemChecklistResponse;
+import com.meclist.dto.checklist.precificacao.ItemPrecificacaoResponse;
+import com.meclist.dto.checklist.precificacao.ProdutoPrecificadoResponse;
 import com.meclist.dto.produto.ProdutoAdicionado;
 
 import com.meclist.persistence.entity.ChecklistEntity;
@@ -16,6 +18,7 @@ import com.meclist.persistence.entity.ItemEntity;
 
 public class ItemChecklistMapper {
 
+    // ============ Entity → Domain (sem alteração) ============
     public static ItemChecklist toDomain(ItemChecklistEntity entity) {
         if (entity == null) return null;
 
@@ -33,14 +36,12 @@ public class ItemChecklistMapper {
             entity.getAtualizadoEm()
         );
 
-        // 🔹 Fotos evidência
         if (entity.getFotosEvidencia() != null) {
             entity.getFotosEvidencia().stream()
                 .map(FotoEvidenciaMapper::toDomain)
                 .forEach(ic::adicionarFotoEvidencia);
         }
 
-        // 🔹 Produtos orçados
         if (entity.getProdutosOrcados() != null) {
             entity.getProdutosOrcados().stream()
                 .map(ChecklistProdutoMapper::toDomain)
@@ -50,6 +51,7 @@ public class ItemChecklistMapper {
         return ic;
     }
 
+    // ============ MECÂNICO — Response limpo (sem preços) ============
     public static ItemChecklistResponse toResponse(ItemChecklist ic) {
         if (ic == null || ic.getItem() == null) return null;
 
@@ -59,8 +61,6 @@ public class ItemChecklistMapper {
                     .map(f -> new FotoEvidenciaResponse(f.getId(), f.getPathFoto(), f.getCriadoEm()))
                     .collect(Collectors.toList());
 
-
-         
         List<ProdutoAdicionado> produtos = ic.getProdutosOrcados() == null
                 ? Collections.emptyList()
                 : ic.getProdutosOrcados().stream()
@@ -69,7 +69,6 @@ public class ItemChecklistMapper {
                             : new ProdutoAdicionado(po.getProduto().getId(), po.getProduto().getNomeProduto(), po.getQuantidade()))
                     .filter(p -> p != null)
                     .collect(Collectors.toList());
-      
 
         return new ItemChecklistResponse(
             ic.getId(),
@@ -85,6 +84,42 @@ public class ItemChecklistMapper {
         );
     }
 
+    // ============ ADM — Response com preços ============
+    public static ItemPrecificacaoResponse toPrecificacaoResponse(ItemChecklist ic) {
+        if (ic == null || ic.getItem() == null) return null;
+
+        List<FotoEvidenciaResponse> fotos = ic.getFotosEvidencia() == null
+                ? Collections.emptyList()
+                : ic.getFotosEvidencia().stream()
+                    .map(f -> new FotoEvidenciaResponse(f.getId(), f.getPathFoto(), f.getCriadoEm()))
+                    .collect(Collectors.toList());
+
+        List<ProdutoPrecificadoResponse> produtos = ic.getProdutosOrcados() == null
+                ? Collections.emptyList()
+                : ic.getProdutosOrcados().stream()
+                    .filter(po -> po.getProduto() != null)
+                    .map(po -> new ProdutoPrecificadoResponse(
+                            po.getId(),
+                            po.getProduto().getId(),
+                            po.getNomeProdutoSnapshot(),
+                            po.getQuantidade(),
+                            po.getValorUnitario(),
+                            po.getMarca()))
+                    .collect(Collectors.toList());
+
+        return new ItemPrecificacaoResponse(
+            ic.getId(),
+            ic.getNomeItemSnapshot(),
+            ic.getItem().getId(),
+            ic.getItem().getParteDoVeiculo(),
+            ic.getStatusItem(),
+            fotos,
+            produtos,
+            ic.getMaoDeObra()
+        );
+    }
+
+    // ============ Listas ============
     public static List<ItemChecklistResponse> toResponse(List<ItemChecklist> list) {
         if (list == null) return Collections.emptyList();
         return list.stream()
@@ -92,20 +127,26 @@ public class ItemChecklistMapper {
                    .collect(Collectors.toList());
     }
 
+    public static List<ItemPrecificacaoResponse> toPrecificacaoResponse(List<ItemChecklist> list) {
+        if (list == null) return Collections.emptyList();
+        return list.stream()
+                   .map(ItemChecklistMapper::toPrecificacaoResponse)
+                   .collect(Collectors.toList());
+    }
+
+    // ============ Domain → Entity (sem alteração) ============
     public static ItemChecklistEntity toEntity(ItemChecklist ic) {
         if (ic == null) return null;
 
         ItemChecklistEntity entity = new ItemChecklistEntity();
         entity.setId(ic.getId());
 
-        // Referência "seca" ao checklist, só com ID
         if (ic.getChecklist() != null && ic.getChecklist().getId() != null) {
             ChecklistEntity checklistEntity = new ChecklistEntity();
             checklistEntity.setId(ic.getChecklist().getId());
             entity.setChecklist(checklistEntity);
         }
 
-        // Referência "seca" ao item, só com ID
         if (ic.getItem() != null && ic.getItem().getId() != null) {
             ItemEntity itemEntity = new ItemEntity();
             itemEntity.setId(ic.getItem().getId());
@@ -116,6 +157,7 @@ public class ItemChecklistMapper {
         entity.setCriadoEm(ic.getCriadoEm());
         entity.setAtualizadoEm(ic.getAtualizadoEm());
         entity.setNomeItemSnapshot(ic.getNomeItemSnapshot());
+        entity.setMaoDeObra(ic.getMaoDeObra());
 
         return entity;
     }

@@ -1,6 +1,6 @@
 package com.meclist.validator;
 
-import java.util.Map;
+
 
 import com.meclist.exception.CampoInvalidoException;
 

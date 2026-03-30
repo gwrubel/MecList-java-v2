@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 import com.meclist.domain.Checklist;
+import com.meclist.domain.enums.StatusProcesso;
 import com.meclist.interfaces.ChecklistGateway;
 import com.meclist.mapper.ChecklistMapper;
 import com.meclist.persistence.repository.ChecklistRepository;
@@ -81,5 +82,16 @@ public class ChecklistGatewayImpl implements ChecklistGateway {
     checklistRepository.save(entity);
         
         
+    }
+
+    @Override
+    public List<Checklist> buscarPorStatus(StatusProcesso status) {
+        return checklistRepository.findByStatus(status)
+                .stream()
+                .map(entity -> {
+                    var itens = itemChecklistRepository.findByChecklistId(entity.getId());
+                    return ChecklistMapper.toDomain(entity, itens);
+                })
+                .collect(Collectors.toList());
     }
 }

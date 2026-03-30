@@ -1,8 +1,9 @@
 package com.meclist.persistence.entity;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Date;
 
+import com.meclist.domain.enums.StatusProcesso;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -23,18 +24,18 @@ public class OrcamentoEntity {
     @JoinColumn(name = "id_checklist", nullable = false)
     private ChecklistEntity checklist;
 
-    @Column(name = "valor_total")
-    private Float valorTotal;
+    @Column(name = "valor_total", precision = 10, scale = 2)
+    private BigDecimal valorTotal;
 
     @Column(name = "data_emissao")
-    private Date dataEmissao;
+    private LocalDateTime dataEmissao;
 
     @Column(name = "data_aprovacao")
-    private Date dataAprovacao;
+    private LocalDateTime dataAprovacao;
 
-    @ManyToOne
-    @JoinColumn(name = "id_status", nullable = false)
-    private StatusEntity status;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private StatusProcesso status;
 
     @Column(name = "criado_em")
     private LocalDateTime criadoEm;

@@ -1,5 +1,6 @@
 package com.meclist.persistence.entity;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +32,9 @@ public class ItemChecklistEntity {
 
     @Column(name = "nome_item_snapshot")
     private String nomeItemSnapshot; // Para armazenar o nome do item no momento do checklist, caso o item seja alterado posteriormente
+
+    @Column(name = "mao_de_obra", precision = 10, scale = 2)
+    private BigDecimal maoDeObra;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status_item", nullable = false)

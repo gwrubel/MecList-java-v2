@@ -9,6 +9,9 @@ import com.meclist.domain.Checklist;
 import com.meclist.domain.ItemChecklist;
 import com.meclist.domain.enums.CategoriaParteVeiculo;
 import com.meclist.dto.checklist.ChecklistResponse;
+import com.meclist.dto.checklist.ChecklistResumoResponse;
+import com.meclist.dto.checklist.precificacao.ChecklistPrecificacaoResponse;
+import com.meclist.dto.checklist.precificacao.ItemPrecificacaoResponse;
 import com.meclist.dto.itemChecklist.ItemChecklistResponse;
 import com.meclist.persistence.entity.ChecklistEntity;
 import com.meclist.persistence.entity.ItemChecklistEntity;
@@ -94,4 +97,63 @@ public class ChecklistMapper {
             itensPorCategoria
         );
     }
+
+    public static ChecklistPrecificacaoResponse toPrecificacaoResponse(Checklist checklist) {
+    if (checklist == null) return null;
+
+    Map<CategoriaParteVeiculo, List<ItemPrecificacaoResponse>> itensPorCategoria =
+        checklist.getItensChecklist().stream()
+            .map(ItemChecklistMapper::toPrecificacaoResponse)
+            .collect(Collectors.groupingBy(ItemPrecificacaoResponse::parteDoVeiculo));
+
+    return new ChecklistPrecificacaoResponse(
+        checklist.getId(),
+        checklist.getVeiculo().getId(),
+        checklist.getVeiculo().getPlaca(),
+        checklist.getVeiculo().getCliente().getNome(),
+        checklist.getStatus(),
+        checklist.getCriadoEm(),
+        checklist.getAtualizadoEm(),
+        itensPorCategoria
+    );
+}
+
+    public static ChecklistPrecificacaoResponse toPrecificacaoResponse(Checklist checklist, 
+                                                                     List<ItemChecklist> itens) {
+    if (checklist == null) return null;
+
+    Map<CategoriaParteVeiculo, List<ItemPrecificacaoResponse>> itensPorCategoria =
+        itens.stream()
+            .map(ItemChecklistMapper::toPrecificacaoResponse)
+            .collect(Collectors.groupingBy(ItemPrecificacaoResponse::parteDoVeiculo));
+
+    return new ChecklistPrecificacaoResponse(
+        checklist.getId(),
+        checklist.getVeiculo().getId(),
+        checklist.getVeiculo().getPlaca(),
+        checklist.getVeiculo().getCliente().getNome(),
+        checklist.getStatus(),
+        checklist.getCriadoEm(),
+        checklist.getAtualizadoEm(),
+        itensPorCategoria
+    );
+}
+
+    public static ChecklistResumoResponse toResumoResponse(Checklist checklist) {
+    if (checklist == null) return null;
+
+    String nomeCliente = checklist.getVeiculo().getCliente() != null
+            ? checklist.getVeiculo().getCliente().getNome()
+            : null;
+
+    return new ChecklistResumoResponse(
+        checklist.getId(),
+        checklist.getVeiculo().getId(),
+        checklist.getVeiculo().getPlaca(),
+        nomeCliente,
+        checklist.getStatus(),
+        checklist.getCriadoEm(),
+        checklist.getAtualizadoEm()
+    );
+}
 }

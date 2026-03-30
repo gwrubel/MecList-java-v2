@@ -1,5 +1,6 @@
 package com.meclist.domain;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +12,7 @@ public class ItemChecklist {
     private Checklist checklist;
     private Item item;
     private String nomeItemSnapshot; // Para armazenar o nome do item no momento do checklist, caso o item seja alterado posteriormente
+    private BigDecimal maoDeObra;
     private StatusItem statusItem;
     private LocalDateTime criadoEm;
     private LocalDateTime atualizadoEm;
@@ -49,6 +51,7 @@ public class ItemChecklist {
     public List<FotoEvidencia> getFotosEvidencia() { return fotosEvidencia; }
     public List<ChecklistProduto> getProdutosOrcados() { return produtosOrcados; }
     public String getNomeItemSnapshot() { return nomeItemSnapshot; }
+    public BigDecimal getMaoDeObra() { return maoDeObra; }
 
     // Métodos de negócio
     public void atualizarStatus(StatusItem novoStatus) {
@@ -105,7 +108,11 @@ public class ItemChecklist {
     public void setAtualizadoEm(LocalDateTime dataAtualizacao) {
         this.atualizadoEm = dataAtualizacao;
     }
-       
+    
+    public void definirMaoDeObra(BigDecimal valorMaoDeObra) {
+        this.maoDeObra = valorMaoDeObra;
+        this.atualizadoEm = LocalDateTime.now();
+    }
 }
 
 

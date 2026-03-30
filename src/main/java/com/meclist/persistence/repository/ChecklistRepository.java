@@ -7,12 +7,13 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import com.meclist.domain.enums.StatusProcesso;
 import com.meclist.persistence.entity.ChecklistEntity;
 
 @Repository
 public interface ChecklistRepository extends JpaRepository<ChecklistEntity, Long> {
     
-       // ✅ CORRETO: "itensChecklist" (não "itens")
+       
     @EntityGraph(attributePaths = {
         "veiculo",
         "veiculo.cliente",
@@ -36,6 +37,8 @@ public interface ChecklistRepository extends JpaRepository<ChecklistEntity, Long
         "itensChecklist.item"
     })
     Optional<ChecklistEntity> findById(Long id);
+
+    List<ChecklistEntity> findByStatus(StatusProcesso status);
 }
 
 

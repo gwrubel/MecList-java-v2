@@ -6,19 +6,21 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.meclist.domain.enums.StatusProcesso;
+
 public class Orcamento {
     private Long id;
     private Checklist checklist;
     private BigDecimal valorTotal;
     private LocalDate dataEmissao;
     private LocalDate dataAprovacao;
-    private Status status;
+    private StatusProcesso status;
     private List<ItemOrcamento> itens;
     private LocalDateTime criadoEm;
     private LocalDateTime atualizadoEm;
 
     public Orcamento(Long id, Checklist checklist, BigDecimal valorTotal, LocalDate dataEmissao,
-                     LocalDate dataAprovacao, Status status, List<ItemOrcamento> itens,
+                     LocalDate dataAprovacao, StatusProcesso status, List<ItemOrcamento> itens,
                      LocalDateTime criadoEm, LocalDateTime atualizadoEm) {
         this.id = id;
         this.checklist = checklist;
@@ -31,7 +33,7 @@ public class Orcamento {
         this.atualizadoEm = atualizadoEm;
     }
 
-    public static Orcamento novo(Checklist checklist, BigDecimal valorTotal, Status status) {
+    public static Orcamento novo(Checklist checklist, BigDecimal valorTotal, StatusProcesso status) {
         LocalDateTime agora = LocalDateTime.now();
         LocalDate hoje = LocalDate.now();
         return new Orcamento(null, checklist, valorTotal, hoje, null, status, new ArrayList<>(), agora, agora);
@@ -43,7 +45,7 @@ public class Orcamento {
     public BigDecimal getValorTotal() { return valorTotal; }
     public LocalDate getDataEmissao() { return dataEmissao; }
     public LocalDate getDataAprovacao() { return dataAprovacao; }
-    public Status getStatus() { return status; }
+    public StatusProcesso getStatus() { return status; }
     public List<ItemOrcamento> getItens() { return itens; }
     public LocalDateTime getCriadoEm() { return criadoEm; }
     public LocalDateTime getAtualizadoEm() { return atualizadoEm; }
@@ -54,7 +56,7 @@ public class Orcamento {
     public void setValorTotal(BigDecimal valorTotal) { this.valorTotal = valorTotal; }
     public void setDataEmissao(LocalDate dataEmissao) { this.dataEmissao = dataEmissao; }
     public void setDataAprovacao(LocalDate dataAprovacao) { this.dataAprovacao = dataAprovacao; }
-    public void setStatus(Status status) { this.status = status; }
+    public void setStatus(StatusProcesso status) { this.status = status; }
     public void setItens(List<ItemOrcamento> itens) { this.itens = itens; }
     public void setCriadoEm(LocalDateTime criadoEm) { this.criadoEm = criadoEm; }
     public void setAtualizadoEm(LocalDateTime atualizadoEm) { this.atualizadoEm = atualizadoEm; }
@@ -79,12 +81,12 @@ public class Orcamento {
 
     public void aprovar() {
         this.dataAprovacao = LocalDate.now();
-        this.status = new Status(2L, "Aprovado", LocalDateTime.now(), LocalDateTime.now());
+        this.status = StatusProcesso.APROVADO;
         this.atualizadoEm = LocalDateTime.now();
     }
 
     public void rejeitar() {
-        this.status = new Status(3L, "Rejeitado", LocalDateTime.now(), LocalDateTime.now());
+        this.status = StatusProcesso.CANCELADO;
         this.atualizadoEm = LocalDateTime.now();
     }
 

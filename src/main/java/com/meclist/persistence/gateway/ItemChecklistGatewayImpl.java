@@ -39,6 +39,7 @@ public class ItemChecklistGatewayImpl implements ItemChecklistGateway {
         } else {
             entity = new ItemChecklistEntity();
             entity.setCriadoEm(itemChecklist.getCriadoEm());
+            entity.setNomeItemSnapshot(itemChecklist.getItem().getNome());
         }
 
         // Carrega as entidades relacionadas
@@ -48,6 +49,7 @@ public class ItemChecklistGatewayImpl implements ItemChecklistGateway {
         entity.setChecklist(checklistEntity);
         entity.setItem(ItemMapper.toEntity(itemChecklist.getItem()));
         entity.setStatusItem(itemChecklist.getStatusItem());
+        entity.setMaoDeObra(itemChecklist.getMaoDeObra());
         entity.setAtualizadoEm(itemChecklist.getAtualizadoEm());
 
         ItemChecklistEntity salvo = itemChecklistRepository.save(entity);
@@ -79,6 +81,8 @@ public class ItemChecklistGatewayImpl implements ItemChecklistGateway {
                     entity.setChecklist(checklistEntity);
                     entity.setItem(ItemMapper.toEntity(itemChecklist.getItem()));
                     entity.setStatusItem(itemChecklist.getStatusItem());
+                    entity.setMaoDeObra(itemChecklist.getMaoDeObra());
+                    entity.setNomeItemSnapshot(itemChecklist.getItem().getNome());
                     entity.setAtualizadoEm(itemChecklist.getAtualizadoEm());
                     return entity;
                 })
