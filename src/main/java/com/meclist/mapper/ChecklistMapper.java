@@ -19,21 +19,35 @@ import com.meclist.persistence.entity.ItemChecklistEntity;
 public class ChecklistMapper {
 
     // Domain → Entity
-    public static ChecklistEntity toEntity(Checklist checklist) {
-        if (checklist == null) return null;
+   // No ChecklistMapper.java
 
-        ChecklistEntity entity = new ChecklistEntity();
-        entity.setId(checklist.getId());
-        entity.setVeiculo(VeiculoMapper.toEntity(checklist.getVeiculo()));
-        entity.setMecanico(MecanicoMapper.toEntity(checklist.getMecanico()));
-        entity.setQuilometragem(checklist.getQuilometragem());
-        entity.setDescricao(checklist.getDescricao());
-        entity.setStatus(checklist.getStatus());
-        entity.setCriadoEm(checklist.getCriadoEm());
-        entity.setAtualizadoEm(checklist.getAtualizadoEm());
-        
-        return entity;
+public static ChecklistEntity toEntity(Checklist domain) {
+    if (domain == null) return null;
+
+    ChecklistEntity entity = new ChecklistEntity();
+    entity.setId(domain.getId());
+    entity.setVeiculo(VeiculoMapper.toEntity(domain.getVeiculo()));
+    entity.setMecanico(MecanicoMapper.toEntity(domain.getMecanico()));
+    entity.setQuilometragem(domain.getQuilometragem());
+    entity.setDescricao(domain.getDescricao());
+    entity.setStatus(domain.getStatus());
+    entity.setCriadoEm(domain.getCriadoEm());
+    entity.setAtualizadoEm(domain.getAtualizadoEm());
+
+    // ADICIONE ISSO: Mapeia os itens de volta para a entidade
+    if (domain.getItensChecklist() != null) {
+        List<ItemChecklistEntity> itensEntities = domain.getItensChecklist().stream()
+            .map(itemDomain -> {
+                ItemChecklistEntity itemEntity = ItemChecklistMapper.toEntity(itemDomain);
+                itemEntity.setChecklist(entity); // CRUCIAL: Vincula o filho ao pai
+                return itemEntity;
+            })
+            .collect(Collectors.toList());
+        entity.setItensChecklist(itensEntities);
     }
+
+    return entity;
+}
 
     // Entity → Domain (sem itens)
     public static Checklist toDomain(ChecklistEntity entity) {

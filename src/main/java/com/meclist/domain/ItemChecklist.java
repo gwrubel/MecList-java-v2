@@ -113,6 +113,17 @@ public class ItemChecklist {
         this.maoDeObra = valorMaoDeObra;
         this.atualizadoEm = LocalDateTime.now();
     }
+
+    public BigDecimal calcularTotalProdutos() {
+        return getProdutosOrcados().stream()
+                .map(p -> {
+                    if (p.getValorUnitario() == null || p.getQuantidade() == null) {
+                        return BigDecimal.ZERO;
+                    }
+                    return p.getValorUnitario().multiply(BigDecimal.valueOf(p.getQuantidade()));
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
 }
 
 

@@ -3,17 +3,19 @@ package com.meclist.domain;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import com.meclist.domain.enums.StatusProcesso;
+
 public class Servico {
     private Long id;
     private Checklist checklist;
     private Mecanico mecanico;
     private LocalDate dataRealizacao;
-    private Status status;
+    private StatusProcesso status;
     private LocalDateTime criadoEm;
     private LocalDateTime atualizadoEm;
 
     public Servico(Long id, Checklist checklist, Mecanico mecanico, LocalDate dataRealizacao,
-                   Status status, LocalDateTime criadoEm, LocalDateTime atualizadoEm) {
+                   StatusProcesso status, LocalDateTime criadoEm, LocalDateTime atualizadoEm) {
         this.id = id;
         this.checklist = checklist;
         this.mecanico = mecanico;
@@ -23,7 +25,7 @@ public class Servico {
         this.atualizadoEm = atualizadoEm;
     }
 
-    public static Servico novo(Checklist checklist, Mecanico mecanico, LocalDate dataRealizacao, Status status) {
+    public static Servico novo(Checklist checklist, Mecanico mecanico, LocalDate dataRealizacao, StatusProcesso status) {
         LocalDateTime agora = LocalDateTime.now();
         return new Servico(null, checklist, mecanico, dataRealizacao, status, agora, agora);
     }
@@ -33,7 +35,7 @@ public class Servico {
     public Checklist getChecklist() { return checklist; }
     public Mecanico getMecanico() { return mecanico; }
     public LocalDate getDataRealizacao() { return dataRealizacao; }
-    public Status getStatus() { return status; }
+    public StatusProcesso getStatus() { return status; }
     public LocalDateTime getCriadoEm() { return criadoEm; }
     public LocalDateTime getAtualizadoEm() { return atualizadoEm; }
 
@@ -42,7 +44,7 @@ public class Servico {
     public void setChecklist(Checklist checklist) { this.checklist = checklist; }
     public void setMecanico(Mecanico mecanico) { this.mecanico = mecanico; }
     public void setDataRealizacao(LocalDate dataRealizacao) { this.dataRealizacao = dataRealizacao; }
-    public void setStatus(Status status) { this.status = status; }
+    public void setStatus(StatusProcesso status) { this.status = status; }
     public void setCriadoEm(LocalDateTime criadoEm) { this.criadoEm = criadoEm; }
     public void setAtualizadoEm(LocalDateTime atualizadoEm) { this.atualizadoEm = atualizadoEm; }
 
@@ -52,7 +54,7 @@ public class Servico {
         this.atualizadoEm = LocalDateTime.now();
     }
 
-    public void atualizarStatus(Status novoStatus) {
+    public void atualizarStatus(StatusProcesso novoStatus) {
         this.status = novoStatus;
         this.atualizadoEm = LocalDateTime.now();
     }

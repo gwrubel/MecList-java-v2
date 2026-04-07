@@ -34,6 +34,9 @@ public class SecurityConfig {
                 // públicos (autenticação)
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/adms/login").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/mecanicos/login").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/clientes/definir-senha").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/clientes/primeiro-acesso").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/clientes/login").permitAll()
 
                 // uploads estáticos
                 .requestMatchers("/uploads/**").permitAll()

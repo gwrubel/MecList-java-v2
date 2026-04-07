@@ -2,16 +2,23 @@ package com.meclist.controller;
 
 
 import com.meclist.domain.enums.Situacao;
+import com.meclist.dto.adm.AdmRequest;
 import com.meclist.dto.cliente.AtualizarClienteRequest;
 import com.meclist.dto.cliente.ClienteListResponse;
 import com.meclist.dto.cliente.ClienteRequest;
 import com.meclist.dto.cliente.ClienteResponse;
+import com.meclist.dto.cliente.DefinirSenhaRequest;
+import com.meclist.dto.cliente.LoginRequest;
+import com.meclist.dto.cliente.PrimeiroAcessoRequest;
 import com.meclist.response.ApiResponse;
 import com.meclist.usecase.cliente.AtualizarDadosClienteUseCase;
+import com.meclist.usecase.cliente.AutenticarClienteUseCase;
 import com.meclist.usecase.cliente.BuscarDadosDoClienteUseCase;
 import com.meclist.usecase.cliente.BuscarPorSituacaoUseCase;
 import com.meclist.usecase.cliente.CadastrarClienteUseCase;
+import com.meclist.usecase.cliente.DefinirSenhaClienteUseCase;
 import com.meclist.usecase.cliente.ListarClientesUseCase;
+import com.meclist.usecase.cliente.SolicitarPrimeiroAcessoUseCase;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -20,6 +27,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -31,18 +39,28 @@ public class ClienteController extends BaseController {
     private final AtualizarDadosClienteUseCase atualizarDadosClienteUseCase;
     private final BuscarPorSituacaoUseCase buscarPorSituacaoUseCase;
     private final BuscarDadosDoClienteUseCase buscarDadosDoClienteUseCase;
+    private final DefinirSenhaClienteUseCase definirSenhaClienteUseCase;
+    private final SolicitarPrimeiroAcessoUseCase solicitarPrimeiroAcessoUseCase;
+    private final AutenticarClienteUseCase autenticarClienteUseCase;
 
     public ClienteController(
             CadastrarClienteUseCase cadastrarClienteUseCase,
             ListarClientesUseCase listarClientesUseCase,
             AtualizarDadosClienteUseCase atualizarDadosClienteUseCase,
             BuscarPorSituacaoUseCase buscarPorSituacaoUseCase,
-            BuscarDadosDoClienteUseCase buscarDadosDoClienteUseCase) {
+            BuscarDadosDoClienteUseCase buscarDadosDoClienteUseCase,
+            DefinirSenhaClienteUseCase definirSenhaClienteUseCase,
+            SolicitarPrimeiroAcessoUseCase solicitarPrimeiroAcessoUseCase,
+            AutenticarClienteUseCase autenticarClienteUseCase
+        ) {
         this.cadastrarClienteUseCase = cadastrarClienteUseCase;
         this.listarClientesUseCase = listarClientesUseCase;
         this.atualizarDadosClienteUseCase = atualizarDadosClienteUseCase;
         this.buscarPorSituacaoUseCase = buscarPorSituacaoUseCase;
         this.buscarDadosDoClienteUseCase = buscarDadosDoClienteUseCase;
+        this.definirSenhaClienteUseCase = definirSenhaClienteUseCase;
+        this.solicitarPrimeiroAcessoUseCase = solicitarPrimeiroAcessoUseCase;
+        this.autenticarClienteUseCase = autenticarClienteUseCase;
     }
 
     /**
@@ -129,5 +147,35 @@ public class ClienteController extends BaseController {
             HttpServletRequest request) {
         ClienteResponse response = buscarDadosDoClienteUseCase.buscarDadosDoCliente(id);
         return success("Cliente encontrado com sucesso!", response, request);
+    }
+
+    @PostMapping("/definir-senha")
+    public ResponseEntity<ApiResponse<Void>> definirSenha(
+            @RequestBody @Valid DefinirSenhaRequest request,
+            HttpServletRequest servletRequest) {
+        definirSenhaClienteUseCase.executar(request);
+        return success("Senha definida com sucesso!", null, servletRequest);
+    }
+
+    @PostMapping("/primeiro-acesso")
+    public ResponseEntity<ApiResponse<Void>> primeiroAcesso(
+            @RequestBody @Valid PrimeiroAcessoRequest request,
+            HttpServletRequest servletRequest) {
+        solicitarPrimeiroAcessoUseCase.executar(request);
+        return success("E-mail de definição de senha enviado com sucesso!", null, servletRequest);
+    }
+
+     @PostMapping("/login")
+    public ResponseEntity<ApiResponse<Map<String, String>>> login(
+            @RequestBody LoginRequest request,
+            HttpServletRequest servletRequest) {
+        
+        String token = autenticarClienteUseCase.autenticar(request.email(), request.senha());
+        
+        return success(
+            "Autenticação realizada com sucesso!",
+            Map.of("token", token),
+            servletRequest
+        );
     }
 }

@@ -49,9 +49,11 @@ public class Cliente extends Usuario {
 }
 
 
-    // Método de fábrica para novo cadastro
-    public static Cliente novoCadastro(String documento, TipoDocumento tipoDocumento, String telefone, String nome, String email, String senhaHash, String endereco) {
-        return new Cliente(null, nome, email, senhaHash, documento, tipoDocumento, telefone, endereco);
+    // Método de fábrica para novo cadastro (sem senha — cliente define depois)
+    public static Cliente novoCadastro(String documento, TipoDocumento tipoDocumento, String telefone, String nome, String email, String endereco) {
+        Cliente cliente = new Cliente(null, nome, email, null, documento, tipoDocumento, telefone, endereco);
+        cliente.setSituacao(Situacao.PENDENTE);
+        return cliente;
     }
 
     

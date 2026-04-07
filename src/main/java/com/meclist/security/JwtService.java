@@ -1,6 +1,7 @@
 package com.meclist.security;
 
 import com.meclist.domain.Adm;
+import com.meclist.domain.Cliente;
 import com.meclist.domain.Mecanico;
 
 import io.jsonwebtoken.Claims;
@@ -67,6 +68,19 @@ public class JwtService {
                 .claim("nome", mecanico.getNome())
                 .claim("email", mecanico.getEmail())
                 .claim("role", "MECANICO")
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .signWith(secretKey, SignatureAlgorithm.HS512)
+                .compact();
+    }
+
+    public String gerarTokenCliente(Cliente cliente) {
+        return Jwts.builder()
+                .setSubject(cliente.getEmail())
+                .claim("id", cliente.getId())
+                .claim("nome", cliente.getNome())
+                .claim("email", cliente.getEmail())
+                .claim("role", "CLIENTE")
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(secretKey, SignatureAlgorithm.HS512)

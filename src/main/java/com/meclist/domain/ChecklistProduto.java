@@ -118,5 +118,11 @@ public class ChecklistProduto {
         }
         return BigDecimal.ZERO;
     }
+
+    public void atualizarPrecificacao(BigDecimal valorUnitario, String marca) {
+    this.valorUnitario = valorUnitario;
+    this.marca = marca;
+    this.atualizadoEm = LocalDateTime.now();
+}
 }
 

@@ -5,8 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meclist.config.SupabaseProperties;
 import com.meclist.interfaces.StorageService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -20,9 +23,9 @@ public class SupabaseStorageService implements StorageService {
     private final SupabaseProperties properties;
     private final HttpClient client = HttpClient.newHttpClient();
 
+    @Retryable(retryFor = { IOException.class, RuntimeException.class }, maxAttempts = 3, backoff = @Backoff(delay = 2000))
     @Override
     public String upload(byte[] file, String path, String contentType) {
-
         try {
             String fileName = UUID.randomUUID().toString();
             String fullPath = path + "/" + fileName;
@@ -54,7 +57,6 @@ public class SupabaseStorageService implements StorageService {
     @Override
     public void delete(String path) {
         try {
-
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(properties.getUrl()
                             + "/storage/v1/object/"
@@ -72,11 +74,10 @@ public class SupabaseStorageService implements StorageService {
         }
     }
 
+    @Retryable(retryFor = { IOException.class, RuntimeException.class }, maxAttempts = 3, backoff = @Backoff(delay = 2000))
     @Override
     public String generateSignedUrl(String path, int expiresIn) {
-
         try {
-
             String body = """
                     {
                       "expiresIn": %d
@@ -97,13 +98,10 @@ public class SupabaseStorageService implements StorageService {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
-
                 ObjectMapper mapper = new ObjectMapper();
                 JsonNode node = mapper.readTree(response.body());
                 String signedPath = node.get("signedURL").asText();
-
                 String baseUrl = properties.getUrl().replaceAll("/$", "");
-
                 return baseUrl + "/storage/v1" + signedPath;
             }
 
@@ -113,5 +111,4 @@ public class SupabaseStorageService implements StorageService {
             throw new RuntimeException("Erro ao gerar signed URL", e);
         }
     }
-
 }

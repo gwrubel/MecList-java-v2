@@ -16,12 +16,14 @@ import com.meclist.dto.checklist.ChecklistResumoResponse;
 import com.meclist.dto.checklist.IniciarChecklistRequest;
 import com.meclist.dto.checklist.SalvarItensPorCategoriaRequest;
 import com.meclist.dto.checklist.precificacao.ChecklistPrecificacaoResponse;
+import com.meclist.dto.checklist.precificacao.PrecificarChecklistRequest;
 import com.meclist.dto.fotoEvidencia.FotoEvidenciaResponse;
 import com.meclist.response.ApiResponse;
 import com.meclist.usecase.checklist.AtualizarItensPorCategoriaUseCase;
 import com.meclist.usecase.checklist.BuscarChecklistParaPrecificacaoUseCase;
 import com.meclist.usecase.checklist.IniciarChecklistUseCase;
 import com.meclist.usecase.checklist.ListarChecklistsPorStatusUseCase;
+import com.meclist.usecase.checklist.PrecificarChecklistUseCase;
 import com.meclist.usecase.fotoEvidencia.BuscarFotosItemChecklistUseCase;
 import com.meclist.usecase.checklist.BuscarChecklistPorIdUseCase;
 import com.meclist.usecase.checklist.EnviarChecklistParaPrecificacaoUseCase;
@@ -42,6 +44,7 @@ public class ChecklistController extends BaseController {
         private final EnviarChecklistParaPrecificacaoUseCase enviarChecklistParaPrecificacaoUseCase;
         private final ListarChecklistsPorStatusUseCase listarChecklistsPorStatusUseCase;
         private final BuscarChecklistParaPrecificacaoUseCase buscarChecklistParaPrecificacaoUseCase;
+        private final PrecificarChecklistUseCase precificarChecklistUseCase;
 
         public ChecklistController(
                         IniciarChecklistUseCase iniciarChecklistUseCase,
@@ -50,7 +53,8 @@ public class ChecklistController extends BaseController {
                         BuscarFotosItemChecklistUseCase buscarFotosItemChecklistUseCase,
                         EnviarChecklistParaPrecificacaoUseCase enviarChecklistParaPrecificacaoUseCase,
                         ListarChecklistsPorStatusUseCase listarChecklistsPorStatusUseCase,
-                        BuscarChecklistParaPrecificacaoUseCase buscarChecklistParaPrecificacaoUseCase) {
+                        BuscarChecklistParaPrecificacaoUseCase buscarChecklistParaPrecificacaoUseCase,
+                        PrecificarChecklistUseCase precificarChecklistUseCase) {
                 this.iniciarChecklistUseCase = iniciarChecklistUseCase;
                 this.atualizarItensPorCategoriaUseCase = atualizarItensPorCategoriaUseCase;
                 this.buscarChecklistPorIdUseCase = buscarChecklistPorIdUseCase;
@@ -58,6 +62,7 @@ public class ChecklistController extends BaseController {
                 this.enviarChecklistParaPrecificacaoUseCase = enviarChecklistParaPrecificacaoUseCase;
                 this.listarChecklistsPorStatusUseCase = listarChecklistsPorStatusUseCase;
                 this.buscarChecklistParaPrecificacaoUseCase = buscarChecklistParaPrecificacaoUseCase;
+                this.precificarChecklistUseCase = precificarChecklistUseCase;
         }
 
         /**
@@ -182,5 +187,16 @@ public class ChecklistController extends BaseController {
                 ChecklistPrecificacaoResponse response = buscarChecklistParaPrecificacaoUseCase.executar(checklistId);
                 return success("Checklist carregado para precificação!", response, servletRequest);
         }
+
+        @PostMapping("/{checklistId}/precificar")
+        public ResponseEntity<ApiResponse<Void>> precificar(
+                        @PathVariable Long checklistId,
+                        @Valid @RequestBody PrecificarChecklistRequest request,
+                        HttpServletRequest servletRequest) {
+
+                precificarChecklistUseCase.executar(checklistId, request);
+                return noContent();
+        }
+        
 
 }

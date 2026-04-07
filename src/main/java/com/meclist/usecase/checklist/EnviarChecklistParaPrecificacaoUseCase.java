@@ -9,14 +9,17 @@ import com.meclist.domain.enums.StatusProcesso;
 import com.meclist.exception.ChecklistNaoEncontradoException;
 import com.meclist.interfaces.ChecklistGateway;
 
-
 @Service
 public class EnviarChecklistParaPrecificacaoUseCase {
 
     private final ChecklistGateway checklistGateway;
+    private final ChecklistWorkflowGuard workflowGuard;
 
-    public EnviarChecklistParaPrecificacaoUseCase(ChecklistGateway checklistGateway) {
+    public EnviarChecklistParaPrecificacaoUseCase(
+            ChecklistGateway checklistGateway,
+            ChecklistWorkflowGuard workflowGuard) {
         this.checklistGateway = checklistGateway;
+        this.workflowGuard = workflowGuard;
     }
 
     @Transactional
@@ -25,10 +28,7 @@ public class EnviarChecklistParaPrecificacaoUseCase {
                 .orElseThrow(() -> new ChecklistNaoEncontradoException(
                         "Checklist não encontrado: " + checklistId));
 
-        if (checklist.getStatus() != StatusProcesso.EM_ANDAMENTO) {
-            throw new IllegalArgumentException(
-                    "Checklist só pode ser enviado para precificação quando estiver EM_ANDAMENTO.");
-        }
+        workflowGuard.validarEnvioParaPrecificacaoPorMecanico(checklist);
 
         boolean existePendente = checklist.getItensChecklist().stream()
                 .anyMatch(item -> item.getStatusItem() == StatusItem.PENDENTE);
@@ -40,8 +40,5 @@ public class EnviarChecklistParaPrecificacaoUseCase {
 
         checklist.atualizarStatus(StatusProcesso.AGUARDANDO_PRECIFICACAO);
         checklistGateway.atualizarStatus(checklist);
-        
-
-        
     }
 }

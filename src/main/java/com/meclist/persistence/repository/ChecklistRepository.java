@@ -38,6 +38,10 @@ public interface ChecklistRepository extends JpaRepository<ChecklistEntity, Long
     })
     Optional<ChecklistEntity> findById(Long id);
 
+    @EntityGraph(attributePaths = {
+        "veiculo",
+        "veiculo.cliente"
+    })
     List<ChecklistEntity> findByStatus(StatusProcesso status);
 }
 

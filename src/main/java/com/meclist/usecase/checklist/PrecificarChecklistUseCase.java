@@ -1,7 +1,9 @@
 package com.meclist.usecase.checklist;
 
 import java.math.BigDecimal;
-import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,80 +14,80 @@ import com.meclist.domain.Orcamento;
 import com.meclist.domain.enums.StatusProcesso;
 import com.meclist.dto.checklist.precificacao.PrecificarChecklistRequest;
 import com.meclist.dto.checklist.precificacao.PrecificarItemRequest;
+import com.meclist.exception.ChecklistNaoEncontradoException;
+import com.meclist.exception.ItemNaoPertenceAoChecklistException;
 import com.meclist.interfaces.ChecklistGateway;
 import com.meclist.interfaces.ItemChecklistGateway;
 import com.meclist.interfaces.OrcamentoGateway;
-import com.meclist.mapper.ChecklistMapper;
+import com.meclist.validator.ChecklistPrecificacaoValidator;
 
 @Service
 public class PrecificarChecklistUseCase {
 
     private final ChecklistGateway checklistGateway;
-    private final ItemChecklistGateway itemChecklistGateway;
     private final OrcamentoGateway orcamentoGateway;
+    private final ItemChecklistGateway itemChecklistGateway;
+    private final ChecklistWorkflowGuard workflowGuard;
+    private final ChecklistPrecificacaoValidator precificacaoValidator;
 
     public PrecificarChecklistUseCase(
-        ChecklistGateway checklistGateway,
-        ItemChecklistGateway itemChecklistGateway,
-        OrcamentoGateway orcamentoGateway
-    ) {
+            ChecklistGateway checklistGateway,
+            OrcamentoGateway orcamentoGateway,
+            ItemChecklistGateway itemChecklistGateway,
+            ChecklistWorkflowGuard workflowGuard,
+            ChecklistPrecificacaoValidator precificacaoValidator) {
         this.checklistGateway = checklistGateway;
-        this.itemChecklistGateway = itemChecklistGateway;
         this.orcamentoGateway = orcamentoGateway;
+        this.itemChecklistGateway = itemChecklistGateway;
+        this.workflowGuard = workflowGuard;
+        this.precificacaoValidator = precificacaoValidator;
     }
 
     @Transactional
     public void executar(Long checklistId, PrecificarChecklistRequest request) {
         Checklist checklist = checklistGateway.buscarPorId(checklistId)
-            .orElseThrow(() -> new IllegalArgumentException("Checklist não encontrado"));
+                .orElseThrow(() -> new ChecklistNaoEncontradoException("Checklist não encontrado: " + checklistId));
 
-        List<ItemChecklist> itensChecklist = itemChecklistGateway.buscarPorChecklist(checklistId);
+        workflowGuard.validarPrecificacaoPorAdm(checklist);
 
-        BigDecimal total = BigDecimal.ZERO;
+        // 1) garante que request cobre exatamente os itens TROCAR
+        precificacaoValidator.validarCoberturaItensTrocar(checklist, request);
 
-        for (PrecificarItemRequest itemReq : request.itens()) {
-            ItemChecklist item = itensChecklist.stream()
-                .filter(i -> i.getId().equals(itemReq.itemChecklistId()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("ItemChecklist não encontrado: " + itemReq.itemChecklistId()));
+        Map<Long, ItemChecklist> itensNoBanco = checklist.getItensChecklist().stream()
+                .collect(Collectors.toMap(ItemChecklist::getId, Function.identity()));
 
-            // Atualiza mão de obra
-            item.definirMaoDeObra(itemReq.maoDeObra());
-            total = total.add(itemReq.maoDeObra() != null ? itemReq.maoDeObra() : BigDecimal.ZERO);
-
-            // Atualiza produtos
-            if (itemReq.produtos() != null) {
-                itemReq.produtos().forEach(prodReq -> {
-                    item.getProdutosOrcados().stream()
-                        .filter(p -> p.getId().equals(prodReq.checklistProdutoId()))
-                        .findFirst()
-                        .ifPresent(produto -> {
-                            produto.setValorUnitario(prodReq.valorUnitario());
-                            produto.setMarca(prodReq.marca());
-                            // Soma ao total
-                            if (prodReq.valorUnitario() != null && produto.getQuantidade() != null) {
-                                total = total.add(prodReq.valorUnitario().multiply(new BigDecimal(produto.getQuantidade())));
-                            }
-                        });
-                });
+        // 2) aplica atualização item a item
+        request.itens().forEach(itemReq -> {
+            ItemChecklist item = itensNoBanco.get(itemReq.itemChecklistId());
+            if (item == null) {
+                throw new ItemNaoPertenceAoChecklistException(itemReq.itemChecklistId());
             }
-        }
 
-        // Persiste alterações nos itens
-        itemChecklistGateway.salvarTodos(itensChecklist);
+            atualizarDadosDoItem(item, itemReq);
+            itemChecklistGateway.salvar(item);
+        });
 
-        // Cria e salva o orçamento
-        Orcamento orcamento = Orcamento.novo(checklist, total, StatusProcesso.AGUARDANDO_APROVACAO);
+        // 3) valida se todos os itens TROCAR estão completamente precificados
+        precificacaoValidator.validarCompletudeDosItensTrocar(checklist);
+
+        // 4) calcula total e persiste orçamento
+        BigDecimal totalCalculado = checklist.calcularTotalGeral();
+        Orcamento orcamento = Orcamento.novo(checklist, totalCalculado, StatusProcesso.AGUARDANDO_APROVACAO);
         orcamentoGateway.salvar(orcamento);
 
-        // Atualiza status do checklist
-        checklist.setStatus(StatusProcesso.AGUARDANDO_APROVACAO);
+        // 5) finaliza checklist
+        checklist.finalizarPrecificacao();
         checklistGateway.salvar(checklist);
+    }
 
-        // Retorna o response atualizado
-        Checklist checklistAtualizado = checklistGateway.buscarPorId(checklistId)
-            .orElseThrow(() -> new IllegalArgumentException("Checklist não encontrado após atualização"));
+    private void atualizarDadosDoItem(ItemChecklist item, PrecificarItemRequest req) {
+        item.definirMaoDeObra(req.maoDeObra());
 
-        
+        if (req.produtos() != null) {
+            req.produtos().forEach(prodReq -> item.getProdutosOrcados().stream()
+                    .filter(p -> p.getId().equals(prodReq.checklistProdutoId()))
+                    .findFirst()
+                    .ifPresent(p -> p.atualizarPrecificacao(prodReq.valorUnitario(), prodReq.marca())));
+        }
     }
 }

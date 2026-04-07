@@ -1,5 +1,6 @@
 package com.meclist.domain;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -147,7 +148,44 @@ public class Checklist {
         return mecanico != null ? mecanico.getId() : null; 
     }
     
-    
+    // ... dentro da classe Checklist
+
+/**
+ * Calcula o total de mão de obra de todos os itens do checklist.
+ */
+public BigDecimal calcularTotalMaoDeObra() {
+    return getItensChecklist().stream()
+            .map(ItemChecklist::getMaoDeObra)
+            .filter(java.util.Objects::nonNull)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+}
+
+/**
+ * Calcula o total de produtos de todos os itens do checklist.
+ */
+public BigDecimal calcularTotalProdutos() {
+    return getItensChecklist().stream()
+            .map(ItemChecklist::calcularTotalProdutos) // O ItemChecklist também deve ter esse método
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+}
+
+/**
+ * Calcula o valor total geral (Mão de obra + Produtos).
+ */
+public BigDecimal calcularTotalGeral() {
+    return calcularTotalMaoDeObra().add(calcularTotalProdutos());
+}
+
+/**
+ * Regra de Negócio: Transiciona o status e valida a integridade.
+ */
+public void finalizarPrecificacao() {
+    if (this.status != StatusProcesso.AGUARDANDO_PRECIFICACAO) {
+        throw new IllegalStateException("O checklist não está em fase de precificação.");
+    }
+    this.status = StatusProcesso.AGUARDANDO_APROVACAO;
+    this.atualizadoEm = LocalDateTime.now();
+}
 }
 
 
