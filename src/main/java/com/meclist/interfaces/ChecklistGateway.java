@@ -12,4 +12,5 @@ public interface ChecklistGateway {
     List<Checklist> buscarPorMecanico(Long mecanicoId);
     void atualizarStatus(Checklist checklist);
     List<Checklist> buscarPorStatus (StatusProcesso status);
+    List<Checklist> buscarDashboardPorCliente(Long clienteId);
 }

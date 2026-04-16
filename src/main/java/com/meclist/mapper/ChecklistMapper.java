@@ -1,5 +1,6 @@
 package com.meclist.mapper;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -7,9 +8,13 @@ import java.util.stream.Collectors;
 
 import com.meclist.domain.Checklist;
 import com.meclist.domain.ItemChecklist;
+import com.meclist.domain.Orcamento;
 import com.meclist.domain.enums.CategoriaParteVeiculo;
+import com.meclist.domain.enums.StatusItem;
 import com.meclist.dto.checklist.ChecklistResponse;
 import com.meclist.dto.checklist.ChecklistResumoResponse;
+import com.meclist.dto.checklist.aprovacao.ChecklistAprovacaoResponse;
+import com.meclist.dto.checklist.aprovacao.ItemAprovacaoResponse;
 import com.meclist.dto.checklist.precificacao.ChecklistPrecificacaoResponse;
 import com.meclist.dto.checklist.precificacao.ItemPrecificacaoResponse;
 import com.meclist.dto.itemChecklist.ItemChecklistResponse;
@@ -170,4 +175,28 @@ public static ChecklistEntity toEntity(Checklist domain) {
         checklist.getAtualizadoEm()
     );
 }
+
+    public static ChecklistAprovacaoResponse toAprovacaoResponse(Checklist checklist, BigDecimal valorTotal) {
+        if (checklist == null) return null;
+
+        Map<CategoriaParteVeiculo, List<ItemAprovacaoResponse>> itensPorCategoria =
+            checklist.getItensChecklist().stream()
+                .filter(ic -> ic.getStatusItem() == StatusItem.TROCAR)
+                .map(ItemChecklistMapper::toAprovacaoResponse)
+                .collect(Collectors.groupingBy(ItemAprovacaoResponse::parteDoVeiculo));
+
+        return new ChecklistAprovacaoResponse(
+            checklist.getId(),
+            checklist.getVeiculo().getId(),
+            checklist.getVeiculo().getPlaca(),
+            checklist.getVeiculo().getModelo(),
+            checklist.getVeiculo().getMarca(),
+
+            checklist.getStatus(),
+            valorTotal,
+            checklist.getCriadoEm(),
+            checklist.getAtualizadoEm(),
+            itensPorCategoria
+        );
+    }
 }

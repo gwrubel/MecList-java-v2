@@ -86,14 +86,25 @@ public class ItemChecklist {
         if (this.produtosOrcados == null) {
             this.produtosOrcados = new ArrayList<>();
         }
+        if (produto != null) {
+            produto.setItemChecklist(this);
+        }
         this.produtosOrcados.add(produto);
         this.atualizadoEm = LocalDateTime.now();
     }
 
     public void adicionarProdutosOrcados(List<ChecklistProduto> produtos) {
+        if (produtos == null || produtos.isEmpty()) {
+            return;
+        }
         if (this.produtosOrcados == null) {
             this.produtosOrcados = new ArrayList<>();
         }
+        produtos.forEach(produto -> {
+            if (produto != null) {
+                produto.setItemChecklist(this);
+            }
+        });
         this.produtosOrcados.addAll(produtos);
         this.atualizadoEm = LocalDateTime.now();
     }

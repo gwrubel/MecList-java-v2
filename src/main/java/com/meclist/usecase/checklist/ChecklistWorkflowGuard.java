@@ -26,6 +26,32 @@ public class ChecklistWorkflowGuard {
     }
 
     /**
+     * Cliente visualiza/aprova checklist já precificado ({@link StatusProcesso#AGUARDANDO_APROVACAO}).
+     * Valida que o usuário autenticado é CLIENTE, que o checklist pertence a ele e está no status correto.
+     */
+    public void validarAprovacaoPorCliente(Checklist checklist) {
+        AuthenticatedUser user = obterUsuarioAutenticado();
+
+        if (!"CLIENTE".equals(user.role())) {
+            throw new AcessoNegadoException("Apenas clientes podem aprovar o checklist.");
+        }
+
+        if (checklist.getStatus() != StatusProcesso.AGUARDANDO_APROVACAO) {
+            throw new ChecklistStatusInvalidoException(
+                    "O checklist não está aguardando aprovação. Status atual: " + checklist.getStatus());
+        }
+
+        Long idClienteDoVeiculo = checklist.getVeiculo() != null
+                && checklist.getVeiculo().getCliente() != null
+                        ? checklist.getVeiculo().getCliente().getId()
+                        : null;
+
+        if (idClienteDoVeiculo == null || !idClienteDoVeiculo.equals(user.id())) {
+            throw new AcessoNegadoException("Este checklist não pertence ao cliente autenticado.");
+        }
+    }
+
+    /**
      * Administrador precifica checklist já enviado pelo mecânico ({@link StatusProcesso#AGUARDANDO_PRECIFICACAO}).
      */
     public void validarPrecificacaoPorAdm(Checklist checklist) {

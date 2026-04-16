@@ -18,5 +18,7 @@ public interface VeiculoRepository extends JpaRepository<VeiculoEntity, Long> {
     @Query("SELECT v FROM VeiculoEntity v WHERE UPPER(v.placa) LIKE UPPER(CONCAT('%', :trecho, '%')) ORDER BY v.placa LIMIT 10")
     List<VeiculoEntity> findTop10ByPlacaContainingIgnoreCase(@Param("trecho") String trecho);
 
+   List<VeiculoEntity> findByClienteId(Long clienteId);
+
 
 }

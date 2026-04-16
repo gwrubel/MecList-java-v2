@@ -5,7 +5,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
-import com.meclist.domain.Cliente;
+
 import com.meclist.domain.Veiculo;
 import com.meclist.domain.enums.StatusProcesso;
 import com.meclist.interfaces.VeiculoGateway;
@@ -46,9 +46,9 @@ public class VeiculoGatewayImpl implements VeiculoGateway {
                 .orElseThrow(() -> new IllegalArgumentException("Veículo não encontrado: " + veiculo.getId()));
 
         ClienteEntity clienteEntity = clienteRepository.findById(veiculo.getCliente().getId())
-                .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado: " + veiculo.getCliente().getId()));
+                .orElseThrow(
+                        () -> new IllegalArgumentException("Cliente não encontrado: " + veiculo.getCliente().getId()));
 
-        
         entity.setPlaca(veiculo.getPlaca());
         entity.setMarca(veiculo.getMarca());
         entity.setModelo(veiculo.getModelo());
@@ -64,16 +64,15 @@ public class VeiculoGatewayImpl implements VeiculoGateway {
     @Override
     public Optional<Veiculo> buscarVeiculoPorId(Long id) {
         return repository.findById(id)
-                .map(entity -> VeiculoMapper.toDomain(
-                        entity,
-                        ClienteMapper.toDomain(entity.getCliente())));
+                .map(this::mapearVeiculoComUltimaRevisao);
     }
 
     @Override
     public List<Veiculo> buscarVeiculosPorCliente(Long clienteId) {
-        ClienteEntity clienteEntity = clienteRepository.findById(clienteId).get();
-        Cliente cliente = ClienteMapper.toDomain(clienteEntity);
-        return cliente.getVeiculos();
+        return repository.findByClienteId(clienteId)
+                .stream()
+                .map(this::mapearVeiculoComUltimaRevisao)
+                .toList();
     }
 
     @Override
@@ -94,12 +93,7 @@ public class VeiculoGatewayImpl implements VeiculoGateway {
         Veiculo veiculo = VeiculoMapper.toDomain(entity, ClienteMapper.toDomain(entity.getCliente()));
 
         servicoRepository.encontrarUltimaRevisao(entity.getId(), StatusProcesso.CONCLUIDO)
-                .ifPresent(servico -> {
-                    veiculo.atualizarDataUltimaRevisao(
-                            servico.getDataRealizacao().toInstant()
-                                    .atZone(java.time.ZoneId.systemDefault())
-                                    .toLocalDate());
-                });
+                .ifPresent(servico -> veiculo.atualizarDataUltimaRevisao(servico.getDataRealizacao()));
 
         return veiculo;
     }

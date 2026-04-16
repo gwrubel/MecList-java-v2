@@ -66,7 +66,7 @@ public class Orcamento {
     }
 
     public void rejeitar() {
-        this.status = StatusProcesso.CANCELADO;
+        this.status = StatusProcesso.REPROVADO;
         this.atualizadoEm = LocalDateTime.now();
     }
 

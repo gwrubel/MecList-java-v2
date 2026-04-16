@@ -8,6 +8,8 @@ import com.meclist.domain.Checklist;
 import com.meclist.domain.ItemChecklist;
 import com.meclist.dto.fotoEvidencia.FotoEvidenciaResponse;
 import com.meclist.dto.itemChecklist.ItemChecklistResponse;
+import com.meclist.dto.checklist.aprovacao.ItemAprovacaoResponse;
+import com.meclist.dto.checklist.aprovacao.ProdutoAprovacaoResponse;
 import com.meclist.dto.checklist.precificacao.ItemPrecificacaoResponse;
 import com.meclist.dto.checklist.precificacao.ProdutoPrecificadoResponse;
 import com.meclist.dto.produto.ProdutoAdicionado;
@@ -46,6 +48,10 @@ public class ItemChecklistMapper {
             entity.getProdutosOrcados().stream()
                 .map(ChecklistProdutoMapper::toDomain)
                 .forEach(ic::adicionarProdutoOrcado);
+        }
+
+        if (entity.getMaoDeObra() != null) {
+            ic.definirMaoDeObra(entity.getMaoDeObra());
         }
 
         return ic;
@@ -160,5 +166,39 @@ public class ItemChecklistMapper {
         entity.setMaoDeObra(ic.getMaoDeObra());
 
         return entity;
+    }
+
+    // ============ CLIENTE — Response para aprovação (com preços e status aprovação) ============
+    public static ItemAprovacaoResponse toAprovacaoResponse(ItemChecklist ic) {
+        if (ic == null || ic.getItem() == null) return null;
+
+        List<FotoEvidenciaResponse> fotos = ic.getFotosEvidencia() == null
+                ? Collections.emptyList()
+                : ic.getFotosEvidencia().stream()
+                    .map(f -> new FotoEvidenciaResponse(f.getId(), f.getPathFoto(), f.getCriadoEm()))
+                    .collect(Collectors.toList());
+
+        List<ProdutoAprovacaoResponse> produtos = ic.getProdutosOrcados() == null
+                ? Collections.emptyList()
+                : ic.getProdutosOrcados().stream()
+                    .filter(po -> po.getProduto() != null)
+                    .map(po -> new ProdutoAprovacaoResponse(
+                            po.getId(),
+                            po.getNomeProdutoSnapshot(),
+                            po.getQuantidade(),
+                            po.getValorUnitario(),
+                            po.getMarca(),
+                            po.getAprovadoCliente()))
+                    .collect(Collectors.toList());
+
+        return new ItemAprovacaoResponse(
+            ic.getId(),
+            ic.getNomeItemSnapshot(),
+            ic.getItem().getParteDoVeiculo(),
+            ic.getStatusItem(),
+            fotos,
+            produtos,
+            ic.getMaoDeObra()
+        );
     }
 }

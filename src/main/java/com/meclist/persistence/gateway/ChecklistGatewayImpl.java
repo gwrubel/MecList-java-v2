@@ -1,5 +1,6 @@
 package com.meclist.persistence.gateway;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -79,8 +80,7 @@ public class ChecklistGatewayImpl implements ChecklistGateway {
 
     @Override
     public List<Checklist> buscarPorMecanico(Long mecanicoId) {
-        return checklistRepository.findAll()
-                .stream()
+        return checklistRepository.findByMecanicoId(mecanicoId).stream()
                 .map(entity -> {
                     var itens = itemChecklistRepository.findByChecklistId(entity.getId());
                     return ChecklistMapper.toDomain(entity, itens);
@@ -110,4 +110,20 @@ public class ChecklistGatewayImpl implements ChecklistGateway {
                 .map(ChecklistMapper::toDomain)
                 .collect(Collectors.toList());
     }
+
+    @Override
+public List<Checklist> buscarDashboardPorCliente(Long clienteId) {
+    var statusAtivos = List.of(
+        StatusProcesso.EM_ANDAMENTO,
+        StatusProcesso.AGUARDANDO_APROVACAO,
+        StatusProcesso.CONCLUIDO,
+        StatusProcesso.REPROVADO
+    );
+    var limiteData = LocalDateTime.now().minusDays(7);
+
+    return checklistRepository.findDashboardPorCliente(clienteId, statusAtivos, limiteData)
+            .stream()
+            .map(ChecklistMapper::toDomain)
+            .collect(Collectors.toList());
+}
 }

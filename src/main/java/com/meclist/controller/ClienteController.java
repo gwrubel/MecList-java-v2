@@ -2,33 +2,39 @@ package com.meclist.controller;
 
 
 import com.meclist.domain.enums.Situacao;
-import com.meclist.dto.adm.AdmRequest;
 import com.meclist.dto.cliente.AtualizarClienteRequest;
+import com.meclist.dto.cliente.ChecklistCardResumo;
 import com.meclist.dto.cliente.ClienteListResponse;
 import com.meclist.dto.cliente.ClienteRequest;
 import com.meclist.dto.cliente.ClienteResponse;
+import com.meclist.dto.cliente.DashboardClienteResponse;
 import com.meclist.dto.cliente.DefinirSenhaRequest;
 import com.meclist.dto.cliente.LoginRequest;
 import com.meclist.dto.cliente.PrimeiroAcessoRequest;
+import com.meclist.dto.checklist.aprovacao.ChecklistAprovacaoResponse;
 import com.meclist.response.ApiResponse;
+import com.meclist.security.AuthenticatedUser;
 import com.meclist.usecase.cliente.AtualizarDadosClienteUseCase;
 import com.meclist.usecase.cliente.AutenticarClienteUseCase;
+import com.meclist.usecase.cliente.BuscarDadosDashboardUseCase;
 import com.meclist.usecase.cliente.BuscarDadosDoClienteUseCase;
+import com.meclist.usecase.cliente.BuscarDetalhesChecklistUseCase;
 import com.meclist.usecase.cliente.BuscarPorSituacaoUseCase;
 import com.meclist.usecase.cliente.CadastrarClienteUseCase;
 import com.meclist.usecase.cliente.DefinirSenhaClienteUseCase;
 import com.meclist.usecase.cliente.ListarClientesUseCase;
 import com.meclist.usecase.cliente.SolicitarPrimeiroAcessoUseCase;
+import com.meclist.usecase.checklist.BuscarChecklistParaAprovacaoUseCase;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-
 
 @RestController
 @RequestMapping("/clientes")
@@ -42,6 +48,9 @@ public class ClienteController extends BaseController {
     private final DefinirSenhaClienteUseCase definirSenhaClienteUseCase;
     private final SolicitarPrimeiroAcessoUseCase solicitarPrimeiroAcessoUseCase;
     private final AutenticarClienteUseCase autenticarClienteUseCase;
+    private final BuscarDadosDashboardUseCase buscarDadosDashboardUseCase;
+    private final BuscarChecklistParaAprovacaoUseCase buscarChecklistParaAprovacaoUseCase;
+    private final BuscarDetalhesChecklistUseCase buscarDetalhesChecklistUseCase;
 
     public ClienteController(
             CadastrarClienteUseCase cadastrarClienteUseCase,
@@ -51,8 +60,10 @@ public class ClienteController extends BaseController {
             BuscarDadosDoClienteUseCase buscarDadosDoClienteUseCase,
             DefinirSenhaClienteUseCase definirSenhaClienteUseCase,
             SolicitarPrimeiroAcessoUseCase solicitarPrimeiroAcessoUseCase,
-            AutenticarClienteUseCase autenticarClienteUseCase
-        ) {
+            AutenticarClienteUseCase autenticarClienteUseCase,
+            BuscarDadosDashboardUseCase buscarDadosDashboardUseCase,
+            BuscarChecklistParaAprovacaoUseCase buscarChecklistParaAprovacaoUseCase ,
+            BuscarDetalhesChecklistUseCase buscarDetalhesChecklistUseCase) {
         this.cadastrarClienteUseCase = cadastrarClienteUseCase;
         this.listarClientesUseCase = listarClientesUseCase;
         this.atualizarDadosClienteUseCase = atualizarDadosClienteUseCase;
@@ -61,6 +72,9 @@ public class ClienteController extends BaseController {
         this.definirSenhaClienteUseCase = definirSenhaClienteUseCase;
         this.solicitarPrimeiroAcessoUseCase = solicitarPrimeiroAcessoUseCase;
         this.autenticarClienteUseCase = autenticarClienteUseCase;
+        this.buscarDadosDashboardUseCase = buscarDadosDashboardUseCase;
+        this.buscarChecklistParaAprovacaoUseCase = buscarChecklistParaAprovacaoUseCase;
+        this.buscarDetalhesChecklistUseCase = buscarDetalhesChecklistUseCase;
     }
 
     /**
@@ -89,7 +103,8 @@ public class ClienteController extends BaseController {
      * - `situacao` (opcional): filtra por `Situacao` (ex.: ATIVO, INATIVO)
      *
      * Retorno: 200 OK com `ApiResponse<List<ClienteListResponse>>`.
-     * Retorna apenas a quantidade de veículos, não a lista completa, para melhor performance.
+     * Retorna apenas a quantidade de veículos, não a lista completa, para melhor
+     * performance.
      *
      * Observação: aqui mantivemos retorno simples sem paginação; se desejar,
      * é recomendado adicionar `Pageable` e devolver `page(...)`.
@@ -165,17 +180,44 @@ public class ClienteController extends BaseController {
         return success("E-mail de definição de senha enviado com sucesso!", null, servletRequest);
     }
 
-     @PostMapping("/login")
+    @PostMapping("/login")
     public ResponseEntity<ApiResponse<Map<String, String>>> login(
             @RequestBody LoginRequest request,
             HttpServletRequest servletRequest) {
-        
+
         String token = autenticarClienteUseCase.autenticar(request.email(), request.senha());
-        
+
         return success(
-            "Autenticação realizada com sucesso!",
-            Map.of("token", token),
-            servletRequest
-        );
+                "Autenticação realizada com sucesso!",
+                Map.of("token", token),
+                servletRequest);
+    }
+
+    @GetMapping("/dashboard")
+    public ResponseEntity<ApiResponse<DashboardClienteResponse>> buscarDadosDashboard(
+            @AuthenticationPrincipal AuthenticatedUser usuario,
+            HttpServletRequest request) {
+
+        DashboardClienteResponse response = buscarDadosDashboardUseCase.buscarDados(usuario.id());
+
+        return success("Dados do dashboard obtidos com sucesso!", response, request);
+    }
+
+    @GetMapping("/checklists/{checklistId}/aprovacao")
+    public ResponseEntity<ApiResponse<ChecklistAprovacaoResponse>> buscarChecklistParaAprovacao(
+            @PathVariable Long checklistId,
+            HttpServletRequest request) {
+
+        ChecklistAprovacaoResponse response = buscarChecklistParaAprovacaoUseCase.executar(checklistId);
+        return success("Checklist carregado para aprovação!", response, request);
+    }
+
+    @GetMapping("/checklists/detalhes/{checklistId}")
+    public ResponseEntity<ApiResponse<ChecklistCardResumo>> buscarDetalhesChecklist(
+            @PathVariable Long checklistId,
+            HttpServletRequest request) {
+
+        ChecklistCardResumo response = buscarDetalhesChecklistUseCase.executar(checklistId);
+        return success("Detalhes do checklist carregados com sucesso!", response, request);
     }
 }

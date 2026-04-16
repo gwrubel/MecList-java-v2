@@ -66,7 +66,7 @@ public class IniciarChecklistUseCase {
                                 mecanico,
                                 request.quilometragem(),
                                 request.descricao(),
-                                StatusProcesso.EM_ANDAMENTO);
+                                StatusProcesso.INICIADO);
 
                 // 5. Salva o checklist
                 Checklist checklistSalvo = checklistGateway.salvar(checklist);

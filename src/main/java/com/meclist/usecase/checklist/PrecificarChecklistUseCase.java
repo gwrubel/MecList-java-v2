@@ -20,6 +20,7 @@ import com.meclist.interfaces.ChecklistGateway;
 import com.meclist.interfaces.ItemChecklistGateway;
 import com.meclist.interfaces.OrcamentoGateway;
 import com.meclist.validator.ChecklistPrecificacaoValidator;
+import com.meclist.interfaces.ChecklistProdutoGateway;
 
 @Service
 public class PrecificarChecklistUseCase {
@@ -29,18 +30,21 @@ public class PrecificarChecklistUseCase {
     private final ItemChecklistGateway itemChecklistGateway;
     private final ChecklistWorkflowGuard workflowGuard;
     private final ChecklistPrecificacaoValidator precificacaoValidator;
+    private final ChecklistProdutoGateway checklistProdutoGateway;
 
     public PrecificarChecklistUseCase(
             ChecklistGateway checklistGateway,
             OrcamentoGateway orcamentoGateway,
             ItemChecklistGateway itemChecklistGateway,
             ChecklistWorkflowGuard workflowGuard,
-            ChecklistPrecificacaoValidator precificacaoValidator) {
+            ChecklistPrecificacaoValidator precificacaoValidator,
+            ChecklistProdutoGateway checklistProdutoGateway) {
         this.checklistGateway = checklistGateway;
         this.orcamentoGateway = orcamentoGateway;
         this.itemChecklistGateway = itemChecklistGateway;
         this.workflowGuard = workflowGuard;
         this.precificacaoValidator = precificacaoValidator;
+        this.checklistProdutoGateway = checklistProdutoGateway; 
     }
 
     @Transactional
@@ -80,14 +84,18 @@ public class PrecificarChecklistUseCase {
         checklistGateway.salvar(checklist);
     }
 
-    private void atualizarDadosDoItem(ItemChecklist item, PrecificarItemRequest req) {
-        item.definirMaoDeObra(req.maoDeObra());
+  private void atualizarDadosDoItem(ItemChecklist item, PrecificarItemRequest req) {
+    item.definirMaoDeObra(req.maoDeObra());
 
-        if (req.produtos() != null) {
-            req.produtos().forEach(prodReq -> item.getProdutosOrcados().stream()
-                    .filter(p -> p.getId().equals(prodReq.checklistProdutoId()))
-                    .findFirst()
-                    .ifPresent(p -> p.atualizarPrecificacao(prodReq.valorUnitario(), prodReq.marca())));
-        }
+    if (req.produtos() != null) {
+        req.produtos().forEach(prodReq -> item.getProdutosOrcados().stream()
+                .filter(p -> p.getId().equals(prodReq.checklistProdutoId()))
+                .findFirst()
+                .ifPresent(p -> {
+                    p.atualizarPrecificacao(prodReq.valorUnitario(), prodReq.marca());
+                    p.setItemChecklist(item);
+                    checklistProdutoGateway.salvar(p);
+                }));
     }
+}
 }
