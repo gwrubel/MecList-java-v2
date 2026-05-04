@@ -87,6 +87,23 @@ public class JwtService {
                 .compact();
     }
 
+    public String gerarTokenClienteAprovacaoChecklist(Cliente cliente, Long checklistId, int minutosValidade) {
+        long expirationMs = minutosValidade * 60L * 1000L;
+
+        return Jwts.builder()
+                .setSubject(cliente.getEmail())
+                .claim("id", cliente.getId())
+                .claim("nome", cliente.getNome())
+                .claim("email", cliente.getEmail())
+                .claim("role", "CLIENTE")
+                .claim("approvalOnly", true)
+                .claim("checklistId", checklistId)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
+                .signWith(secretKey, SignatureAlgorithm.HS512)
+                .compact();
+    }
+
     public Claims getClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(secretKey)

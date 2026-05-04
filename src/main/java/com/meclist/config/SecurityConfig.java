@@ -34,9 +34,13 @@ public class SecurityConfig {
                 // públicos (autenticação)
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/adms/login").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/mecanicos/login").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/mecanicos/recuperar-senha").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/mecanicos/definir-senha").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/clientes/definir-senha").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/clientes/primeiro-acesso").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/clientes/recuperar-senha").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/clientes/login").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/checklists/aprovacao-link/validar").permitAll()
 
                 // uploads estáticos
                 .requestMatchers("/uploads/**").permitAll()
@@ -75,6 +79,14 @@ public class SecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/checklists/*/fotos-evidencia").hasAnyRole("CLIENTE", "MECANICO", "ADMIN")
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/checklists/*/aprovar").hasRole("CLIENTE")
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/checklists/**").hasAnyRole("ADMIN", "MECANICO")
+
+                // checklist administrativo
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/admin/checklists/*/aprovacao").hasRole("ADMIN")
+                .requestMatchers(org.springframework.http.HttpMethod.PATCH, "/admin/checklists/*/fluxo-manual/iniciar").hasRole("ADMIN")
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/admin/checklists/*/fluxo-manual/proposta.pdf").hasRole("ADMIN")
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/admin/checklists/*/fluxo-manual/confirmacao").hasRole("ADMIN")
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/admin/checklists/*/fluxo-manual/aprovar").hasRole("ADMIN")
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/admin/checklists/*/link-aprovacao-cliente").hasRole("ADMIN")
 
                 // fallback
                 .anyRequest().authenticated()

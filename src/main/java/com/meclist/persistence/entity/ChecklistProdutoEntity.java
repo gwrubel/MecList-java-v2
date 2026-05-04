@@ -3,6 +3,8 @@ package com.meclist.persistence.entity;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.meclist.domain.enums.OrigemAprovacao;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -40,6 +42,19 @@ public class ChecklistProdutoEntity {
 
     @Column(name = "aprovado_cliente")
     private Boolean aprovadoCliente; // NULL = Pendente, TRUE = Aprovado, FALSE = Rejeitado
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "origem_decisao")
+    private OrigemAprovacao origemDecisao;
+
+    @Column(name = "decidido_por_id")
+    private Long decididoPorId;
+
+    @Column(name = "decidido_por_tipo")
+    private String decididoPorTipo;
+
+    @Column(name = "decidido_em")
+    private LocalDateTime decididoEm;
 
     @Column(name = "criado_em")
     private LocalDateTime criadoEm;

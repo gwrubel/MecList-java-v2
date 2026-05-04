@@ -60,6 +60,10 @@ public class ChecklistProdutoMapper {
         entity.setValorUnitario(produto.getValorUnitario());
         entity.setMarca(produto.getMarca());
         entity.setAprovadoCliente(produto.getAprovadoCliente());
+        entity.setOrigemDecisao(produto.getOrigemDecisao());
+        entity.setDecididoPorId(produto.getDecididoPorId());
+        entity.setDecididoPorTipo(produto.getDecididoPorTipo());
+        entity.setDecididoEm(produto.getDecididoEm());
         entity.setCriadoEm(produto.getCriadoEm());
         entity.setAtualizadoEm(produto.getAtualizadoEm());
         return entity;
@@ -80,6 +84,10 @@ public class ChecklistProdutoMapper {
                 entity.getValorUnitario(),
                 entity.getMarca(),
                 entity.getAprovadoCliente(),
+                entity.getOrigemDecisao(),
+                entity.getDecididoPorId(),
+                entity.getDecididoPorTipo(),
+                entity.getDecididoEm(),
                 entity.getCriadoEm(),
                 entity.getAtualizadoEm());
     }

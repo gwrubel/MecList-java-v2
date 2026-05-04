@@ -20,14 +20,18 @@ import org.springframework.web.bind.annotation.RestController;
 import com.meclist.domain.enums.Situacao;
 import com.meclist.dto.adm.AdmRequest;
 import com.meclist.dto.mecanico.AtualizarMecanicoRequest;
+import com.meclist.dto.mecanico.DefinirSenhaMecanicoRequest;
 import com.meclist.dto.mecanico.MecanicoRequest;
 import com.meclist.dto.mecanico.MecanicoResponse;
+import com.meclist.dto.mecanico.RecuperarSenhaMecanicoRequest;
 import com.meclist.response.ApiResponse;
 import com.meclist.usecase.mecanico.CadastrarMecanicoUseCase;
 import com.meclist.usecase.mecanico.AtualizarDadosMecanico;
 import com.meclist.usecase.mecanico.AuthMecanicoUseCase;
 import com.meclist.usecase.mecanico.BuscarPorSituacaoMecanicoUseCase;
+import com.meclist.usecase.mecanico.DefinirSenhaMecanicoUseCase;
 import com.meclist.usecase.mecanico.ListarMecanicosUseCase;
+import com.meclist.usecase.mecanico.SolicitarRecuperacaoSenhaMecanicoUseCase;
 
 
 @RestController
@@ -39,18 +43,24 @@ public class MecanicoController extends BaseController {
     private final BuscarPorSituacaoMecanicoUseCase buscarPorSituacaoMecanicoUseCase;
     private final AtualizarDadosMecanico atualizarDadosMecanicoUseCase;
     private final AuthMecanicoUseCase authMecanicoUseCase;
+    private final SolicitarRecuperacaoSenhaMecanicoUseCase solicitarRecuperacaoSenhaMecanicoUseCase;
+    private final DefinirSenhaMecanicoUseCase definirSenhaMecanicoUseCase;
 
     public MecanicoController(
             CadastrarMecanicoUseCase cadastrarMecanicoUseCase,
             ListarMecanicosUseCase listarMecanicosUseCase,
             AtualizarDadosMecanico atualizarDadosMecanicoUseCase,
             BuscarPorSituacaoMecanicoUseCase buscarPorSituacaoMecanicoUseCase,
-            AuthMecanicoUseCase authMecanicoUseCase) {
+            AuthMecanicoUseCase authMecanicoUseCase,
+            SolicitarRecuperacaoSenhaMecanicoUseCase solicitarRecuperacaoSenhaMecanicoUseCase,
+            DefinirSenhaMecanicoUseCase definirSenhaMecanicoUseCase) {
         this.listarMecanicosUseCase = listarMecanicosUseCase;
         this.cadastrarMecanicoUseCase = cadastrarMecanicoUseCase;
         this.atualizarDadosMecanicoUseCase = atualizarDadosMecanicoUseCase;
         this.buscarPorSituacaoMecanicoUseCase = buscarPorSituacaoMecanicoUseCase;
         this.authMecanicoUseCase = authMecanicoUseCase;
+        this.solicitarRecuperacaoSenhaMecanicoUseCase = solicitarRecuperacaoSenhaMecanicoUseCase;
+        this.definirSenhaMecanicoUseCase = definirSenhaMecanicoUseCase;
     }
 
     /**
@@ -118,5 +128,21 @@ public class MecanicoController extends BaseController {
     ) {
         String token = authMecanicoUseCase.autenticar(request.email(), request.senha());
        return success("Autenticação realizada com sucesso!", Map.of("token", token), servletRequest);
+    }
+
+    @PostMapping("/recuperar-senha")
+    public ResponseEntity<ApiResponse<Void>> recuperarSenha(
+            @RequestBody @Valid RecuperarSenhaMecanicoRequest request,
+            HttpServletRequest servletRequest) {
+        solicitarRecuperacaoSenhaMecanicoUseCase.executar(request);
+        return success("Se o e-mail estiver cadastrado, enviaremos as instruções de recuperação.", null, servletRequest);
+    }
+
+    @PostMapping("/definir-senha")
+    public ResponseEntity<ApiResponse<Void>> definirSenha(
+            @RequestBody @Valid DefinirSenhaMecanicoRequest request,
+            HttpServletRequest servletRequest) {
+        definirSenhaMecanicoUseCase.executar(request);
+        return success("Senha definida com sucesso!", null, servletRequest);
     }
 }

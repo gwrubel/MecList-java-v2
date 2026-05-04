@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.meclist.domain.enums.OrigemAprovacao;
 import com.meclist.domain.enums.StatusProcesso;
 
 public class Checklist {
@@ -14,6 +15,10 @@ public class Checklist {
     private Float quilometragem;
     private String descricao;
     private StatusProcesso status;
+    private OrigemAprovacao origemAprovacao;
+    private Long aprovadoPorId;
+    private String aprovadoPorTipo;
+    private LocalDateTime aprovadoEm;
     private LocalDateTime criadoEm;
     private LocalDateTime atualizadoEm;
     
@@ -30,12 +35,23 @@ public class Checklist {
     // Novo construtor com objetos de domínio
     public Checklist(Long id, Veiculo veiculo, Mecanico mecanico, Float quilometragem, String descricao,
                      StatusProcesso status, LocalDateTime criadoEm, LocalDateTime atualizadoEm) {
+        this(id, veiculo, mecanico, quilometragem, descricao, status, null, null, null, null, criadoEm, atualizadoEm);
+    }
+
+    public Checklist(Long id, Veiculo veiculo, Mecanico mecanico, Float quilometragem, String descricao,
+                     StatusProcesso status, OrigemAprovacao origemAprovacao, Long aprovadoPorId,
+                     String aprovadoPorTipo, LocalDateTime aprovadoEm, LocalDateTime criadoEm,
+                     LocalDateTime atualizadoEm) {
         this.id = id;
         this.veiculo = veiculo;
         this.mecanico = mecanico;
         this.quilometragem = quilometragem;
         this.descricao = descricao;
         this.status = status;
+        this.origemAprovacao = origemAprovacao;
+        this.aprovadoPorId = aprovadoPorId;
+        this.aprovadoPorTipo = aprovadoPorTipo;
+        this.aprovadoEm = aprovadoEm;
         this.criadoEm = criadoEm;
         this.atualizadoEm = atualizadoEm;
     }
@@ -44,6 +60,15 @@ public class Checklist {
      public Checklist(Long id, Veiculo veiculo, Mecanico mecanico, Float quilometragem, String descricao,
                      StatusProcesso status, List<ItemChecklist> itensChecklist, List<Servico> servicos, 
                      List<Orcamento> orcamentos, LocalDateTime criadoEm, LocalDateTime atualizadoEm) {
+        this(id, veiculo, mecanico, quilometragem, descricao, status, itensChecklist, servicos, orcamentos,
+            null, null, null, null, criadoEm, atualizadoEm);
+        }
+
+         public Checklist(Long id, Veiculo veiculo, Mecanico mecanico, Float quilometragem, String descricao,
+                 StatusProcesso status, List<ItemChecklist> itensChecklist, List<Servico> servicos,
+                 List<Orcamento> orcamentos, OrigemAprovacao origemAprovacao, Long aprovadoPorId,
+                 String aprovadoPorTipo, LocalDateTime aprovadoEm, LocalDateTime criadoEm,
+                 LocalDateTime atualizadoEm) {
         this.id = id;
         this.veiculo = veiculo;
         this.mecanico = mecanico;
@@ -53,6 +78,10 @@ public class Checklist {
         this.itensChecklist = itensChecklist != null ? itensChecklist : new ArrayList<>();
         this.servicos = servicos != null ? servicos : new ArrayList<>();
         this.orcamentos = orcamentos != null ? orcamentos : new ArrayList<>();
+        this.origemAprovacao = origemAprovacao;
+        this.aprovadoPorId = aprovadoPorId;
+        this.aprovadoPorTipo = aprovadoPorTipo;
+        this.aprovadoEm = aprovadoEm;
         this.criadoEm = criadoEm;
         this.atualizadoEm = atualizadoEm;
     }
@@ -99,6 +128,10 @@ public class Checklist {
     public Long getId() { return id; }
     public Float getQuilometragem() { return quilometragem; }
     public String getDescricao() { return descricao; }
+    public OrigemAprovacao getOrigemAprovacao() { return origemAprovacao; }
+    public Long getAprovadoPorId() { return aprovadoPorId; }
+    public String getAprovadoPorTipo() { return aprovadoPorTipo; }
+    public LocalDateTime getAprovadoEm() { return aprovadoEm; }
     public LocalDateTime getCriadoEm() { return criadoEm; }
     public LocalDateTime getAtualizadoEm() { return atualizadoEm; }
 
@@ -122,6 +155,10 @@ public class Checklist {
     public void setMecanico(Mecanico mecanico) { this.mecanico = mecanico; }
     public void setQuilometragem(Float quilometragem) { this.quilometragem = quilometragem; }
     public void setDescricao(String descricao) { this.descricao = descricao; }
+    public void setOrigemAprovacao(OrigemAprovacao origemAprovacao) { this.origemAprovacao = origemAprovacao; }
+    public void setAprovadoPorId(Long aprovadoPorId) { this.aprovadoPorId = aprovadoPorId; }
+    public void setAprovadoPorTipo(String aprovadoPorTipo) { this.aprovadoPorTipo = aprovadoPorTipo; }
+    public void setAprovadoEm(LocalDateTime aprovadoEm) { this.aprovadoEm = aprovadoEm; }
     public void setStatus(StatusProcesso status) { 
         this.status = status;
         this.atualizadoEm = LocalDateTime.now();
@@ -195,6 +232,14 @@ public void aprovar() {
     }
     this.status = StatusProcesso.APROVADO;
     this.atualizadoEm = LocalDateTime.now();
+}
+
+public void registrarAprovacao(OrigemAprovacao origemAprovacao, Long aprovadoPorId, String aprovadoPorTipo) {
+    this.origemAprovacao = origemAprovacao;
+    this.aprovadoPorId = aprovadoPorId;
+    this.aprovadoPorTipo = aprovadoPorTipo;
+    this.aprovadoEm = LocalDateTime.now();
+    this.atualizadoEm = this.aprovadoEm;
 }
 
 public void reprovar() {

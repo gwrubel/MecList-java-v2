@@ -1,7 +1,9 @@
 package com.meclist.security;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -39,6 +41,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String role = claims.get("role", String.class);
                 Number idNumber = claims.get("id", Number.class);
                 Long id = idNumber != null ? idNumber.longValue() : null;
+                Boolean approvalOnly = claims.get("approvalOnly", Boolean.class);
+                Number checklistIdNumber = claims.get("checklistId", Number.class);
+                Long checklistId = checklistIdNumber != null ? checklistIdNumber.longValue() : null;
 
                 if (email != null && role != null && id != null) {
                     var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
@@ -54,6 +59,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             null,
                             authorities
                     );
+
+                        Map<String, Object> details = new HashMap<>();
+                        details.put("approvalOnly", Boolean.TRUE.equals(approvalOnly));
+                        details.put("checklistId", checklistId);
+                        authentication.setDetails(details);
 
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }

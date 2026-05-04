@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.meclist.domain.enums.CategoriaParteVeiculo;
+import com.meclist.domain.enums.EtapaFluxoManual;
 import com.meclist.domain.enums.StatusProcesso;
 
 public record ChecklistAprovacaoResponse(
@@ -15,6 +16,7 @@ public record ChecklistAprovacaoResponse(
     String modelo,
     String marca,
     StatusProcesso status,
+    EtapaFluxoManual etapaFluxoManual,
     BigDecimal valorTotal,
     LocalDateTime criadoEm,
     LocalDateTime atualizadoEm,

@@ -19,6 +19,8 @@ import com.meclist.dto.checklist.precificacao.ChecklistPrecificacaoResponse;
 import com.meclist.dto.checklist.precificacao.PrecificarChecklistRequest;
 import com.meclist.dto.checklist.aprovacao.AprovarChecklistRequest;
 import com.meclist.dto.checklist.aprovacao.ChecklistAprovacaoResponse;
+import com.meclist.dto.checklist.aprovacaoLink.ValidarLinkAprovacaoRequest;
+import com.meclist.dto.checklist.aprovacaoLink.ValidarLinkAprovacaoResponse;
 import com.meclist.dto.fotoEvidencia.FotoEvidenciaResponse;
 import com.meclist.response.ApiResponse;
 import com.meclist.usecase.checklist.AtualizarItensPorCategoriaUseCase;
@@ -28,6 +30,7 @@ import com.meclist.usecase.checklist.BuscarChecklistParaPrecificacaoUseCase;
 import com.meclist.usecase.checklist.IniciarChecklistUseCase;
 import com.meclist.usecase.checklist.ListarChecklistsPorStatusUseCase;
 import com.meclist.usecase.checklist.PrecificarChecklistUseCase;
+import com.meclist.usecase.checklist.ValidarLinkAprovacaoChecklistUseCase;
 import com.meclist.usecase.fotoEvidencia.BuscarFotosItemChecklistUseCase;
 import com.meclist.usecase.checklist.BuscarChecklistPorIdUseCase;
 import com.meclist.usecase.checklist.EnviarChecklistParaPrecificacaoUseCase;
@@ -51,6 +54,7 @@ public class ChecklistController extends BaseController {
         private final PrecificarChecklistUseCase precificarChecklistUseCase;
         private final BuscarChecklistParaAprovacaoUseCase buscarChecklistParaAprovacaoUseCase;
         private final AprovarChecklistUseCase aprovarChecklistUseCase;
+        private final ValidarLinkAprovacaoChecklistUseCase validarLinkAprovacaoChecklistUseCase;
 
         public ChecklistController(
                         IniciarChecklistUseCase iniciarChecklistUseCase,
@@ -62,7 +66,8 @@ public class ChecklistController extends BaseController {
                         BuscarChecklistParaPrecificacaoUseCase buscarChecklistParaPrecificacaoUseCase,
                         PrecificarChecklistUseCase precificarChecklistUseCase,
                         BuscarChecklistParaAprovacaoUseCase buscarChecklistParaAprovacaoUseCase,
-                        AprovarChecklistUseCase aprovarChecklistUseCase) {
+                        AprovarChecklistUseCase aprovarChecklistUseCase,
+                        ValidarLinkAprovacaoChecklistUseCase validarLinkAprovacaoChecklistUseCase) {
                 this.iniciarChecklistUseCase = iniciarChecklistUseCase;
                 this.atualizarItensPorCategoriaUseCase = atualizarItensPorCategoriaUseCase;
                 this.buscarChecklistPorIdUseCase = buscarChecklistPorIdUseCase;
@@ -73,6 +78,7 @@ public class ChecklistController extends BaseController {
                 this.precificarChecklistUseCase = precificarChecklistUseCase;
                 this.buscarChecklistParaAprovacaoUseCase = buscarChecklistParaAprovacaoUseCase;
                 this.aprovarChecklistUseCase = aprovarChecklistUseCase;
+                this.validarLinkAprovacaoChecklistUseCase = validarLinkAprovacaoChecklistUseCase;
         }
 
         /**
@@ -225,6 +231,15 @@ public class ChecklistController extends BaseController {
 
                 aprovarChecklistUseCase.executar(checklistId, request);
                 return noContent();
+        }
+
+        @PostMapping("/aprovacao-link/validar")
+        public ResponseEntity<ApiResponse<ValidarLinkAprovacaoResponse>> validarLinkAprovacao(
+                        @Valid @RequestBody ValidarLinkAprovacaoRequest request,
+                        HttpServletRequest servletRequest) {
+
+                ValidarLinkAprovacaoResponse response = validarLinkAprovacaoChecklistUseCase.executar(request);
+                return success("Link de aprovação validado com sucesso!", response, servletRequest);
         }
         
 

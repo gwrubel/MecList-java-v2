@@ -3,6 +3,9 @@ package com.meclist.persistence.entity;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.meclist.domain.enums.CanalConfirmacaoCliente;
+import com.meclist.domain.enums.EtapaFluxoManual;
+import com.meclist.domain.enums.OrigemAprovacao;
 import com.meclist.domain.enums.StatusProcesso;
 
 import jakarta.persistence.*;
@@ -36,6 +39,33 @@ public class OrcamentoEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private StatusProcesso status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "etapa_fluxo_manual")
+    private EtapaFluxoManual etapaFluxoManual;
+
+    @Column(name = "ultimo_pdf_gerado_em")
+    private LocalDateTime ultimoPdfGeradoEm;
+
+    @Column(name = "ultimo_pdf_gerado_por_adm_id")
+    private Long ultimoPdfGeradoPorAdmId;
+
+    @Column(name = "confirmacao_manual_em")
+    private LocalDateTime confirmacaoManualEm;
+
+    @Column(name = "confirmacao_manual_por_adm_id")
+    private Long confirmacaoManualPorAdmId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "canal_confirmacao_cliente")
+    private CanalConfirmacaoCliente canalConfirmacaoCliente;
+
+    @Column(name = "observacao_confirmacao", length = 1000)
+    private String observacaoConfirmacao;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "origem_aprovacao_final")
+    private OrigemAprovacao origemAprovacaoFinal;
 
     @Column(name = "criado_em")
     private LocalDateTime criadoEm;

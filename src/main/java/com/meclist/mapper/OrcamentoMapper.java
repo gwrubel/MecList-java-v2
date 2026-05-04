@@ -2,6 +2,7 @@ package com.meclist.mapper;
 
 import com.meclist.domain.Checklist;
 import com.meclist.domain.Orcamento;
+import com.meclist.domain.enums.EtapaFluxoManual;
 
 import com.meclist.persistence.entity.ChecklistEntity;
 import com.meclist.persistence.entity.OrcamentoEntity;
@@ -34,6 +35,14 @@ public class OrcamentoMapper {
                 ? orcamento.getDataAprovacao().atStartOfDay() : null);
 
         entity.setStatus(orcamento.getStatus());
+        entity.setEtapaFluxoManual(orcamento.getEtapaFluxoManual());
+        entity.setUltimoPdfGeradoEm(orcamento.getUltimoPdfGeradoEm());
+        entity.setUltimoPdfGeradoPorAdmId(orcamento.getUltimoPdfGeradoPorAdmId());
+        entity.setConfirmacaoManualEm(orcamento.getConfirmacaoManualEm());
+        entity.setConfirmacaoManualPorAdmId(orcamento.getConfirmacaoManualPorAdmId());
+        entity.setCanalConfirmacaoCliente(orcamento.getCanalConfirmacaoCliente());
+        entity.setObservacaoConfirmacao(orcamento.getObservacaoConfirmacao());
+        entity.setOrigemAprovacaoFinal(orcamento.getOrigemAprovacaoFinal());
         entity.setCriadoEm(orcamento.getCriadoEm());
         entity.setAtualizadoEm(orcamento.getAtualizadoEm());
 
@@ -57,6 +66,10 @@ public class OrcamentoMapper {
                 null,
                 null,
                 null,
+                null,
+                null,
+                null,
+                null,
                 null
             );
         }
@@ -68,6 +81,14 @@ public class OrcamentoMapper {
             entity.getDataEmissao() != null ? entity.getDataEmissao().toLocalDate() : null,
             entity.getDataAprovacao() != null ? entity.getDataAprovacao().toLocalDate() : null,
             entity.getStatus(),
+            entity.getEtapaFluxoManual() != null ? entity.getEtapaFluxoManual() : EtapaFluxoManual.NAO_INICIADO,
+            entity.getUltimoPdfGeradoEm(),
+            entity.getUltimoPdfGeradoPorAdmId(),
+            entity.getConfirmacaoManualEm(),
+            entity.getConfirmacaoManualPorAdmId(),
+            entity.getCanalConfirmacaoCliente(),
+            entity.getObservacaoConfirmacao(),
+            entity.getOrigemAprovacaoFinal(),
             entity.getCriadoEm(),
             entity.getAtualizadoEm()
         );

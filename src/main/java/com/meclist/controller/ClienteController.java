@@ -11,6 +11,7 @@ import com.meclist.dto.cliente.DashboardClienteResponse;
 import com.meclist.dto.cliente.DefinirSenhaRequest;
 import com.meclist.dto.cliente.LoginRequest;
 import com.meclist.dto.cliente.PrimeiroAcessoRequest;
+import com.meclist.dto.cliente.RecuperarSenhaRequest;
 import com.meclist.dto.checklist.aprovacao.ChecklistAprovacaoResponse;
 import com.meclist.response.ApiResponse;
 import com.meclist.security.AuthenticatedUser;
@@ -24,6 +25,7 @@ import com.meclist.usecase.cliente.CadastrarClienteUseCase;
 import com.meclist.usecase.cliente.DefinirSenhaClienteUseCase;
 import com.meclist.usecase.cliente.ListarClientesUseCase;
 import com.meclist.usecase.cliente.SolicitarPrimeiroAcessoUseCase;
+import com.meclist.usecase.cliente.SolicitarRecuperacaoSenhaClienteUseCase;
 import com.meclist.usecase.checklist.BuscarChecklistParaAprovacaoUseCase;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -47,6 +49,7 @@ public class ClienteController extends BaseController {
     private final BuscarDadosDoClienteUseCase buscarDadosDoClienteUseCase;
     private final DefinirSenhaClienteUseCase definirSenhaClienteUseCase;
     private final SolicitarPrimeiroAcessoUseCase solicitarPrimeiroAcessoUseCase;
+    private final SolicitarRecuperacaoSenhaClienteUseCase solicitarRecuperacaoSenhaClienteUseCase;
     private final AutenticarClienteUseCase autenticarClienteUseCase;
     private final BuscarDadosDashboardUseCase buscarDadosDashboardUseCase;
     private final BuscarChecklistParaAprovacaoUseCase buscarChecklistParaAprovacaoUseCase;
@@ -60,6 +63,7 @@ public class ClienteController extends BaseController {
             BuscarDadosDoClienteUseCase buscarDadosDoClienteUseCase,
             DefinirSenhaClienteUseCase definirSenhaClienteUseCase,
             SolicitarPrimeiroAcessoUseCase solicitarPrimeiroAcessoUseCase,
+            SolicitarRecuperacaoSenhaClienteUseCase solicitarRecuperacaoSenhaClienteUseCase,
             AutenticarClienteUseCase autenticarClienteUseCase,
             BuscarDadosDashboardUseCase buscarDadosDashboardUseCase,
             BuscarChecklistParaAprovacaoUseCase buscarChecklistParaAprovacaoUseCase ,
@@ -71,6 +75,7 @@ public class ClienteController extends BaseController {
         this.buscarDadosDoClienteUseCase = buscarDadosDoClienteUseCase;
         this.definirSenhaClienteUseCase = definirSenhaClienteUseCase;
         this.solicitarPrimeiroAcessoUseCase = solicitarPrimeiroAcessoUseCase;
+        this.solicitarRecuperacaoSenhaClienteUseCase = solicitarRecuperacaoSenhaClienteUseCase;
         this.autenticarClienteUseCase = autenticarClienteUseCase;
         this.buscarDadosDashboardUseCase = buscarDadosDashboardUseCase;
         this.buscarChecklistParaAprovacaoUseCase = buscarChecklistParaAprovacaoUseCase;
@@ -178,6 +183,14 @@ public class ClienteController extends BaseController {
             HttpServletRequest servletRequest) {
         solicitarPrimeiroAcessoUseCase.executar(request);
         return success("E-mail de definição de senha enviado com sucesso!", null, servletRequest);
+    }
+
+    @PostMapping("/recuperar-senha")
+    public ResponseEntity<ApiResponse<Void>> recuperarSenha(
+            @RequestBody @Valid RecuperarSenhaRequest request,
+            HttpServletRequest servletRequest) {
+        solicitarRecuperacaoSenhaClienteUseCase.executar(request);
+        return success("Se o e-mail estiver cadastrado, enviaremos as instruções de recuperação.", null, servletRequest);
     }
 
     @PostMapping("/login")

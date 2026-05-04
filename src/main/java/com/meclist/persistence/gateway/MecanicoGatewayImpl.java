@@ -4,12 +4,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Component;
 
 import com.meclist.domain.Mecanico;
 import com.meclist.domain.enums.Situacao;
 import com.meclist.interfaces.MecanicoGateway;
 import com.meclist.mapper.MecanicoMapper;
+import com.meclist.persistence.entity.MecanicoEntity;
 import com.meclist.persistence.repository.MecanicoRepository;
 
 
@@ -51,8 +53,18 @@ public class MecanicoGatewayImpl implements MecanicoGateway {
 
     @Override
     public Mecanico atualizarMecanico(Mecanico mecanico) {
-        
-        return MecanicoMapper.toDomain(repository.save(MecanicoMapper.toEntity(mecanico)));
+        MecanicoEntity entity = repository.findById(mecanico.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Mecânico não encontrado."));
+
+        entity.setNome(mecanico.getNome());
+        entity.setEmail(mecanico.getEmail());
+        entity.setSenha(mecanico.getSenha());
+        entity.setCpf(mecanico.getCpf());
+        entity.setTelefone(mecanico.getTelefone());
+        entity.setTipoDeUsuario(mecanico.getTipoDeUsuario().name());
+        entity.setSituacao(mecanico.getSituacao());
+
+        return MecanicoMapper.toDomain(repository.save(entity));
     }
 
     @Override

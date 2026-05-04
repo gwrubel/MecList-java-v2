@@ -3,6 +3,7 @@ package com.meclist.persistence.entity;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.meclist.domain.enums.OrigemAprovacao;
 import com.meclist.domain.enums.StatusProcesso;
 
 import jakarta.persistence.*;
@@ -34,6 +35,19 @@ public class ChecklistEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private StatusProcesso status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "origem_aprovacao")
+    private OrigemAprovacao origemAprovacao;
+
+    @Column(name = "aprovado_por_id")
+    private Long aprovadoPorId;
+
+    @Column(name = "aprovado_por_tipo")
+    private String aprovadoPorTipo;
+
+    @Column(name = "aprovado_em")
+    private LocalDateTime aprovadoEm;
 
     private String descricao;
 

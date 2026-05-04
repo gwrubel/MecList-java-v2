@@ -10,6 +10,7 @@ import com.meclist.domain.Checklist;
 import com.meclist.domain.ItemChecklist;
 import com.meclist.domain.Orcamento;
 import com.meclist.domain.enums.CategoriaParteVeiculo;
+import com.meclist.domain.enums.EtapaFluxoManual;
 import com.meclist.domain.enums.StatusItem;
 import com.meclist.dto.checklist.ChecklistResponse;
 import com.meclist.dto.checklist.ChecklistResumoResponse;
@@ -36,6 +37,10 @@ public static ChecklistEntity toEntity(Checklist domain) {
     entity.setQuilometragem(domain.getQuilometragem());
     entity.setDescricao(domain.getDescricao());
     entity.setStatus(domain.getStatus());
+    entity.setOrigemAprovacao(domain.getOrigemAprovacao());
+    entity.setAprovadoPorId(domain.getAprovadoPorId());
+    entity.setAprovadoPorTipo(domain.getAprovadoPorTipo());
+    entity.setAprovadoEm(domain.getAprovadoEm());
     entity.setCriadoEm(domain.getCriadoEm());
     entity.setAtualizadoEm(domain.getAtualizadoEm());
 
@@ -68,6 +73,10 @@ public static ChecklistEntity toEntity(Checklist domain) {
             Collections.emptyList(),
             Collections.emptyList(),
             Collections.emptyList(),
+            entity.getOrigemAprovacao(),
+            entity.getAprovadoPorId(),
+            entity.getAprovadoPorTipo(),
+            entity.getAprovadoEm(),
             entity.getCriadoEm(),
             entity.getAtualizadoEm()
         );
@@ -93,6 +102,10 @@ public static ChecklistEntity toEntity(Checklist domain) {
             itens,
             Collections.emptyList(),
             Collections.emptyList(),
+            entity.getOrigemAprovacao(),
+            entity.getAprovadoPorId(),
+            entity.getAprovadoPorTipo(),
+            entity.getAprovadoEm(),
             entity.getCriadoEm(),
             entity.getAtualizadoEm()
         );
@@ -177,6 +190,12 @@ public static ChecklistEntity toEntity(Checklist domain) {
 }
 
     public static ChecklistAprovacaoResponse toAprovacaoResponse(Checklist checklist, BigDecimal valorTotal) {
+        return toAprovacaoResponse(checklist, valorTotal, null);
+    }
+
+    public static ChecklistAprovacaoResponse toAprovacaoResponse(Checklist checklist,
+                                                                 BigDecimal valorTotal,
+                                                                 EtapaFluxoManual etapaFluxoManual) {
         if (checklist == null) return null;
 
         Map<CategoriaParteVeiculo, List<ItemAprovacaoResponse>> itensPorCategoria =
@@ -193,6 +212,7 @@ public static ChecklistEntity toEntity(Checklist domain) {
             checklist.getVeiculo().getMarca(),
 
             checklist.getStatus(),
+            etapaFluxoManual,
             valorTotal,
             checklist.getCriadoEm(),
             checklist.getAtualizadoEm(),

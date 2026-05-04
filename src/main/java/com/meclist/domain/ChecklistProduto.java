@@ -3,6 +3,8 @@ package com.meclist.domain;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.meclist.domain.enums.OrigemAprovacao;
+
 /**
  * ChecklistProduto representa o relacionamento entre ItemChecklist e Produto na execução/orçamento.
  * Registra os produtos efetivamente orçados para um checklist específico de um cliente.
@@ -18,12 +20,24 @@ public class ChecklistProduto {
     private BigDecimal valorUnitario;
     private String marca;
     private Boolean aprovadoCliente; // NULL = Pendente, TRUE = Aprovado, FALSE = Rejeitado
+    private OrigemAprovacao origemDecisao;
+    private Long decididoPorId;
+    private String decididoPorTipo;
+    private LocalDateTime decididoEm;
     private LocalDateTime criadoEm;
     private LocalDateTime atualizadoEm;
 
     public ChecklistProduto(Long id, ItemChecklist itemChecklist, Produto produto, String nomeProdutoSnapshot, Integer quantidade,
                            BigDecimal valorUnitario, String marca, Boolean aprovadoCliente, 
                            LocalDateTime criadoEm, LocalDateTime atualizadoEm) {
+        this(id, itemChecklist, produto, nomeProdutoSnapshot, quantidade, valorUnitario, marca, aprovadoCliente,
+                null, null, null, null, criadoEm, atualizadoEm);
+    }
+
+    public ChecklistProduto(Long id, ItemChecklist itemChecklist, Produto produto, String nomeProdutoSnapshot,
+                           Integer quantidade, BigDecimal valorUnitario, String marca, Boolean aprovadoCliente,
+                           OrigemAprovacao origemDecisao, Long decididoPorId, String decididoPorTipo,
+                           LocalDateTime decididoEm, LocalDateTime criadoEm, LocalDateTime atualizadoEm) {
         this.id = id;
         this.itemChecklist = itemChecklist;
         this.produto = produto;
@@ -32,6 +46,10 @@ public class ChecklistProduto {
         this.aprovadoCliente = aprovadoCliente;
         this.valorUnitario = valorUnitario;
         this.marca = marca;
+        this.origemDecisao = origemDecisao;
+        this.decididoPorId = decididoPorId;
+        this.decididoPorTipo = decididoPorTipo;
+        this.decididoEm = decididoEm;
         this.criadoEm = criadoEm;
         this.atualizadoEm = atualizadoEm;
     }
@@ -61,6 +79,10 @@ public class ChecklistProduto {
     public LocalDateTime getAtualizadoEm() { return atualizadoEm; }
     public String getMarca() { return marca; }
     public String getNomeProdutoSnapshot() { return nomeProdutoSnapshot; }
+    public OrigemAprovacao getOrigemDecisao() { return origemDecisao; }
+    public Long getDecididoPorId() { return decididoPorId; }
+    public String getDecididoPorTipo() { return decididoPorTipo; }
+    public LocalDateTime getDecididoEm() { return decididoEm; }
 
     // Setters
     public void setId(Long id) { this.id = id; }
@@ -73,6 +95,10 @@ public class ChecklistProduto {
     public void setAtualizadoEm(LocalDateTime atualizadoEm) { this.atualizadoEm = atualizadoEm; }
     public void setMarca(String marca) { this.marca = marca; }
     public void setNomeProdutoSnapshot(String nomeProdutoSnapshot) { this.nomeProdutoSnapshot = nomeProdutoSnapshot; }
+    public void setOrigemDecisao(OrigemAprovacao origemDecisao) { this.origemDecisao = origemDecisao; }
+    public void setDecididoPorId(Long decididoPorId) { this.decididoPorId = decididoPorId; }
+    public void setDecididoPorTipo(String decididoPorTipo) { this.decididoPorTipo = decididoPorTipo; }
+    public void setDecididoEm(LocalDateTime decididoEm) { this.decididoEm = decididoEm; }
 
     // Métodos de negócio
     public void atualizarQuantidade(Integer novaQuantidade) {
@@ -124,5 +150,13 @@ public class ChecklistProduto {
     this.marca = marca;
     this.atualizadoEm = LocalDateTime.now();
 }
+
+        public void registrarDecisao(OrigemAprovacao origemDecisao, Long decididoPorId, String decididoPorTipo) {
+            this.origemDecisao = origemDecisao;
+            this.decididoPorId = decididoPorId;
+            this.decididoPorTipo = decididoPorTipo;
+            this.decididoEm = LocalDateTime.now();
+            this.atualizadoEm = this.decididoEm;
+        }
 }
 
