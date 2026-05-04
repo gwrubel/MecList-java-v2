@@ -59,6 +59,10 @@ public class ChecklistPrecificacaoValidator {
             return true;
         }
 
+        if (item.getProdutosOrcados() == null || item.getProdutosOrcados().isEmpty()) {
+            return true;
+        }
+
         return item.getProdutosOrcados().stream()
                 .anyMatch(produto -> produto.getValorUnitario() == null
                         || produto.getValorUnitario().compareTo(BigDecimal.ZERO) < 0);

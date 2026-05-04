@@ -51,12 +51,13 @@ public interface ChecklistRepository extends JpaRepository<ChecklistEntity, Long
                 WHERE c.veiculo.cliente.id = :clienteId
                 AND (
                     c.status IN :statusAtivos
-                    OR (c.status = 'CONCLUIDO' AND c.atualizadoEm >= :limiteData)
+                    OR (c.status IN :statusComLimite AND c.atualizadoEm >= :limiteData)
                 )
             """)
     @EntityGraph(attributePaths = { "veiculo", "veiculo.cliente", "mecanico" })
     List<ChecklistEntity> findDashboardPorCliente(
             @Param("clienteId") Long clienteId,
             @Param("statusAtivos") List<StatusProcesso> statusAtivos,
+            @Param("statusComLimite") List<StatusProcesso> statusComLimite,
             @Param("limiteData") LocalDateTime limiteData);
 }

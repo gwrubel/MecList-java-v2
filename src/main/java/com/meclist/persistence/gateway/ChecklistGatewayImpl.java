@@ -115,13 +115,16 @@ public class ChecklistGatewayImpl implements ChecklistGateway {
 public List<Checklist> buscarDashboardPorCliente(Long clienteId) {
     var statusAtivos = List.of(
         StatusProcesso.EM_ANDAMENTO,
-        StatusProcesso.AGUARDANDO_APROVACAO,
+        StatusProcesso.AGUARDANDO_APROVACAO
+    );
+    var statusComLimite = List.of(
+        StatusProcesso.REPROVADO,
         StatusProcesso.CONCLUIDO,
-        StatusProcesso.REPROVADO
+        StatusProcesso.CANCELADO
     );
     var limiteData = LocalDateTime.now().minusDays(7);
 
-    return checklistRepository.findDashboardPorCliente(clienteId, statusAtivos, limiteData)
+    return checklistRepository.findDashboardPorCliente(clienteId, statusAtivos, statusComLimite, limiteData)
             .stream()
             .map(ChecklistMapper::toDomain)
             .collect(Collectors.toList());

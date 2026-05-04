@@ -1,5 +1,6 @@
 package com.meclist.mapper;
 
+import com.meclist.domain.Checklist;
 import com.meclist.domain.Orcamento;
 
 import com.meclist.persistence.entity.ChecklistEntity;
@@ -46,9 +47,23 @@ public class OrcamentoMapper {
     public static Orcamento toDomain(OrcamentoEntity entity) {
         if (entity == null) return null;
 
+        Checklist checklist = null;
+        if (entity.getChecklist() != null && entity.getChecklist().getId() != null) {
+            checklist = new Checklist(
+                entity.getChecklist().getId(),
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            );
+        }
+
         return new Orcamento(
             entity.getId(),
-            null, // Checklist pode ser mapeado depois se necessário
+            checklist,
             entity.getValorTotal(),
             entity.getDataEmissao() != null ? entity.getDataEmissao().toLocalDate() : null,
             entity.getDataAprovacao() != null ? entity.getDataAprovacao().toLocalDate() : null,

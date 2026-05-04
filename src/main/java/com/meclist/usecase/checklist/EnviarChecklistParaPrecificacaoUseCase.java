@@ -38,7 +38,8 @@ public class EnviarChecklistParaPrecificacaoUseCase {
                     "Não é possível enviar para precificação com itens pendentes.");
         }
 
-        checklist.atualizarStatus(StatusProcesso.AGUARDANDO_PRECIFICACAO);
+        
+        checklist.enviarParaPrecificacao();
         checklistGateway.atualizarStatus(checklist);
     }
 }

@@ -57,16 +57,15 @@ public class Checklist {
         this.atualizadoEm = atualizadoEm;
     }
 
-  public static Checklist novo(Veiculo veiculo, Mecanico mecanico, Float quilometragem, String descricao, StatusProcesso status) {
+  public static Checklist novo(Veiculo veiculo, Mecanico mecanico, Float quilometragem, String descricao) {
         LocalDateTime agora = LocalDateTime.now();
-        return new Checklist(null, veiculo, mecanico, quilometragem, descricao, status, agora, agora);
+        StatusProcesso statusInicial = StatusProcesso.INICIADO; // Define o status inicial como INICIADO
+        return new Checklist(null, veiculo, mecanico, quilometragem, descricao, statusInicial, agora, agora);
     }
 
-    public Checklist atualizarStatus(StatusProcesso novoStatus) {
-        this.status = novoStatus;
-        this.atualizadoEm = LocalDateTime.now();
-        return this;
-    }
+   
+
+   
 
     // Métodos para gerenciar serviços
     public void adicionarServico(Servico servico) {
@@ -148,7 +147,7 @@ public class Checklist {
         return mecanico != null ? mecanico.getId() : null; 
     }
     
-    // ... dentro da classe Checklist
+
 
 /**
  * Calcula o total de mão de obra de todos os itens do checklist.
@@ -175,15 +174,34 @@ public BigDecimal calcularTotalProdutos() {
 public BigDecimal calcularTotalGeral() {
     return calcularTotalMaoDeObra().add(calcularTotalProdutos());
 }
-
-/**
- * Regra de Negócio: Transiciona o status e valida a integridade.
- */
+public void enviarParaPrecificacao() {
+    if (this.status != StatusProcesso.INICIADO) {
+        throw new IllegalStateException("O checklist deve estar em status INICIADO para ser enviado para precificação.");
+    }
+    this.status = StatusProcesso.AGUARDANDO_PRECIFICACAO;
+    this.atualizadoEm = LocalDateTime.now();
+}
 public void finalizarPrecificacao() {
     if (this.status != StatusProcesso.AGUARDANDO_PRECIFICACAO) {
         throw new IllegalStateException("O checklist não está em fase de precificação.");
     }
     this.status = StatusProcesso.AGUARDANDO_APROVACAO;
+    this.atualizadoEm = LocalDateTime.now();
+}
+
+public void aprovar() {
+    if (this.status != StatusProcesso.AGUARDANDO_APROVACAO) {
+        throw new IllegalStateException("O checklist não está aguardando aprovação.");
+    }
+    this.status = StatusProcesso.APROVADO;
+    this.atualizadoEm = LocalDateTime.now();
+}
+
+public void reprovar() {
+    if (this.status != StatusProcesso.AGUARDANDO_APROVACAO) {
+        throw new IllegalStateException("O checklist não está aguardando aprovação.");
+    }
+    this.status = StatusProcesso.REPROVADO;
     this.atualizadoEm = LocalDateTime.now();
 }
 }

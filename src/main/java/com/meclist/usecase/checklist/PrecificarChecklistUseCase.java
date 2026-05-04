@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.meclist.domain.Checklist;
+import com.meclist.domain.ChecklistProduto;
 import com.meclist.domain.ItemChecklist;
 import com.meclist.domain.Orcamento;
 import com.meclist.domain.enums.StatusProcesso;
@@ -16,11 +17,14 @@ import com.meclist.dto.checklist.precificacao.PrecificarChecklistRequest;
 import com.meclist.dto.checklist.precificacao.PrecificarItemRequest;
 import com.meclist.exception.ChecklistNaoEncontradoException;
 import com.meclist.exception.ItemNaoPertenceAoChecklistException;
+import com.meclist.domain.Produto;
+import com.meclist.exception.ItemNaoEncontradoException;
 import com.meclist.interfaces.ChecklistGateway;
+import com.meclist.interfaces.ChecklistProdutoGateway;
 import com.meclist.interfaces.ItemChecklistGateway;
 import com.meclist.interfaces.OrcamentoGateway;
+import com.meclist.interfaces.ProdutoGateway;
 import com.meclist.validator.ChecklistPrecificacaoValidator;
-import com.meclist.interfaces.ChecklistProdutoGateway;
 
 @Service
 public class PrecificarChecklistUseCase {
@@ -31,6 +35,7 @@ public class PrecificarChecklistUseCase {
     private final ChecklistWorkflowGuard workflowGuard;
     private final ChecklistPrecificacaoValidator precificacaoValidator;
     private final ChecklistProdutoGateway checklistProdutoGateway;
+    private final ProdutoGateway produtoGateway;
 
     public PrecificarChecklistUseCase(
             ChecklistGateway checklistGateway,
@@ -38,13 +43,15 @@ public class PrecificarChecklistUseCase {
             ItemChecklistGateway itemChecklistGateway,
             ChecklistWorkflowGuard workflowGuard,
             ChecklistPrecificacaoValidator precificacaoValidator,
-            ChecklistProdutoGateway checklistProdutoGateway) {
+            ChecklistProdutoGateway checklistProdutoGateway,
+            ProdutoGateway produtoGateway) {
         this.checklistGateway = checklistGateway;
         this.orcamentoGateway = orcamentoGateway;
         this.itemChecklistGateway = itemChecklistGateway;
         this.workflowGuard = workflowGuard;
         this.precificacaoValidator = precificacaoValidator;
-        this.checklistProdutoGateway = checklistProdutoGateway; 
+        this.checklistProdutoGateway = checklistProdutoGateway;
+        this.produtoGateway = produtoGateway;
     }
 
     @Transactional
@@ -88,14 +95,32 @@ public class PrecificarChecklistUseCase {
     item.definirMaoDeObra(req.maoDeObra());
 
     if (req.produtos() != null) {
-        req.produtos().forEach(prodReq -> item.getProdutosOrcados().stream()
-                .filter(p -> p.getId().equals(prodReq.checklistProdutoId()))
-                .findFirst()
-                .ifPresent(p -> {
-                    p.atualizarPrecificacao(prodReq.valorUnitario(), prodReq.marca());
-                    p.setItemChecklist(item);
-                    checklistProdutoGateway.salvar(p);
-                }));
+        req.produtos().forEach(prodReq -> {
+            if (prodReq.checklistProdutoId() != null) {
+                // Produto existente: atualiza precificação
+                item.getProdutosOrcados().stream()
+                        .filter(p -> p.getId().equals(prodReq.checklistProdutoId()))
+                        .findFirst()
+                        .ifPresent(p -> {
+                            p.atualizarPrecificacao(prodReq.valorUnitario(), prodReq.marca());
+                            p.setItemChecklist(item);
+                            checklistProdutoGateway.salvar(p);
+                        });
+            } else {
+                // Produto novo: cria e persiste
+                if (prodReq.produtoId() == null || prodReq.quantidade() == null) {
+                    throw new ItemNaoEncontradoException(
+                            "Produto novo requer produtoId e quantidade");
+                }
+                Produto produto = produtoGateway.buscarPorId(prodReq.produtoId())
+                        .orElseThrow(() -> new ItemNaoEncontradoException(
+                                "Produto não encontrado: " + prodReq.produtoId()));
+                ChecklistProduto novo = ChecklistProduto.novoComValorEMarca(
+                        item, produto, prodReq.quantidade(),
+                        prodReq.valorUnitario(), prodReq.marca());
+                checklistProdutoGateway.salvar(novo);
+            }
+        });
     }
 }
 }

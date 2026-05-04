@@ -70,6 +70,10 @@ public class SecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/checklists/veiculos/*/iniciar").hasRole("MECANICO")
                 .requestMatchers(org.springframework.http.HttpMethod.PATCH, "/checklists/*/categorias/*").hasRole("MECANICO")
                 .requestMatchers(org.springframework.http.HttpMethod.PATCH, "/checklists/*/enviar-para-precificacao").hasRole("MECANICO")
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/checklists/*/precificar").hasRole("ADMIN")
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/checklists/*/aprovacao").hasRole("CLIENTE")
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/checklists/*/fotos-evidencia").hasAnyRole("CLIENTE", "MECANICO", "ADMIN")
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/checklists/*/aprovar").hasRole("CLIENTE")
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/checklists/**").hasAnyRole("ADMIN", "MECANICO")
 
                 // fallback

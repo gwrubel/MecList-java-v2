@@ -17,9 +17,13 @@ import com.meclist.dto.checklist.IniciarChecklistRequest;
 import com.meclist.dto.checklist.SalvarItensPorCategoriaRequest;
 import com.meclist.dto.checklist.precificacao.ChecklistPrecificacaoResponse;
 import com.meclist.dto.checklist.precificacao.PrecificarChecklistRequest;
+import com.meclist.dto.checklist.aprovacao.AprovarChecklistRequest;
+import com.meclist.dto.checklist.aprovacao.ChecklistAprovacaoResponse;
 import com.meclist.dto.fotoEvidencia.FotoEvidenciaResponse;
 import com.meclist.response.ApiResponse;
 import com.meclist.usecase.checklist.AtualizarItensPorCategoriaUseCase;
+import com.meclist.usecase.checklist.BuscarChecklistParaAprovacaoUseCase;
+import com.meclist.usecase.checklist.AprovarChecklistUseCase;
 import com.meclist.usecase.checklist.BuscarChecklistParaPrecificacaoUseCase;
 import com.meclist.usecase.checklist.IniciarChecklistUseCase;
 import com.meclist.usecase.checklist.ListarChecklistsPorStatusUseCase;
@@ -45,6 +49,8 @@ public class ChecklistController extends BaseController {
         private final ListarChecklistsPorStatusUseCase listarChecklistsPorStatusUseCase;
         private final BuscarChecklistParaPrecificacaoUseCase buscarChecklistParaPrecificacaoUseCase;
         private final PrecificarChecklistUseCase precificarChecklistUseCase;
+        private final BuscarChecklistParaAprovacaoUseCase buscarChecklistParaAprovacaoUseCase;
+        private final AprovarChecklistUseCase aprovarChecklistUseCase;
 
         public ChecklistController(
                         IniciarChecklistUseCase iniciarChecklistUseCase,
@@ -54,7 +60,9 @@ public class ChecklistController extends BaseController {
                         EnviarChecklistParaPrecificacaoUseCase enviarChecklistParaPrecificacaoUseCase,
                         ListarChecklistsPorStatusUseCase listarChecklistsPorStatusUseCase,
                         BuscarChecklistParaPrecificacaoUseCase buscarChecklistParaPrecificacaoUseCase,
-                        PrecificarChecklistUseCase precificarChecklistUseCase) {
+                        PrecificarChecklistUseCase precificarChecklistUseCase,
+                        BuscarChecklistParaAprovacaoUseCase buscarChecklistParaAprovacaoUseCase,
+                        AprovarChecklistUseCase aprovarChecklistUseCase) {
                 this.iniciarChecklistUseCase = iniciarChecklistUseCase;
                 this.atualizarItensPorCategoriaUseCase = atualizarItensPorCategoriaUseCase;
                 this.buscarChecklistPorIdUseCase = buscarChecklistPorIdUseCase;
@@ -63,6 +71,8 @@ public class ChecklistController extends BaseController {
                 this.listarChecklistsPorStatusUseCase = listarChecklistsPorStatusUseCase;
                 this.buscarChecklistParaPrecificacaoUseCase = buscarChecklistParaPrecificacaoUseCase;
                 this.precificarChecklistUseCase = precificarChecklistUseCase;
+                this.buscarChecklistParaAprovacaoUseCase = buscarChecklistParaAprovacaoUseCase;
+                this.aprovarChecklistUseCase = aprovarChecklistUseCase;
         }
 
         /**
@@ -195,6 +205,25 @@ public class ChecklistController extends BaseController {
                         HttpServletRequest servletRequest) {
 
                 precificarChecklistUseCase.executar(checklistId, request);
+                return noContent();
+        }
+
+        @GetMapping("/{checklistId}/aprovacao")
+        public ResponseEntity<ApiResponse<ChecklistAprovacaoResponse>> buscarParaAprovacao(
+                        @PathVariable Long checklistId,
+                        HttpServletRequest servletRequest) {
+
+                ChecklistAprovacaoResponse response = buscarChecklistParaAprovacaoUseCase.executar(checklistId);
+                return success("Checklist carregado para aprovação!", response, servletRequest);
+        }
+
+        @PostMapping("/{checklistId}/aprovar")
+        public ResponseEntity<ApiResponse<Void>> aprovar(
+                        @PathVariable Long checklistId,
+                        @Valid @RequestBody AprovarChecklistRequest request,
+                        HttpServletRequest servletRequest) {
+
+                aprovarChecklistUseCase.executar(checklistId, request);
                 return noContent();
         }
         

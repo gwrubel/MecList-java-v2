@@ -1,7 +1,6 @@
 package com.meclist.usecase.checklist;
 
 import java.math.BigDecimal;
-
 import org.springframework.stereotype.Service;
 
 import com.meclist.domain.Checklist;
@@ -21,7 +20,7 @@ public class BuscarChecklistParaAprovacaoUseCase {
 
     public BuscarChecklistParaAprovacaoUseCase(ChecklistGateway checklistGateway,
                                                 OrcamentoGateway orcamentoGateway,
-                                                ChecklistWorkflowGuard workflowGuard) {
+                                                                                                ChecklistWorkflowGuard workflowGuard) {
         this.checklistGateway = checklistGateway;
         this.orcamentoGateway = orcamentoGateway;
         this.workflowGuard = workflowGuard;
@@ -34,7 +33,6 @@ public class BuscarChecklistParaAprovacaoUseCase {
 
         workflowGuard.validarAprovacaoPorCliente(checklist);
 
-        // Busca o valor total do orçamento
         BigDecimal valorTotal = orcamentoGateway.buscarPorChecklistId(checklistId)
                 .map(Orcamento::getValorTotal)
                 .orElse(BigDecimal.ZERO);

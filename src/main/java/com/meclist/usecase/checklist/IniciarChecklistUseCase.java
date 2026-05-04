@@ -10,7 +10,6 @@ import com.meclist.domain.Item;
 import com.meclist.domain.ItemChecklist;
 import com.meclist.domain.Mecanico;
 import com.meclist.domain.Veiculo;
-import com.meclist.domain.enums.StatusProcesso;
 import com.meclist.dto.checklist.ChecklistResponse;
 import com.meclist.dto.checklist.IniciarChecklistRequest;
 import com.meclist.exception.ItemNaoEncontradoException;
@@ -65,8 +64,7 @@ public class IniciarChecklistUseCase {
                                 veiculoAtualizado,
                                 mecanico,
                                 request.quilometragem(),
-                                request.descricao(),
-                                StatusProcesso.INICIADO);
+                                request.descricao());
 
                 // 5. Salva o checklist
                 Checklist checklistSalvo = checklistGateway.salvar(checklist);

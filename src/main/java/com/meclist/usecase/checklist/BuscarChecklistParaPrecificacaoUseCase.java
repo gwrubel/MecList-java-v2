@@ -9,7 +9,6 @@ import com.meclist.interfaces.ChecklistGateway;
 import com.meclist.mapper.ChecklistMapper;
 
 import java.util.List;
-
 import org.springframework.stereotype.Service;
 
 @Service

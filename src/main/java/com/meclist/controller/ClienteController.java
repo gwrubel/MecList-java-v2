@@ -203,14 +203,6 @@ public class ClienteController extends BaseController {
         return success("Dados do dashboard obtidos com sucesso!", response, request);
     }
 
-    @GetMapping("/checklists/{checklistId}/aprovacao")
-    public ResponseEntity<ApiResponse<ChecklistAprovacaoResponse>> buscarChecklistParaAprovacao(
-            @PathVariable Long checklistId,
-            HttpServletRequest request) {
-
-        ChecklistAprovacaoResponse response = buscarChecklistParaAprovacaoUseCase.executar(checklistId);
-        return success("Checklist carregado para aprovação!", response, request);
-    }
 
     @GetMapping("/checklists/detalhes/{checklistId}")
     public ResponseEntity<ApiResponse<ChecklistCardResumo>> buscarDetalhesChecklist(
@@ -220,4 +212,5 @@ public class ClienteController extends BaseController {
         ChecklistCardResumo response = buscarDetalhesChecklistUseCase.executar(checklistId);
         return success("Detalhes do checklist carregados com sucesso!", response, request);
     }
+    
 }

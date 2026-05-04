@@ -79,7 +79,7 @@ public class ChecklistWorkflowGuard {
             throw new AcessoNegadoException(mensagemSomenteMecanico);
         }
 
-        if (checklist.getStatus() != StatusProcesso.EM_ANDAMENTO) {
+        if (checklist.getStatus() != StatusProcesso.INICIADO && checklist.getStatus() != StatusProcesso.EM_ANDAMENTO){
             throw new ChecklistStatusInvalidoException(
                     "Checklist já foi finalizado ou está em um status inválido.");
         }
