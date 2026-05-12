@@ -4,5 +4,6 @@ public enum StatusItem {
     PENDENTE,
     OK,
     TROCAR,
-    AUSENTE
+    AUSENTE,
+    TROCA_FEITA
 }

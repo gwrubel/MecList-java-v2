@@ -1,13 +1,16 @@
 package com.meclist.controller;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
 import com.meclist.dto.adm.AdmRequest;
 import com.meclist.dto.adm.AdmResponse;
+import com.meclist.dto.admin.DashboardAdmResponse;
 import com.meclist.response.ApiResponse;
 import com.meclist.usecase.adm.AutenticarAdmUseCase;
+import com.meclist.usecase.adm.BuscarDashboardAdmUseCase;
 import com.meclist.usecase.adm.CadastroAdmUseCase;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,11 +29,14 @@ public class AdmController extends BaseController {
 
     private final CadastroAdmUseCase cadastroAdmUseCase;
     private final AutenticarAdmUseCase autenticarAdmUseCase;
+    private final BuscarDashboardAdmUseCase buscarDashboardAdmUseCase;
 
     public AdmController(CadastroAdmUseCase cadastroAdmUseCase,
-            AutenticarAdmUseCase autenticarAdmUseCase) {
+            AutenticarAdmUseCase autenticarAdmUseCase,
+            BuscarDashboardAdmUseCase buscarDashboardAdmUseCase) {
         this.cadastroAdmUseCase = cadastroAdmUseCase;
         this.autenticarAdmUseCase = autenticarAdmUseCase;
+        this.buscarDashboardAdmUseCase = buscarDashboardAdmUseCase;
     }
 
     /**
@@ -69,6 +75,13 @@ public class AdmController extends BaseController {
             Map.of("token", token),
             servletRequest
         );
+    }
+
+    @GetMapping("/dashboard")
+    public ResponseEntity<ApiResponse<DashboardAdmResponse>> buscarDashboard(
+            HttpServletRequest servletRequest) {
+        DashboardAdmResponse response = buscarDashboardAdmUseCase.executar();
+        return success("Dados do dashboard obtidos com sucesso!", response, servletRequest);
     }
 
 }

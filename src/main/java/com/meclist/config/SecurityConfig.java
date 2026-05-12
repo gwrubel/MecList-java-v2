@@ -48,6 +48,9 @@ public class SecurityConfig {
                 // bootstrap (decidir se quer manter aberto)
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/adms").hasRole("ADMIN")
 
+                // dashboard administrativo
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/adms/dashboard").hasRole("ADMIN")
+
                 // clientes/veículos de cliente
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/clientes").hasAnyRole("ADMIN", "MECANICO", "CLIENTE")
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/clientes/**").hasAnyRole("ADMIN", "MECANICO", "CLIENTE")
@@ -56,9 +59,15 @@ public class SecurityConfig {
                 .requestMatchers("/clientes/*/veiculos/**").hasAnyRole("ADMIN", "MECANICO")
 
                 // mecânicos
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/mecanicos/dashboard/me").hasAnyRole("MECANICO", "ADMIN")
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/mecanicos/*/dashboard").hasRole("ADMIN")
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/mecanicos/**").hasRole("ADMIN")
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/mecanicos").hasRole("ADMIN")
                 .requestMatchers(org.springframework.http.HttpMethod.PUT, "/mecanicos/**").hasAnyRole("ADMIN", "MECANICO")
+
+                // serviços (execução do mecânico)
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/servicos/*/execucao").hasAnyRole("MECANICO", "ADMIN")
+                .requestMatchers(org.springframework.http.HttpMethod.PATCH, "/servicos/*/concluir").hasRole("MECANICO")
 
                 // catálogo base
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/categorias-veiculo/**").authenticated()
@@ -87,6 +96,7 @@ public class SecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/admin/checklists/*/fluxo-manual/confirmacao").hasRole("ADMIN")
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/admin/checklists/*/fluxo-manual/aprovar").hasRole("ADMIN")
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/admin/checklists/*/link-aprovacao-cliente").hasRole("ADMIN")
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/admin/checklists/*/servico").hasRole("ADMIN")
 
                 // fallback
                 .anyRequest().authenticated()

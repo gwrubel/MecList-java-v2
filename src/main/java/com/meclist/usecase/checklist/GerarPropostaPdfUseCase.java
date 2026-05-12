@@ -7,7 +7,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.meclist.domain.Checklist;
+
 import com.meclist.domain.ChecklistProduto;
 import com.meclist.domain.ItemChecklist;
 import com.meclist.domain.enums.StatusItem;

@@ -16,6 +16,7 @@ import com.meclist.dto.checklist.administrativo.RegistrarConfirmacaoManualReques
 import com.meclist.dto.checklist.aprovacao.AprovarChecklistRequest;
 import com.meclist.dto.checklist.aprovacao.ChecklistAprovacaoResponse;
 import com.meclist.dto.checklist.aprovacaoLink.GerarLinkAprovacaoResponse;
+import com.meclist.dto.servico.VincularServicoRequest;
 import com.meclist.response.ApiResponse;
 import com.meclist.usecase.checklist.AprovarChecklistAdministrativoUseCase;
 import com.meclist.usecase.checklist.BuscarChecklistParaAprovacaoAdministrativaUseCase;
@@ -23,6 +24,7 @@ import com.meclist.usecase.checklist.GerarLinkAprovacaoClienteUseCase;
 import com.meclist.usecase.checklist.GerarPropostaPdfUseCase;
 import com.meclist.usecase.checklist.IniciarFluxoManualAprovacaoUseCase;
 import com.meclist.usecase.checklist.RegistrarConfirmacaoManualUseCase;
+import com.meclist.usecase.servico.VincularChecklistAoServicoUseCase;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -37,6 +39,7 @@ public class ChecklistAdministrativoController extends BaseController {
     private final RegistrarConfirmacaoManualUseCase registrarConfirmacaoManualUseCase;
     private final AprovarChecklistAdministrativoUseCase aprovarChecklistAdministrativoUseCase;
     private final GerarLinkAprovacaoClienteUseCase gerarLinkAprovacaoClienteUseCase;
+    private final VincularChecklistAoServicoUseCase vincularChecklistAoServicoUseCase;
 
     public ChecklistAdministrativoController(
             BuscarChecklistParaAprovacaoAdministrativaUseCase buscarChecklistParaAprovacaoAdministrativaUseCase,
@@ -44,13 +47,15 @@ public class ChecklistAdministrativoController extends BaseController {
             GerarPropostaPdfUseCase gerarPropostaPdfUseCase,
             RegistrarConfirmacaoManualUseCase registrarConfirmacaoManualUseCase,
             AprovarChecklistAdministrativoUseCase aprovarChecklistAdministrativoUseCase,
-            GerarLinkAprovacaoClienteUseCase gerarLinkAprovacaoClienteUseCase) {
+            GerarLinkAprovacaoClienteUseCase gerarLinkAprovacaoClienteUseCase,
+            VincularChecklistAoServicoUseCase vincularChecklistAoServicoUseCase) {
         this.buscarChecklistParaAprovacaoAdministrativaUseCase = buscarChecklistParaAprovacaoAdministrativaUseCase;
         this.iniciarFluxoManualAprovacaoUseCase = iniciarFluxoManualAprovacaoUseCase;
         this.gerarPropostaPdfUseCase = gerarPropostaPdfUseCase;
         this.registrarConfirmacaoManualUseCase = registrarConfirmacaoManualUseCase;
         this.aprovarChecklistAdministrativoUseCase = aprovarChecklistAdministrativoUseCase;
         this.gerarLinkAprovacaoClienteUseCase = gerarLinkAprovacaoClienteUseCase;
+        this.vincularChecklistAoServicoUseCase = vincularChecklistAoServicoUseCase;
     }
 
     @GetMapping("/{checklistId}/aprovacao")
@@ -74,7 +79,7 @@ public class ChecklistAdministrativoController extends BaseController {
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
-                        ContentDisposition.inline().filename(filename).build().toString())
+                        ContentDisposition.attachment().filename(filename).build().toString())
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdf);
     }
@@ -101,5 +106,13 @@ public class ChecklistAdministrativoController extends BaseController {
             HttpServletRequest request) {
         GerarLinkAprovacaoResponse response = gerarLinkAprovacaoClienteUseCase.executar(checklistId);
         return success("Link seguro de aprovação gerado e enviado ao cliente.", response, request);
+    }
+
+    @PostMapping("/{checklistId}/servico")
+    public ResponseEntity<Void> vincularServico(
+            @PathVariable Long checklistId,
+            @Valid @RequestBody VincularServicoRequest request) {
+        vincularChecklistAoServicoUseCase.executar(checklistId, request);
+        return noContent();
     }
 }

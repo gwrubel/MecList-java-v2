@@ -234,6 +234,22 @@ public void aprovar() {
     this.atualizadoEm = LocalDateTime.now();
 }
 
+public void emAndamento() {
+    if (this.status != StatusProcesso.APROVADO) {
+        throw new IllegalStateException("O checklist deve estar aprovado para iniciar o serviço.");
+    }
+    this.status = StatusProcesso.EM_ANDAMENTO;
+    this.atualizadoEm = LocalDateTime.now();
+}
+
+public void finalizar() {
+    if (this.status != StatusProcesso.EM_ANDAMENTO) {
+        throw new IllegalStateException("O checklist deve estar em andamento para ser finalizado.");
+    }
+    this.status = StatusProcesso.CONCLUIDO;
+    this.atualizadoEm = LocalDateTime.now();
+}
+
 public void registrarAprovacao(OrigemAprovacao origemAprovacao, Long aprovadoPorId, String aprovadoPorTipo) {
     this.origemAprovacao = origemAprovacao;
     this.aprovadoPorId = aprovadoPorId;

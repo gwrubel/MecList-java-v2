@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.meclist.domain.enums.Situacao;
 import com.meclist.dto.adm.AdmRequest;
 import com.meclist.dto.mecanico.AtualizarMecanicoRequest;
+import com.meclist.dto.mecanico.DashboardMecanicoResponse;
 import com.meclist.dto.mecanico.DefinirSenhaMecanicoRequest;
 import com.meclist.dto.mecanico.MecanicoRequest;
 import com.meclist.dto.mecanico.MecanicoResponse;
@@ -28,6 +29,7 @@ import com.meclist.response.ApiResponse;
 import com.meclist.usecase.mecanico.CadastrarMecanicoUseCase;
 import com.meclist.usecase.mecanico.AtualizarDadosMecanico;
 import com.meclist.usecase.mecanico.AuthMecanicoUseCase;
+import com.meclist.usecase.mecanico.BuscarDashboardMecanicoUseCase;
 import com.meclist.usecase.mecanico.BuscarPorSituacaoMecanicoUseCase;
 import com.meclist.usecase.mecanico.DefinirSenhaMecanicoUseCase;
 import com.meclist.usecase.mecanico.ListarMecanicosUseCase;
@@ -43,6 +45,7 @@ public class MecanicoController extends BaseController {
     private final BuscarPorSituacaoMecanicoUseCase buscarPorSituacaoMecanicoUseCase;
     private final AtualizarDadosMecanico atualizarDadosMecanicoUseCase;
     private final AuthMecanicoUseCase authMecanicoUseCase;
+    private final BuscarDashboardMecanicoUseCase buscarDashboardMecanicoUseCase;
     private final SolicitarRecuperacaoSenhaMecanicoUseCase solicitarRecuperacaoSenhaMecanicoUseCase;
     private final DefinirSenhaMecanicoUseCase definirSenhaMecanicoUseCase;
 
@@ -52,6 +55,7 @@ public class MecanicoController extends BaseController {
             AtualizarDadosMecanico atualizarDadosMecanicoUseCase,
             BuscarPorSituacaoMecanicoUseCase buscarPorSituacaoMecanicoUseCase,
             AuthMecanicoUseCase authMecanicoUseCase,
+            BuscarDashboardMecanicoUseCase buscarDashboardMecanicoUseCase,
             SolicitarRecuperacaoSenhaMecanicoUseCase solicitarRecuperacaoSenhaMecanicoUseCase,
             DefinirSenhaMecanicoUseCase definirSenhaMecanicoUseCase) {
         this.listarMecanicosUseCase = listarMecanicosUseCase;
@@ -59,6 +63,7 @@ public class MecanicoController extends BaseController {
         this.atualizarDadosMecanicoUseCase = atualizarDadosMecanicoUseCase;
         this.buscarPorSituacaoMecanicoUseCase = buscarPorSituacaoMecanicoUseCase;
         this.authMecanicoUseCase = authMecanicoUseCase;
+        this.buscarDashboardMecanicoUseCase = buscarDashboardMecanicoUseCase;
         this.solicitarRecuperacaoSenhaMecanicoUseCase = solicitarRecuperacaoSenhaMecanicoUseCase;
         this.definirSenhaMecanicoUseCase = definirSenhaMecanicoUseCase;
     }
@@ -144,5 +149,20 @@ public class MecanicoController extends BaseController {
             HttpServletRequest servletRequest) {
         definirSenhaMecanicoUseCase.executar(request);
         return success("Senha definida com sucesso!", null, servletRequest);
+    }
+
+    @GetMapping("/dashboard/me")
+    public ResponseEntity<ApiResponse<DashboardMecanicoResponse>> buscarMeuDashboard(
+            HttpServletRequest servletRequest) {
+        DashboardMecanicoResponse response = buscarDashboardMecanicoUseCase.executarDoUsuarioAutenticado();
+        return success("Dashboard do mecânico carregado com sucesso!", response, servletRequest);
+    }
+
+    @GetMapping("/{id}/dashboard")
+    public ResponseEntity<ApiResponse<DashboardMecanicoResponse>> buscarDashboardPorMecanico(
+            @PathVariable Long id,
+            HttpServletRequest servletRequest) {
+        DashboardMecanicoResponse response = buscarDashboardMecanicoUseCase.executarPorMecanicoId(id);
+        return success("Dashboard do mecânico carregado com sucesso!", response, servletRequest);
     }
 }
