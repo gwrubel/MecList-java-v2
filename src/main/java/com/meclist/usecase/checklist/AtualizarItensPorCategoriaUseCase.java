@@ -13,7 +13,9 @@ import org.springframework.web.multipart.MultipartFile;
 import com.meclist.domain.Checklist;
 import com.meclist.domain.ItemChecklist;
 import com.meclist.domain.Produto;
+import com.meclist.domain.Servico;
 import com.meclist.domain.enums.CategoriaParteVeiculo;
+import com.meclist.domain.enums.StatusProcesso;
 import com.meclist.dto.checklist.ChecklistResponse;
 import com.meclist.dto.checklist.SalvarItensPorCategoriaRequest;
 import com.meclist.dto.itemChecklist.AtualizacaoItemChecklist;
@@ -22,6 +24,7 @@ import com.meclist.exception.ItemNaoEncontradoException;
 import com.meclist.interfaces.ChecklistGateway;
 import com.meclist.interfaces.ItemChecklistGateway;
 import com.meclist.interfaces.ProdutoGateway;
+import com.meclist.interfaces.ServicoGateway;
 import com.meclist.interfaces.StorageService;
 import com.meclist.mapper.ChecklistMapper;
 
@@ -32,6 +35,7 @@ public class AtualizarItensPorCategoriaUseCase {
     private final ChecklistGateway checklistGateway;
     private final ItemChecklistGateway itemChecklistGateway;
     private final ProdutoGateway produtoGateway;
+    private final ServicoGateway servicoGateway;
     private final StorageService storageService;
     private final EntityManager entityManager;
 
@@ -45,6 +49,7 @@ public class AtualizarItensPorCategoriaUseCase {
             ChecklistGateway checklistGateway,
             ItemChecklistGateway itemChecklistGateway,
             ProdutoGateway produtoGateway,
+            ServicoGateway servicoGateway,
             StorageService storageService,
             EntityManager entityManager,
             ItemChecklistCategoriaValidator itemChecklistCategoriaValidator,
@@ -54,6 +59,7 @@ public class AtualizarItensPorCategoriaUseCase {
         this.checklistGateway = checklistGateway;
         this.itemChecklistGateway = itemChecklistGateway;
         this.produtoGateway = produtoGateway;
+        this.servicoGateway = servicoGateway;
         this.storageService = storageService;
         this.entityManager = entityManager;
         this.itemChecklistCategoriaValidator = itemChecklistCategoriaValidator;
@@ -74,7 +80,14 @@ public class AtualizarItensPorCategoriaUseCase {
         Checklist checklist = checklistGateway.buscarPorId(checklistId)
                 .orElseThrow(() -> new ChecklistNaoEncontradoException("Checklist não encontrado: " + checklistId));
 
-        checklistWorkflowGuard.validarEdicaoItensPorMecanico(checklist);
+        Servico servicoAtivo = null;
+        if (checklist.getStatus() == StatusProcesso.EM_ANDAMENTO) {
+            servicoAtivo = servicoGateway.buscarPorChecklistId(checklistId).stream()
+                    .filter(s -> s.getStatus() == StatusProcesso.EM_ANDAMENTO)
+                    .findFirst()
+                    .orElse(null);
+        }
+        checklistWorkflowGuard.validarEdicaoItensPorMecanico(checklist, servicoAtivo);
 
         StorageCompensationContext compensationContext = new StorageCompensationContext();
 

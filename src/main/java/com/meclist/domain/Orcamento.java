@@ -112,8 +112,13 @@ public class Orcamento {
         this.atualizadoEm = LocalDateTime.now();
     }
 
-    public void rejeitar() {
+    public void reprovar() {
         this.status = StatusProcesso.REPROVADO;
+        this.atualizadoEm = LocalDateTime.now();
+    }
+
+    public void concluir() {
+        this.status = StatusProcesso.CONCLUIDO;
         this.atualizadoEm = LocalDateTime.now();
     }
 

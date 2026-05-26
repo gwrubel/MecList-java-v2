@@ -15,15 +15,15 @@ public interface OrcamentoRepository extends JpaRepository<OrcamentoEntity, Long
 
     Optional<OrcamentoEntity> findByChecklistId(Long checklistId);
 
-    @Query("SELECT COALESCE(SUM(o.valorTotal), 0) FROM OrcamentoEntity o WHERE o.status = :status AND o.criadoEm >= :dataInicio")
+    @Query("SELECT COALESCE(SUM(o.valorTotal), 0) FROM OrcamentoEntity o WHERE o.status = :status AND o.atualizadoEm >= :dataInicio")
     BigDecimal somarValorPorStatus(@Param("status") StatusProcesso status,
                                    @Param("dataInicio") LocalDateTime dataInicio);
 
-    @Query("SELECT COALESCE(AVG(o.valorTotal), 0) FROM OrcamentoEntity o WHERE o.status = :status AND o.criadoEm >= :dataInicio")
+    @Query("SELECT COALESCE(AVG(o.valorTotal), 0) FROM OrcamentoEntity o WHERE o.status = :status AND o.atualizadoEm >= :dataInicio")
     BigDecimal calcularTicketMedio(@Param("status") StatusProcesso status,
                                    @Param("dataInicio") LocalDateTime dataInicio);
 
-    @Query("SELECT COUNT(o) FROM OrcamentoEntity o WHERE o.status = :status AND o.criadoEm >= :dataInicio")
+    @Query("SELECT COUNT(o) FROM OrcamentoEntity o WHERE o.status = :status AND o.atualizadoEm >= :dataInicio")
     Long contarPorStatus(@Param("status") StatusProcesso status,
                          @Param("dataInicio") LocalDateTime dataInicio);
 

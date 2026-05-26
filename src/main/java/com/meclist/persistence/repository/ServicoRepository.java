@@ -27,6 +27,8 @@ public interface ServicoRepository extends JpaRepository<ServicoEntity, Long> {
 
     List<ServicoEntity> findByChecklistIdOrderByIdDesc(Long checklistId);
 
+    Optional<ServicoEntity> findFirstByChecklistIdAndStatus(Long checklistId, StatusProcesso status);
+
     @EntityGraph(attributePaths = {
            "checklist",
            "checklist.veiculo",
@@ -38,7 +40,7 @@ public interface ServicoRepository extends JpaRepository<ServicoEntity, Long> {
     @Query("SELECT s FROM ServicoEntity s " +
            "WHERE s.checklist.veiculo.id = :veiculoId " +
            "AND s.status = :status " +
-           "ORDER BY s.dataRealizacao DESC, s.id DESC " +
+           "ORDER BY s.dataConclusao DESC, s.id DESC " +
            "LIMIT 1")
     Optional<ServicoEntity> encontrarUltimaRevisao(@Param("veiculoId") Long veiculoId,
                                                    @Param("status") StatusProcesso status);
@@ -70,4 +72,36 @@ public interface ServicoRepository extends JpaRepository<ServicoEntity, Long> {
            "ORDER BY COUNT(s) DESC " +
            "LIMIT 3")
     List<Object[]> buscarTopMecanicos(@Param("dataInicio") java.time.LocalDateTime dataInicio);
+
+    @EntityGraph(attributePaths = {
+           "checklist",
+           "checklist.veiculo",
+           "checklist.veiculo.cliente",
+           "mecanico"
+    })
+    List<ServicoEntity> findByMecanicoIdAndStatusOrderByDataConclusaoDescIdDesc(
+            Long mecanicoId, StatusProcesso status);
+
+    @Query(value = """
+            SELECT ROUND(AVG(EXTRACT(EPOCH FROM (data_inicio - data_atribuicao)) / 60.0)::numeric, 1)
+            FROM servico
+            WHERE status = 'CONCLUIDO'
+              AND data_conclusao >= :dataInicio
+              AND data_inicio IS NOT NULL
+              AND data_atribuicao IS NOT NULL
+            """, nativeQuery = true)
+    Double calcularTempoMedioAteMecanico(@Param("dataInicio") java.time.LocalDateTime dataInicio);
+
+    @Query(value = """
+            SELECT ROUND(AVG(EXTRACT(EPOCH FROM (data_conclusao - data_inicio)) / 60.0)::numeric, 1)
+            FROM servico
+            WHERE status = 'CONCLUIDO'
+              AND data_conclusao >= :dataInicio
+              AND data_inicio IS NOT NULL
+              AND data_conclusao IS NOT NULL
+            """, nativeQuery = true)
+    Double calcularTempoMedioExecucao(@Param("dataInicio") java.time.LocalDateTime dataInicio);
+
+    @Query("SELECT COUNT(s) FROM ServicoEntity s WHERE s.status = :status")
+    Long contarPorStatusSemData(@Param("status") StatusProcesso status);
 }

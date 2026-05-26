@@ -1,6 +1,5 @@
 package com.meclist.persistence.entity;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import com.meclist.domain.enums.StatusProcesso;
@@ -28,10 +27,15 @@ public class ServicoEntity {
     @JoinColumn(name = "id_mecanico", nullable = false)
     private MecanicoEntity mecanico;
 
-    @Column(name = "data_realizacao")
-    private LocalDate dataRealizacao;
+    @Column(name = "data_atribuicao")
+    private LocalDateTime dataAtribuicao;
 
-    
+    @Column(name = "data_inicio")
+    private LocalDateTime dataInicio;
+
+    @Column(name = "data_conclusao")
+    private LocalDateTime dataConclusao;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private StatusProcesso status;

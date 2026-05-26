@@ -60,7 +60,10 @@ public class ChecklistGatewayImpl implements ChecklistGateway {
         entity.setQuilometragem(domain.getQuilometragem());
         entity.setDescricao(domain.getDescricao());
         entity.setAtualizadoEm(domain.getAtualizadoEm());
-
+        entity.setOrigemAprovacao(domain.getOrigemAprovacao());
+        entity.setAprovadoPorId(domain.getAprovadoPorId());
+        entity.setAprovadoPorTipo(domain.getAprovadoPorTipo());
+        entity.setAprovadoEm(domain.getAprovadoEm());
     }
 
     @Override
@@ -76,6 +79,16 @@ public class ChecklistGatewayImpl implements ChecklistGateway {
 
         // Converte entity para domain
         return Optional.of(ChecklistMapper.toDomain(entity.get(), itens));
+    }
+
+    @Override
+    public List<Checklist> buscarPorVeiculoId(Long veiculoId) {
+        return checklistRepository.findByVeiculoId(veiculoId).stream()
+                .map(entity -> {
+                    var itens = itemChecklistRepository.findByChecklistId(entity.getId());
+                    return ChecklistMapper.toDomain(entity, itens);
+                })
+                .toList();
     }
 
     @Override
@@ -112,8 +125,17 @@ public class ChecklistGatewayImpl implements ChecklistGateway {
     }
 
     @Override
+    public List<Checklist> buscarInativosParaCancelamento(LocalDateTime limite) {
+        return checklistRepository.findInativosParaCancelamento(limite)
+                .stream()
+                .map(ChecklistMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
 public List<Checklist> buscarDashboardPorCliente(Long clienteId) {
     var statusAtivos = List.of(
+        StatusProcesso.ATRIBUIDO,
         StatusProcesso.EM_ANDAMENTO,
         StatusProcesso.AGUARDANDO_APROVACAO
     );

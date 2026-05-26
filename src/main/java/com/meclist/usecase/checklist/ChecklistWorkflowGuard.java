@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.meclist.domain.Checklist;
 import com.meclist.domain.Orcamento;
+import com.meclist.domain.Servico;
 import com.meclist.domain.enums.EtapaFluxoManual;
 import com.meclist.domain.enums.StatusProcesso;
 import com.meclist.exception.AcessoNegadoException;
@@ -24,14 +25,20 @@ public class ChecklistWorkflowGuard {
     }
 
     public void validarEdicaoItensPorMecanico(Checklist checklist) {
+        validarEdicaoItensPorMecanico(checklist, null);
+    }
+
+    public void validarEdicaoItensPorMecanico(Checklist checklist, Servico servicoAtivo) {
         validarOperacaoMecanicoDonoEmAndamento(
                 checklist,
+                servicoAtivo,
                 "Apenas mecânico pode atualizar checklist.");
     }
 
     public void validarEnvioParaPrecificacaoPorMecanico(Checklist checklist) {
         validarOperacaoMecanicoDonoEmAndamento(
                 checklist,
+                null,
                 "Apenas mecânico pode enviar o checklist para precificação.");
     }
 
@@ -124,7 +131,8 @@ public class ChecklistWorkflowGuard {
         }
     }
 
-    private void validarOperacaoMecanicoDonoEmAndamento(Checklist checklist, String mensagemSomenteMecanico) {
+    private void validarOperacaoMecanicoDonoEmAndamento(Checklist checklist, Servico servicoAtivo,
+                                                         String mensagemSomenteMecanico) {
         Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
 
         if (auth == null || !auth.isAuthenticated()
@@ -136,13 +144,21 @@ public class ChecklistWorkflowGuard {
             throw new AcessoNegadoException(mensagemSomenteMecanico);
         }
 
-        if (checklist.getStatus() != StatusProcesso.INICIADO && checklist.getStatus() != StatusProcesso.EM_ANDAMENTO){
+        if (checklist.getStatus() != StatusProcesso.INICIADO && checklist.getStatus() != StatusProcesso.EM_ANDAMENTO) {
             throw new ChecklistStatusInvalidoException(
                     "Checklist já foi finalizado ou está em um status inválido.");
         }
 
-        Long idMecanicoChecklist = checklist.getMecanico() != null ? checklist.getMecanico().getId() : null;
-        if (idMecanicoChecklist == null || !idMecanicoChecklist.equals(user.id())) {
+        Long mecanicoEsperadoId;
+        if (checklist.getStatus() == StatusProcesso.EM_ANDAMENTO
+                && servicoAtivo != null
+                && servicoAtivo.getMecanico() != null) {
+            mecanicoEsperadoId = servicoAtivo.getMecanico().getId();
+        } else {
+            mecanicoEsperadoId = checklist.getMecanico() != null ? checklist.getMecanico().getId() : null;
+        }
+
+        if (mecanicoEsperadoId == null || !mecanicoEsperadoId.equals(user.id())) {
             throw new AcessoNegadoException("Este checklist pertence a outro mecânico.");
         }
     }

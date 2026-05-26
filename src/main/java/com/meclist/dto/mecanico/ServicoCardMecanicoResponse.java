@@ -1,6 +1,5 @@
 package com.meclist.dto.mecanico;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import com.meclist.domain.enums.StatusProcesso;
@@ -16,6 +15,6 @@ public record ServicoCardMecanicoResponse(
         Integer ano,
         Float quilometragem,
         LocalDateTime criadoEm,
-        LocalDate dataConclusao
+        LocalDateTime dataConclusao
 ) {
 }

@@ -21,6 +21,7 @@ import com.meclist.dto.checklist.aprovacao.AprovarChecklistRequest;
 import com.meclist.dto.checklist.aprovacao.ChecklistAprovacaoResponse;
 import com.meclist.dto.checklist.aprovacaoLink.ValidarLinkAprovacaoRequest;
 import com.meclist.dto.checklist.aprovacaoLink.ValidarLinkAprovacaoResponse;
+import com.meclist.dto.checklist.visualizacao.ChecklistVisualizacaoCompletaResponse;
 import com.meclist.dto.fotoEvidencia.FotoEvidenciaResponse;
 import com.meclist.response.ApiResponse;
 import com.meclist.usecase.checklist.AtualizarItensPorCategoriaUseCase;
@@ -34,6 +35,7 @@ import com.meclist.usecase.checklist.ValidarLinkAprovacaoChecklistUseCase;
 import com.meclist.usecase.fotoEvidencia.BuscarFotosItemChecklistUseCase;
 import com.meclist.usecase.checklist.BuscarChecklistPorIdUseCase;
 import com.meclist.usecase.checklist.EnviarChecklistParaPrecificacaoUseCase;
+import com.meclist.usecase.checklist.BuscarChecklistCompletoUseCase;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -55,6 +57,7 @@ public class ChecklistController extends BaseController {
         private final BuscarChecklistParaAprovacaoUseCase buscarChecklistParaAprovacaoUseCase;
         private final AprovarChecklistUseCase aprovarChecklistUseCase;
         private final ValidarLinkAprovacaoChecklistUseCase validarLinkAprovacaoChecklistUseCase;
+        private final BuscarChecklistCompletoUseCase buscarChecklistCompletoUseCase;
 
         public ChecklistController(
                         IniciarChecklistUseCase iniciarChecklistUseCase,
@@ -67,7 +70,8 @@ public class ChecklistController extends BaseController {
                         PrecificarChecklistUseCase precificarChecklistUseCase,
                         BuscarChecklistParaAprovacaoUseCase buscarChecklistParaAprovacaoUseCase,
                         AprovarChecklistUseCase aprovarChecklistUseCase,
-                        ValidarLinkAprovacaoChecklistUseCase validarLinkAprovacaoChecklistUseCase) {
+                        ValidarLinkAprovacaoChecklistUseCase validarLinkAprovacaoChecklistUseCase,
+                        BuscarChecklistCompletoUseCase buscarChecklistCompletoUseCase) {
                 this.iniciarChecklistUseCase = iniciarChecklistUseCase;
                 this.atualizarItensPorCategoriaUseCase = atualizarItensPorCategoriaUseCase;
                 this.buscarChecklistPorIdUseCase = buscarChecklistPorIdUseCase;
@@ -79,6 +83,7 @@ public class ChecklistController extends BaseController {
                 this.buscarChecklistParaAprovacaoUseCase = buscarChecklistParaAprovacaoUseCase;
                 this.aprovarChecklistUseCase = aprovarChecklistUseCase;
                 this.validarLinkAprovacaoChecklistUseCase = validarLinkAprovacaoChecklistUseCase;
+                this.buscarChecklistCompletoUseCase = buscarChecklistCompletoUseCase;
         }
 
         /**
@@ -162,6 +167,9 @@ public class ChecklistController extends BaseController {
                 return updated("Itens atualizados com sucesso!", checklistResponse, servletRequest);
         }
 
+        /**
+         so esta sendo usado em um hook de front para acessar checklist via url
+         */
         @GetMapping("/{checklistId}")
         public ResponseEntity<ApiResponse<ChecklistResponse>> buscarPorId(
                         @PathVariable Long checklistId,
@@ -221,6 +229,15 @@ public class ChecklistController extends BaseController {
 
                 ChecklistAprovacaoResponse response = buscarChecklistParaAprovacaoUseCase.executar(checklistId);
                 return success("Checklist carregado para aprovação!", response, servletRequest);
+        }
+
+        @GetMapping("/{checklistId}/completo")
+        public ResponseEntity<ApiResponse<ChecklistVisualizacaoCompletaResponse>> buscarChecklistCompleto(
+                        @PathVariable Long checklistId,
+                        HttpServletRequest servletRequest) {
+
+                ChecklistVisualizacaoCompletaResponse response = buscarChecklistCompletoUseCase.executar(checklistId);
+                return success("Checklist completo carregado com sucesso!", response, servletRequest);
         }
 
         @PostMapping("/{checklistId}/aprovar")

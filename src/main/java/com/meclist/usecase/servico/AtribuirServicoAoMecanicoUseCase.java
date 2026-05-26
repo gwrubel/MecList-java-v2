@@ -15,15 +15,15 @@ import com.meclist.interfaces.MecanicoGateway;
 import com.meclist.interfaces.ServicoGateway;
 
 @Service
-public class VincularChecklistAoServicoUseCase {
+public class AtribuirServicoAoMecanicoUseCase {
 
     private final ChecklistGateway checklistGateway;
     private final MecanicoGateway mecanicoGateway;
     private final ServicoGateway servicoGateway;
 
-    public VincularChecklistAoServicoUseCase(ChecklistGateway checklistGateway,
-                                             MecanicoGateway mecanicoGateway,
-                                             ServicoGateway servicoGateway) {
+    public AtribuirServicoAoMecanicoUseCase(ChecklistGateway checklistGateway,
+                                            MecanicoGateway mecanicoGateway,
+                                            ServicoGateway servicoGateway) {
         this.checklistGateway = checklistGateway;
         this.mecanicoGateway = mecanicoGateway;
         this.servicoGateway = servicoGateway;
@@ -37,16 +37,7 @@ public class VincularChecklistAoServicoUseCase {
 
         if (checklist.getStatus() != StatusProcesso.APROVADO) {
             throw new ChecklistStatusInvalidoException(
-                    "Apenas checklists aprovados podem ser vinculados a um serviço.");
-        }
-
-        var servicosExistentes = servicoGateway.buscarPorChecklistId(checklistId);
-        boolean temServicoAtivo = servicosExistentes.stream()
-                .anyMatch(s -> s.getStatus() == StatusProcesso.ATRIBUIDO
-                        || s.getStatus() == StatusProcesso.EM_ANDAMENTO);
-        if (temServicoAtivo) {
-            throw new ChecklistStatusInvalidoException(
-                    "O checklist já possui um serviço ativo em andamento.");
+                    "Apenas checklists aprovados podem ser atribuídos a um mecânico.");
         }
 
         var mecanico = mecanicoGateway.bucarPorId(request.mecanicoId())

@@ -14,7 +14,9 @@ public class ServicoMapper {
         entity.setId(servico.getId());
         entity.setChecklist(ChecklistMapper.toEntity(servico.getChecklist()));
         entity.setMecanico(MecanicoMapper.toEntity(servico.getMecanico()));
-        entity.setDataRealizacao(servico.getDataRealizacao());
+        entity.setDataAtribuicao(servico.getDataAtribuicao());
+        entity.setDataInicio(servico.getDataInicio());
+        entity.setDataConclusao(servico.getDataConclusao());
         entity.setStatus(servico.getStatus());
         entity.setCriadoEm(servico.getCriadoEm());
         entity.setAtualizadoEm(servico.getAtualizadoEm());
@@ -30,7 +32,9 @@ public class ServicoMapper {
                 entity.getId(),
                 ChecklistMapper.toDomain(entity.getChecklist()),
                 MecanicoMapper.toDomain(entity.getMecanico()),
-                entity.getDataRealizacao(),
+                entity.getDataAtribuicao(),
+                entity.getDataInicio(),
+                entity.getDataConclusao(),
                 entity.getStatus(),
                 entity.getCriadoEm(),
                 entity.getAtualizadoEm());

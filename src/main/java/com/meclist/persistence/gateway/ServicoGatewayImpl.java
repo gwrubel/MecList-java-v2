@@ -43,8 +43,24 @@ public class ServicoGatewayImpl implements ServicoGateway {
     }
 
     @Override
+    public Optional<Servico> buscarExecutorPorChecklistId(Long checklistId, StatusProcesso status) {
+        return servicoRepository.findFirstByChecklistIdAndStatus(checklistId, status)
+                .map(ServicoMapper::toDomain);
+    }
+
+    @Override
     public List<Servico> buscarPorMecanicoEStatuses(Long mecanicoId, Collection<StatusProcesso> statuses) {
         return servicoRepository.findByMecanicoIdAndStatusInOrderByAtualizadoEmDescIdDesc(mecanicoId, statuses)
+                .stream()
+                .map(ServicoMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public List<Servico> buscarConcluidosPorMecanico(Long mecanicoId) {
+        return servicoRepository
+                .findByMecanicoIdAndStatusOrderByDataConclusaoDescIdDesc(
+                        mecanicoId, StatusProcesso.CONCLUIDO)
                 .stream()
                 .map(ServicoMapper::toDomain)
                 .toList();

@@ -35,6 +35,7 @@ public class BuscarDadosDashboardUseCase {
                         v.getMarca(),
                         v.getModelo(),
                         v.getPlaca(),
+                        v.getAno(),
                         v.getQuilometragem(),
                         v.getDataUltimaRevisao()
                 ))

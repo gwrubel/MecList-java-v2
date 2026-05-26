@@ -15,5 +15,9 @@ public interface ServicoGateway {
 
     List<Servico> buscarPorChecklistId(Long checklistId);
 
+    Optional<Servico> buscarExecutorPorChecklistId(Long checklistId, StatusProcesso status);
+
     List<Servico> buscarPorMecanicoEStatuses(Long mecanicoId, Collection<StatusProcesso> statuses);
+
+    List<Servico> buscarConcluidosPorMecanico(Long mecanicoId);
 }

@@ -55,12 +55,14 @@ public class SecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/clientes").hasAnyRole("ADMIN", "MECANICO", "CLIENTE")
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/clientes/**").hasAnyRole("ADMIN", "MECANICO", "CLIENTE")
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/clientes/checklists/*/aprovacao").hasRole("CLIENTE")
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/clientes/veiculos/*/checklists").hasRole("CLIENTE")
                 .requestMatchers(org.springframework.http.HttpMethod.PUT, "/clientes/**").hasAnyRole("ADMIN", "MECANICO", "CLIENTE")
                 .requestMatchers("/clientes/*/veiculos/**").hasAnyRole("ADMIN", "MECANICO")
 
                 // mecânicos
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/mecanicos/dashboard/me").hasAnyRole("MECANICO", "ADMIN")
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/mecanicos/*/dashboard").hasRole("ADMIN")
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/mecanicos/*/servicos/concluidos").hasRole("ADMIN")
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/mecanicos/**").hasRole("ADMIN")
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/mecanicos").hasRole("ADMIN")
                 .requestMatchers(org.springframework.http.HttpMethod.PUT, "/mecanicos/**").hasAnyRole("ADMIN", "MECANICO")
@@ -85,6 +87,7 @@ public class SecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.PATCH, "/checklists/*/enviar-para-precificacao").hasRole("MECANICO")
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/checklists/*/precificar").hasRole("ADMIN")
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/checklists/*/aprovacao").hasRole("CLIENTE")
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/checklists/*/completo").hasAnyRole("ADMIN", "MECANICO", "CLIENTE")
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/checklists/*/fotos-evidencia").hasAnyRole("CLIENTE", "MECANICO", "ADMIN")
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/checklists/*/aprovar").hasRole("CLIENTE")
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/checklists/**").hasAnyRole("ADMIN", "MECANICO")

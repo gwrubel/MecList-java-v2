@@ -3,8 +3,8 @@ package com.meclist.controller;
 
 import com.meclist.domain.enums.Situacao;
 import com.meclist.dto.cliente.AtualizarClienteRequest;
-import com.meclist.dto.cliente.ChecklistCardResumo;
 import com.meclist.dto.cliente.ClienteListResponse;
+import com.meclist.dto.cliente.HistoricoServicoCard;
 import com.meclist.dto.cliente.ClienteRequest;
 import com.meclist.dto.cliente.ClienteResponse;
 import com.meclist.dto.cliente.DashboardClienteResponse;
@@ -12,21 +12,21 @@ import com.meclist.dto.cliente.DefinirSenhaRequest;
 import com.meclist.dto.cliente.LoginRequest;
 import com.meclist.dto.cliente.PrimeiroAcessoRequest;
 import com.meclist.dto.cliente.RecuperarSenhaRequest;
-import com.meclist.dto.checklist.aprovacao.ChecklistAprovacaoResponse;
 import com.meclist.response.ApiResponse;
 import com.meclist.security.AuthenticatedUser;
 import com.meclist.usecase.cliente.AtualizarDadosClienteUseCase;
 import com.meclist.usecase.cliente.AutenticarClienteUseCase;
 import com.meclist.usecase.cliente.BuscarDadosDashboardUseCase;
 import com.meclist.usecase.cliente.BuscarDadosDoClienteUseCase;
-import com.meclist.usecase.cliente.BuscarDetalhesChecklistUseCase;
 import com.meclist.usecase.cliente.BuscarPorSituacaoUseCase;
 import com.meclist.usecase.cliente.CadastrarClienteUseCase;
 import com.meclist.usecase.cliente.DefinirSenhaClienteUseCase;
+import com.meclist.usecase.cliente.ListarServicosPorVeiculoClienteUseCase;
 import com.meclist.usecase.cliente.ListarClientesUseCase;
+import com.meclist.usecase.cliente.ListarVeiculosClienteUseCase;
+import com.meclist.dto.cliente.VeiculoResumo;
 import com.meclist.usecase.cliente.SolicitarPrimeiroAcessoUseCase;
 import com.meclist.usecase.cliente.SolicitarRecuperacaoSenhaClienteUseCase;
-import com.meclist.usecase.checklist.BuscarChecklistParaAprovacaoUseCase;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -52,8 +52,8 @@ public class ClienteController extends BaseController {
     private final SolicitarRecuperacaoSenhaClienteUseCase solicitarRecuperacaoSenhaClienteUseCase;
     private final AutenticarClienteUseCase autenticarClienteUseCase;
     private final BuscarDadosDashboardUseCase buscarDadosDashboardUseCase;
-    private final BuscarChecklistParaAprovacaoUseCase buscarChecklistParaAprovacaoUseCase;
-    private final BuscarDetalhesChecklistUseCase buscarDetalhesChecklistUseCase;
+    private final ListarServicosPorVeiculoClienteUseCase listarServicosPorVeiculoClienteUseCase;
+    private final ListarVeiculosClienteUseCase listarVeiculosClienteUseCase;
 
     public ClienteController(
             CadastrarClienteUseCase cadastrarClienteUseCase,
@@ -66,8 +66,8 @@ public class ClienteController extends BaseController {
             SolicitarRecuperacaoSenhaClienteUseCase solicitarRecuperacaoSenhaClienteUseCase,
             AutenticarClienteUseCase autenticarClienteUseCase,
             BuscarDadosDashboardUseCase buscarDadosDashboardUseCase,
-            BuscarChecklistParaAprovacaoUseCase buscarChecklistParaAprovacaoUseCase ,
-            BuscarDetalhesChecklistUseCase buscarDetalhesChecklistUseCase) {
+            ListarServicosPorVeiculoClienteUseCase listarServicosPorVeiculoClienteUseCase,
+            ListarVeiculosClienteUseCase listarVeiculosClienteUseCase) {
         this.cadastrarClienteUseCase = cadastrarClienteUseCase;
         this.listarClientesUseCase = listarClientesUseCase;
         this.atualizarDadosClienteUseCase = atualizarDadosClienteUseCase;
@@ -78,8 +78,8 @@ public class ClienteController extends BaseController {
         this.solicitarRecuperacaoSenhaClienteUseCase = solicitarRecuperacaoSenhaClienteUseCase;
         this.autenticarClienteUseCase = autenticarClienteUseCase;
         this.buscarDadosDashboardUseCase = buscarDadosDashboardUseCase;
-        this.buscarChecklistParaAprovacaoUseCase = buscarChecklistParaAprovacaoUseCase;
-        this.buscarDetalhesChecklistUseCase = buscarDetalhesChecklistUseCase;
+        this.listarServicosPorVeiculoClienteUseCase = listarServicosPorVeiculoClienteUseCase;
+        this.listarVeiculosClienteUseCase = listarVeiculosClienteUseCase;
     }
 
     /**
@@ -217,13 +217,21 @@ public class ClienteController extends BaseController {
     }
 
 
-    @GetMapping("/checklists/detalhes/{checklistId}")
-    public ResponseEntity<ApiResponse<ChecklistCardResumo>> buscarDetalhesChecklist(
-            @PathVariable Long checklistId,
+    
+    @GetMapping("/veiculos/{veiculoId}/servicos")
+    public ResponseEntity<ApiResponse<List<HistoricoServicoCard>>> listarServicosPorVeiculo(
+            @PathVariable Long veiculoId,
             HttpServletRequest request) {
 
-        ChecklistCardResumo response = buscarDetalhesChecklistUseCase.executar(checklistId);
-        return success("Detalhes do checklist carregados com sucesso!", response, request);
+        List<HistoricoServicoCard> response = listarServicosPorVeiculoClienteUseCase.executar(veiculoId);
+        return success("Serviços do veiculo carregados com sucesso!", response, request);
     }
-    
+
+    @GetMapping("/veiculos")
+    public ResponseEntity<ApiResponse<List<VeiculoResumo>>> listarVeiculos(
+            HttpServletRequest request) {
+        List<VeiculoResumo> veiculos = listarVeiculosClienteUseCase.executar();
+        return success("Veículos listados com sucesso!", veiculos, request);
+    }
+
 }

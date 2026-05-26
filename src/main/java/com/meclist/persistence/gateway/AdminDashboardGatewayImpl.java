@@ -13,31 +13,38 @@ import org.springframework.stereotype.Component;
 
 import com.meclist.domain.enums.StatusProcesso;
 import com.meclist.dto.admin.DashboardAdmResponse;
+import com.meclist.dto.admin.DashboardEstadoAtualDTO;
 import com.meclist.dto.admin.DashboardGraficoDTO;
 import com.meclist.dto.admin.DashboardPeriodoDTO;
+import com.meclist.dto.admin.DashboardTemposMediosDTO;
 import com.meclist.dto.admin.MecanicoTopDTO;
 import com.meclist.interfaces.AdminDashboardGateway;
+import com.meclist.persistence.repository.ChecklistRepository;
 import com.meclist.persistence.repository.OrcamentoRepository;
 import com.meclist.persistence.repository.ServicoRepository;
 
 @Component
 public class AdminDashboardGatewayImpl implements AdminDashboardGateway {
 
-    private static final List<StatusProcesso> STATUSES_PENDENTES = List.of(
+    private static final List<StatusProcesso> STATUS_PENDENTES = List.of(
             StatusProcesso.INICIADO,
-            StatusProcesso.EM_ANDAMENTO,
             StatusProcesso.AGUARDANDO_PRECIFICACAO,
             StatusProcesso.AGUARDANDO_APROVACAO,
-            StatusProcesso.APROVADO
+            StatusProcesso.APROVADO,
+            StatusProcesso.ATRIBUIDO,
+            StatusProcesso.EM_ANDAMENTO
     );
 
     private final ServicoRepository servicoRepository;
     private final OrcamentoRepository orcamentoRepository;
+    private final ChecklistRepository checklistRepository;
 
     public AdminDashboardGatewayImpl(ServicoRepository servicoRepository,
-                                     OrcamentoRepository orcamentoRepository) {
+                                     OrcamentoRepository orcamentoRepository,
+                                     ChecklistRepository checklistRepository) {
         this.servicoRepository = servicoRepository;
         this.orcamentoRepository = orcamentoRepository;
+        this.checklistRepository = checklistRepository;
     }
 
     @Override
@@ -46,41 +53,51 @@ public class AdminDashboardGatewayImpl implements AdminDashboardGateway {
         LocalDateTime inicio7Dias = agora.minusDays(7);
         LocalDateTime inicio30Dias = agora.minusDays(30);
 
-        DashboardPeriodoDTO periodo7Dias = montarPeriodo("Últimos 7 dias", inicio7Dias);
-        DashboardPeriodoDTO periodo30Dias = montarPeriodo("Últimos 30 dias", inicio30Dias);
+        DashboardPeriodoDTO atividade7Dias = montarAtividade("Últimos 7 dias", inicio7Dias);
+        DashboardPeriodoDTO atividade30Dias = montarAtividade("Últimos 30 dias", inicio30Dias);
+        DashboardEstadoAtualDTO estadoAtual = montarEstadoAtual();
 
         BigDecimal ticketMedio = orcamentoRepository.calcularTicketMedio(StatusProcesso.CONCLUIDO, inicio30Dias);
-        Double taxaAprovacao = calcularTaxaAprovacao(inicio30Dias);
         List<MecanicoTopDTO> topMecanicos = buscarTopMecanicos(inicio30Dias);
+        DashboardTemposMediosDTO temposMedios = montarTemposMedios(inicio30Dias);
 
         return new DashboardAdmResponse(
-                periodo7Dias,
-                periodo30Dias,
+                atividade7Dias,
+                atividade30Dias,
+                estadoAtual,
                 ticketMedio.setScale(2, RoundingMode.HALF_UP),
-                taxaAprovacao,
-                topMecanicos
+                topMecanicos,
+                temposMedios
         );
     }
 
-    private DashboardPeriodoDTO montarPeriodo(String label, LocalDateTime dataInicio) {
-        Long total = servicoRepository.contarTotal(dataInicio);
-        Long pendentes = servicoRepository.contarPorStatuses(STATUSES_PENDENTES, dataInicio);
-        Long finalizados = servicoRepository.contarPorStatus(StatusProcesso.CONCLUIDO, dataInicio);
-        BigDecimal valorTotal = orcamentoRepository.somarValorPorStatus(StatusProcesso.CONCLUIDO, dataInicio);
+    private DashboardPeriodoDTO montarAtividade(String label, LocalDateTime dataInicio) {
+        Long movimentados = checklistRepository.contarTotal(dataInicio);
+        Long finalizados = checklistRepository.contarPorStatus(StatusProcesso.CONCLUIDO, dataInicio);
+        BigDecimal faturamento = orcamentoRepository.somarValorPorStatus(StatusProcesso.CONCLUIDO, dataInicio);
+        Double taxaAprovacao = calcularTaxaAprovacao(dataInicio);
         DashboardGraficoDTO grafico = montarGrafico(dataInicio);
 
         return new DashboardPeriodoDTO(
                 label,
-                total,
-                pendentes,
+                movimentados,
                 finalizados,
-                valorTotal.setScale(2, RoundingMode.HALF_UP),
+                faturamento.setScale(2, RoundingMode.HALF_UP),
+                taxaAprovacao,
                 grafico
         );
     }
 
+    private DashboardEstadoAtualDTO montarEstadoAtual() {
+        Long pendentesAtuais = checklistRepository.contarPorStatusesSemData(STATUS_PENDENTES);
+        Long aguardandoAprovacao = checklistRepository.contarPorStatusSemData(StatusProcesso.AGUARDANDO_APROVACAO);
+        Long atribuidos = servicoRepository.contarPorStatusSemData(StatusProcesso.ATRIBUIDO);
+        Long emAndamento = servicoRepository.contarPorStatusSemData(StatusProcesso.EM_ANDAMENTO);
+        return new DashboardEstadoAtualDTO(pendentesAtuais, aguardandoAprovacao, atribuidos, emAndamento);
+    }
+
     private DashboardGraficoDTO montarGrafico(LocalDateTime dataInicio) {
-        List<Object[]> rows = servicoRepository.contarPorMes(dataInicio);
+        List<Object[]> rows = checklistRepository.contarPorMes(dataInicio);
 
         List<String> labels = new ArrayList<>();
         List<Long> valores = new ArrayList<>();
@@ -101,14 +118,14 @@ public class AdminDashboardGatewayImpl implements AdminDashboardGateway {
     }
 
     private Double calcularTaxaAprovacao(LocalDateTime dataInicio) {
-        Long total = orcamentoRepository.contarTotal(dataInicio);
-        if (total == 0) return 0.0;
-
         Long aprovados = orcamentoRepository.contarPorStatus(StatusProcesso.APROVADO, dataInicio);
         Long concluidos = orcamentoRepository.contarPorStatus(StatusProcesso.CONCLUIDO, dataInicio);
-        Long aprovadosTotal = aprovados + concluidos;
+        Long reprovados = orcamentoRepository.contarPorStatus(StatusProcesso.REPROVADO, dataInicio);
 
-        return BigDecimal.valueOf(aprovadosTotal * 100.0 / total)
+        Long totalDecididos = aprovados + concluidos + reprovados;
+        if (totalDecididos == 0) return 0.0;
+
+        return BigDecimal.valueOf((aprovados + concluidos) * 100.0 / totalDecididos)
                 .setScale(1, RoundingMode.HALF_UP)
                 .doubleValue();
     }
@@ -125,5 +142,11 @@ public class AdminDashboardGatewayImpl implements AdminDashboardGateway {
         }
 
         return resultado;
+    }
+
+    private DashboardTemposMediosDTO montarTemposMedios(LocalDateTime dataInicio) {
+        Double ateMecanico = servicoRepository.calcularTempoMedioAteMecanico(dataInicio);
+        Double execucao = servicoRepository.calcularTempoMedioExecucao(dataInicio);
+        return new DashboardTemposMediosDTO(ateMecanico, execucao);
     }
 }

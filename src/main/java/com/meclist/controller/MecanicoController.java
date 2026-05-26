@@ -31,9 +31,11 @@ import com.meclist.usecase.mecanico.AtualizarDadosMecanico;
 import com.meclist.usecase.mecanico.AuthMecanicoUseCase;
 import com.meclist.usecase.mecanico.BuscarDashboardMecanicoUseCase;
 import com.meclist.usecase.mecanico.BuscarPorSituacaoMecanicoUseCase;
+import com.meclist.usecase.mecanico.BuscarServicosConcluidosMecanicoUseCase;
 import com.meclist.usecase.mecanico.DefinirSenhaMecanicoUseCase;
 import com.meclist.usecase.mecanico.ListarMecanicosUseCase;
 import com.meclist.usecase.mecanico.SolicitarRecuperacaoSenhaMecanicoUseCase;
+import com.meclist.dto.mecanico.ServicosConcluidoMecanicoResponse;
 
 
 @RestController
@@ -46,6 +48,7 @@ public class MecanicoController extends BaseController {
     private final AtualizarDadosMecanico atualizarDadosMecanicoUseCase;
     private final AuthMecanicoUseCase authMecanicoUseCase;
     private final BuscarDashboardMecanicoUseCase buscarDashboardMecanicoUseCase;
+    private final BuscarServicosConcluidosMecanicoUseCase buscarServicosConcluidosMecanicoUseCase;
     private final SolicitarRecuperacaoSenhaMecanicoUseCase solicitarRecuperacaoSenhaMecanicoUseCase;
     private final DefinirSenhaMecanicoUseCase definirSenhaMecanicoUseCase;
 
@@ -56,6 +59,7 @@ public class MecanicoController extends BaseController {
             BuscarPorSituacaoMecanicoUseCase buscarPorSituacaoMecanicoUseCase,
             AuthMecanicoUseCase authMecanicoUseCase,
             BuscarDashboardMecanicoUseCase buscarDashboardMecanicoUseCase,
+            BuscarServicosConcluidosMecanicoUseCase buscarServicosConcluidosMecanicoUseCase,
             SolicitarRecuperacaoSenhaMecanicoUseCase solicitarRecuperacaoSenhaMecanicoUseCase,
             DefinirSenhaMecanicoUseCase definirSenhaMecanicoUseCase) {
         this.listarMecanicosUseCase = listarMecanicosUseCase;
@@ -64,6 +68,7 @@ public class MecanicoController extends BaseController {
         this.buscarPorSituacaoMecanicoUseCase = buscarPorSituacaoMecanicoUseCase;
         this.authMecanicoUseCase = authMecanicoUseCase;
         this.buscarDashboardMecanicoUseCase = buscarDashboardMecanicoUseCase;
+        this.buscarServicosConcluidosMecanicoUseCase = buscarServicosConcluidosMecanicoUseCase;
         this.solicitarRecuperacaoSenhaMecanicoUseCase = solicitarRecuperacaoSenhaMecanicoUseCase;
         this.definirSenhaMecanicoUseCase = definirSenhaMecanicoUseCase;
     }
@@ -164,5 +169,13 @@ public class MecanicoController extends BaseController {
             HttpServletRequest servletRequest) {
         DashboardMecanicoResponse response = buscarDashboardMecanicoUseCase.executarPorMecanicoId(id);
         return success("Dashboard do mecânico carregado com sucesso!", response, servletRequest);
+    }
+
+    @GetMapping("/{mecanicoId}/servicos/concluidos")
+    public ResponseEntity<ApiResponse<List<ServicosConcluidoMecanicoResponse>>> buscarServicosConcluidosMecanico(
+            @PathVariable Long mecanicoId,
+            HttpServletRequest servletRequest) {
+        var response = buscarServicosConcluidosMecanicoUseCase.executar(mecanicoId);
+        return success("Serviços concluídos do mecânico obtidos com sucesso!", response, servletRequest);
     }
 }

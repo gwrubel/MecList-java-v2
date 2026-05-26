@@ -82,7 +82,7 @@ public class ProcessarAprovacaoChecklistService {
             orcamento.aprovar();
             checklist.aprovar();
         } else {
-            orcamento.rejeitar();
+            orcamento.reprovar();
             checklist.reprovar();
         }
 

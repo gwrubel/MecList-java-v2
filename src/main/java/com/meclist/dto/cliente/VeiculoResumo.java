@@ -7,6 +7,7 @@ public record VeiculoResumo(
     String marca,
     String modelo,
     String placa,
+    Integer ano,
     Float quilometragem,
     LocalDate dataUltimaRevisao
 ) {

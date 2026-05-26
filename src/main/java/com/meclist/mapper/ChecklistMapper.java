@@ -18,6 +18,8 @@ import com.meclist.dto.checklist.aprovacao.ChecklistAprovacaoResponse;
 import com.meclist.dto.checklist.aprovacao.ItemAprovacaoResponse;
 import com.meclist.dto.checklist.precificacao.ChecklistPrecificacaoResponse;
 import com.meclist.dto.checklist.precificacao.ItemPrecificacaoResponse;
+import com.meclist.dto.checklist.visualizacao.ChecklistVisualizacaoCompletaResponse;
+import com.meclist.dto.checklist.visualizacao.ItemVisualizacaoCompletaResponse;
 import com.meclist.dto.itemChecklist.ItemChecklistResponse;
 import com.meclist.persistence.entity.ChecklistEntity;
 import com.meclist.persistence.entity.ItemChecklistEntity;
@@ -217,6 +219,37 @@ public static ChecklistEntity toEntity(Checklist domain) {
             checklist.getCriadoEm(),
             checklist.getAtualizadoEm(),
             itensPorCategoria
+        );
+    }
+
+    public static ChecklistVisualizacaoCompletaResponse toVisualizacaoCompletaResponse(Checklist checklist,
+                                                                                        Orcamento orcamento,
+                                                                                        String nomeMecanicoExecutor) {
+        if (checklist == null) return null;
+
+        Map<CategoriaParteVeiculo, List<ItemVisualizacaoCompletaResponse>> itensPorCategoria =
+                checklist.getItensChecklist().stream()
+                        .map(ItemChecklistMapper::toVisualizacaoCompletaResponse)
+                        .filter(i -> i.statusItem() == StatusItem.TROCAR || i.statusItem() == StatusItem.TROCA_FEITA)
+                        .collect(Collectors.groupingBy(ItemVisualizacaoCompletaResponse::parteDoVeiculo));
+
+        return new ChecklistVisualizacaoCompletaResponse(
+                checklist.getId(),
+                checklist.getVeiculo() != null ? checklist.getVeiculo().getId() : null,
+                checklist.getVeiculo() != null ? checklist.getVeiculo().getPlaca() : null,
+                checklist.getVeiculo() != null ? checklist.getVeiculo().getMarca() : null,
+                checklist.getVeiculo() != null ? checklist.getVeiculo().getModelo() : null,
+                checklist.getVeiculo() != null ? checklist.getVeiculo().getAno() : null,
+                checklist.getVeiculo() != null ? checklist.getVeiculo().getCor() : null,
+                checklist.getVeiculo() != null && checklist.getVeiculo().getCliente() != null
+                        ? checklist.getVeiculo().getCliente().getNome()
+                        : null,
+                nomeMecanicoExecutor,
+                checklist.getStatus(),
+                orcamento != null ? orcamento.getValorTotal() : BigDecimal.ZERO,
+                checklist.getCriadoEm(),
+                checklist.getAtualizadoEm(),
+                itensPorCategoria
         );
     }
 }

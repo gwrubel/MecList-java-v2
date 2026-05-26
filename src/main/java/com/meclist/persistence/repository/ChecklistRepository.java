@@ -60,4 +60,31 @@ public interface ChecklistRepository extends JpaRepository<ChecklistEntity, Long
             @Param("statusAtivos") List<StatusProcesso> statusAtivos,
             @Param("statusComLimite") List<StatusProcesso> statusComLimite,
             @Param("limiteData") LocalDateTime limiteData);
+
+    @Query("SELECT c FROM ChecklistEntity c WHERE c.status = 'INICIADO' AND c.criadoEm < :limite")
+    List<ChecklistEntity> findInativosParaCancelamento(@Param("limite") LocalDateTime limite);
+
+    @Query("SELECT COUNT(c) FROM ChecklistEntity c WHERE c.atualizadoEm >= :dataInicio AND c.status != 'CANCELADO'")
+    Long contarTotal(@Param("dataInicio") LocalDateTime dataInicio);
+
+    @Query("SELECT COUNT(c) FROM ChecklistEntity c WHERE c.status IN :statuses")
+    Long contarPorStatusesSemData(@Param("statuses") List<StatusProcesso> statuses);
+
+    @Query("SELECT COUNT(c) FROM ChecklistEntity c WHERE c.status = :status")
+    Long contarPorStatusSemData(@Param("status") StatusProcesso status);
+
+    @Query("SELECT COUNT(c) FROM ChecklistEntity c WHERE c.status = :status AND c.atualizadoEm >= :dataInicio")
+    Long contarPorStatus(@Param("status") StatusProcesso status,
+                         @Param("dataInicio") LocalDateTime dataInicio);
+
+    @Query("SELECT COUNT(c) FROM ChecklistEntity c WHERE c.status IN :statuses AND c.criadoEm >= :dataInicio")
+    Long contarPorStatuses(@Param("statuses") List<StatusProcesso> statuses,
+                           @Param("dataInicio") LocalDateTime dataInicio);
+
+    @Query("SELECT YEAR(c.atualizadoEm), MONTH(c.atualizadoEm), COUNT(c) " +
+           "FROM ChecklistEntity c " +
+           "WHERE c.atualizadoEm >= :dataInicio AND c.status != 'CANCELADO'" +
+           "GROUP BY YEAR(c.atualizadoEm), MONTH(c.atualizadoEm) " +
+           "ORDER BY YEAR(c.atualizadoEm), MONTH(c.atualizadoEm)")
+    List<Object[]> contarPorMes(@Param("dataInicio") LocalDateTime dataInicio);
 }

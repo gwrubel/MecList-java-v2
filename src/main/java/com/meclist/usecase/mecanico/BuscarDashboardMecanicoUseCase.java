@@ -42,7 +42,7 @@ public class BuscarDashboardMecanicoUseCase {
                 .orElseThrow(() -> new MecanicoNaoEncontradoException(mecanicoId));
 
         List<ServicoCardMecanicoResponse> pendentes = servicoGateway
-                .buscarPorMecanicoEStatuses(mecanicoId, List.of(StatusProcesso.EM_ANDAMENTO))
+                .buscarPorMecanicoEStatuses(mecanicoId, List.of(StatusProcesso.EM_ANDAMENTO, StatusProcesso.ATRIBUIDO))
                 .stream()
                 .map(this::toCard)
                 .toList();
@@ -75,6 +75,6 @@ public class BuscarDashboardMecanicoUseCase {
                 veiculo != null ? veiculo.getAno() : null,
                 checklist != null ? checklist.getQuilometragem() : null,
                 servico.getCriadoEm(),
-            servico.getDataRealizacao());
+            servico.getDataConclusao());
     }
 }

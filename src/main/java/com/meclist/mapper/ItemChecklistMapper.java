@@ -12,6 +12,8 @@ import com.meclist.dto.checklist.aprovacao.ItemAprovacaoResponse;
 import com.meclist.dto.checklist.aprovacao.ProdutoAprovacaoResponse;
 import com.meclist.dto.checklist.precificacao.ItemPrecificacaoResponse;
 import com.meclist.dto.checklist.precificacao.ProdutoPrecificadoResponse;
+import com.meclist.dto.checklist.visualizacao.ItemVisualizacaoCompletaResponse;
+import com.meclist.dto.checklist.visualizacao.ProdutoVisualizacaoCompletaResponse;
 import com.meclist.dto.produto.ProdutoAdicionado;
 
 import com.meclist.persistence.entity.ChecklistEntity;
@@ -200,5 +202,37 @@ public class ItemChecklistMapper {
             produtos,
             ic.getMaoDeObra()
         );
+    }
+
+    public static ItemVisualizacaoCompletaResponse toVisualizacaoCompletaResponse(ItemChecklist ic) {
+        if (ic == null || ic.getItem() == null) return null;
+
+        List<FotoEvidenciaResponse> fotos = ic.getFotosEvidencia() == null
+                ? Collections.emptyList()
+                : ic.getFotosEvidencia().stream()
+                    .map(f -> new FotoEvidenciaResponse(f.getId(), f.getPathFoto(), f.getCriadoEm()))
+                    .collect(Collectors.toList());
+
+        List<ProdutoVisualizacaoCompletaResponse> produtos = ic.getProdutosOrcados() == null
+                ? Collections.emptyList()
+                : ic.getProdutosOrcados().stream()
+                    .filter(po -> po.getProduto() != null)
+                    .map(po -> new ProdutoVisualizacaoCompletaResponse(
+                            po.getProduto().getId(),
+                            po.getNomeProdutoSnapshot(),
+                            po.getQuantidade(),
+                            po.getValorUnitario(),
+                            po.getMarca()))
+                    .collect(Collectors.toList());
+
+        return new ItemVisualizacaoCompletaResponse(
+                ic.getId(),
+                ic.getNomeItemSnapshot(),
+                ic.getItem().getParteDoVeiculo(),
+                ic.getItem().getImagemIlustrativa(),
+                ic.getStatusItem(),
+                fotos,
+                produtos,
+                ic.getMaoDeObra());
     }
 }

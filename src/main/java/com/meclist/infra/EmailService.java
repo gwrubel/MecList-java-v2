@@ -1,5 +1,8 @@
 package com.meclist.infra;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -10,6 +13,8 @@ import jakarta.mail.internet.MimeMessage;
 
 @Service
 public class EmailService {
+
+    private static final DateTimeFormatter DATA_HORA_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     private final JavaMailSender mailSender;
 
@@ -114,6 +119,55 @@ public class EmailService {
                 """.formatted(link, link, horasValidade);
 
         enviarHtml(emailDestino, assunto, corpo);
+    }
+
+    public void enviarEmailVeiculoProntoRetirada(String emailDestino,
+                                                 String nomeCliente,
+                                                 String placa,
+                                                 String marca,
+                                                 String modelo,
+                                                 LocalDateTime concluidoEm,
+                                                 Long checklistId,
+                                                 Long servicoId) {
+        String nome = valorOuPadrao(nomeCliente, "Cliente");
+        String placaVeiculo = valorOuPadrao(placa, "não informada");
+        String marcaVeiculo = valorOuPadrao(marca, "não informada");
+        String modeloVeiculo = valorOuPadrao(modelo, "não informado");
+        String dataHoraConclusao = concluidoEm != null
+                ? concluidoEm.format(DATA_HORA_FORMATTER)
+                : "não informada";
+        String assunto = "Meclist - Veículo pronto para retirada";
+        String corpo = """
+                <html>
+                <body style="font-family: Arial, sans-serif; padding: 20px;">
+                    <h2>Olá, %s!</h2>
+                    <p>Seu veículo já está pronto para retirada.</p>
+                    <p><strong>Placa:</strong> %s</p>
+                    <p><strong>Veículo:</strong> %s %s</p>
+                    <p><strong>Conclusão do serviço:</strong> %s</p>
+                    <p><strong>Checklist:</strong> #%d</p>
+                    <p><strong>Serviço:</strong> #%d</p>
+                    <br>
+                    <p>Obrigado por escolher a Meclist.</p>
+                </body>
+                </html>
+                """.formatted(
+                nome,
+                placaVeiculo,
+                marcaVeiculo,
+                modeloVeiculo,
+                dataHoraConclusao,
+                checklistId,
+                servicoId);
+
+        enviarHtml(emailDestino, assunto, corpo);
+    }
+
+    private String valorOuPadrao(String valor, String padrao) {
+        if (valor == null || valor.isBlank()) {
+            return padrao;
+        }
+        return valor;
     }
 
     private void enviarHtml(String para, String assunto, String corpoHtml) {

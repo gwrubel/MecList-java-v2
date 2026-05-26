@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.meclist.domain.enums.OrigemAprovacao;
+import com.meclist.domain.enums.StatusItem;
 import com.meclist.domain.enums.StatusProcesso;
 
 public class Checklist {
@@ -234,15 +235,23 @@ public void aprovar() {
     this.atualizadoEm = LocalDateTime.now();
 }
 
-public void emAndamento() {
+public void atribuido() {
     if (this.status != StatusProcesso.APROVADO) {
-        throw new IllegalStateException("O checklist deve estar aprovado para iniciar o serviço.");
+        throw new IllegalStateException("O checklist deve estar aprovado para ser atribuído a um mecânico.");
+    }
+    this.status = StatusProcesso.ATRIBUIDO;
+    this.atualizadoEm = LocalDateTime.now();
+}
+
+public void emAndamento() {
+    if (this.status != StatusProcesso.ATRIBUIDO) {
+        throw new IllegalStateException("O checklist deve estar atribuído para iniciar o serviço.");
     }
     this.status = StatusProcesso.EM_ANDAMENTO;
     this.atualizadoEm = LocalDateTime.now();
 }
 
-public void finalizar() {
+public void concluir () {
     if (this.status != StatusProcesso.EM_ANDAMENTO) {
         throw new IllegalStateException("O checklist deve estar em andamento para ser finalizado.");
     }
@@ -256,6 +265,33 @@ public void registrarAprovacao(OrigemAprovacao origemAprovacao, Long aprovadoPor
     this.aprovadoPorTipo = aprovadoPorTipo;
     this.aprovadoEm = LocalDateTime.now();
     this.atualizadoEm = this.aprovadoEm;
+}
+
+public record ResultadoConclusaoItens(List<ItemChecklist> itensMarcados, int itensSemAutorizacao) {}
+
+public ResultadoConclusaoItens processarItensConclusao() {
+    List<ItemChecklist> marcados = new ArrayList<>();
+    int semAutorizacao = 0;
+    for (var item : getItensChecklist()) {
+        if (item.getStatusItem() != StatusItem.TROCAR) continue;
+        boolean possuiProdutoAutorizado = item.getProdutosOrcados().stream()
+                .anyMatch(produto -> Boolean.TRUE.equals(produto.getAprovadoCliente()));
+        if (possuiProdutoAutorizado) {
+            item.atualizarStatus(StatusItem.TROCA_FEITA);
+            marcados.add(item);
+        } else {
+            semAutorizacao++;
+        }
+    }
+    return new ResultadoConclusaoItens(marcados, semAutorizacao);
+}
+
+public void cancelar() {
+    if (this.status != StatusProcesso.INICIADO) {
+        throw new IllegalStateException("Somente checklists com status INICIADO podem ser cancelados automaticamente.");
+    }
+    this.status = StatusProcesso.CANCELADO;
+    this.atualizadoEm = LocalDateTime.now();
 }
 
 public void reprovar() {
