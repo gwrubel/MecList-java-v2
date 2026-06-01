@@ -23,6 +23,11 @@ public class AdmGatewayImpl implements AdmGateway {
     }
 
     @Override
+    public Adm atualizarAdm(Adm adm) {
+        return AdmMapper.toDomain(repository.save(AdmMapper.toEntity(adm)));
+    }
+
+    @Override
     public Optional<Adm> buscarPorEmail(String email) {
         return repository.findByEmail(email).map(AdmMapper::toDomain);
     }

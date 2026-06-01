@@ -33,6 +33,8 @@ public class SecurityConfig {
 
                 // públicos (autenticação)
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/adms/login").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/adms/recuperar-senha").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/adms/definir-senha").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/mecanicos/login").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/mecanicos/recuperar-senha").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/mecanicos/definir-senha").permitAll()

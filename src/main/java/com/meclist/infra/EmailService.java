@@ -93,6 +93,28 @@ public class EmailService {
         enviarHtml(emailDestino, assunto, corpo);
     }
 
+    public void enviarEmailRecuperacaoSenhaAdm(String emailDestino, String token) {
+        String link = frontendUrl + "/adm/definir-senha?token=" + token;
+        String assunto = "Meclist - Recuperação de senha";
+        String corpo = """
+                <html>
+                <body style="font-family: Arial, sans-serif; padding: 20px;">
+                    <h2>Recuperação de senha</h2>
+                    <p>Recebemos uma solicitação para redefinir a senha da sua conta administrativa.</p>
+                    <p>Para criar uma nova senha, clique no botão abaixo:</p>
+                    <p><a href="%s" style="background-color: #D86B06; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Redefinir minha senha</a></p>
+                    <p>Ou copie e cole o link no navegador:</p>
+                    <p>%s</p>
+                    <br>
+                    <p style="color: #888;">Este link expira em 2 horas.</p>
+                    <p style="color: #888;">Se você não solicitou a redefinição, ignore este e-mail.</p>
+                </body>
+                </html>
+                """.formatted(link, link);
+
+        enviarHtml(emailDestino, assunto, corpo);
+    }
+
     public String montarLinkAprovacaoChecklist(Long checklistId, String token) {
         return frontendUrl + "/cliente/checklist/" + checklistId + "/aprovacao?token=" + token;
     }
