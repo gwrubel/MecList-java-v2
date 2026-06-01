@@ -4,7 +4,7 @@ package com.meclist.controller;
 import com.meclist.domain.enums.Situacao;
 import com.meclist.dto.cliente.AtualizarClienteRequest;
 import com.meclist.dto.cliente.ClienteListResponse;
-import com.meclist.dto.cliente.HistoricoServicoCard;
+import com.meclist.dto.veiculo.HistoricoServicoCard;
 import com.meclist.dto.cliente.ClienteRequest;
 import com.meclist.dto.cliente.ClienteResponse;
 import com.meclist.dto.cliente.DashboardClienteResponse;
@@ -21,7 +21,7 @@ import com.meclist.usecase.cliente.BuscarDadosDoClienteUseCase;
 import com.meclist.usecase.cliente.BuscarPorSituacaoUseCase;
 import com.meclist.usecase.cliente.CadastrarClienteUseCase;
 import com.meclist.usecase.cliente.DefinirSenhaClienteUseCase;
-import com.meclist.usecase.cliente.ListarServicosPorVeiculoClienteUseCase;
+import com.meclist.usecase.veiculo.ListarServicosPorVeiculoUseCase;
 import com.meclist.usecase.cliente.ListarClientesUseCase;
 import com.meclist.usecase.cliente.ListarVeiculosClienteUseCase;
 import com.meclist.dto.cliente.VeiculoResumo;
@@ -52,7 +52,7 @@ public class ClienteController extends BaseController {
     private final SolicitarRecuperacaoSenhaClienteUseCase solicitarRecuperacaoSenhaClienteUseCase;
     private final AutenticarClienteUseCase autenticarClienteUseCase;
     private final BuscarDadosDashboardUseCase buscarDadosDashboardUseCase;
-    private final ListarServicosPorVeiculoClienteUseCase listarServicosPorVeiculoClienteUseCase;
+    private final ListarServicosPorVeiculoUseCase listarServicosPorVeiculoUseCase;
     private final ListarVeiculosClienteUseCase listarVeiculosClienteUseCase;
 
     public ClienteController(
@@ -66,7 +66,7 @@ public class ClienteController extends BaseController {
             SolicitarRecuperacaoSenhaClienteUseCase solicitarRecuperacaoSenhaClienteUseCase,
             AutenticarClienteUseCase autenticarClienteUseCase,
             BuscarDadosDashboardUseCase buscarDadosDashboardUseCase,
-            ListarServicosPorVeiculoClienteUseCase listarServicosPorVeiculoClienteUseCase,
+            ListarServicosPorVeiculoUseCase listarServicosPorVeiculoUseCase,
             ListarVeiculosClienteUseCase listarVeiculosClienteUseCase) {
         this.cadastrarClienteUseCase = cadastrarClienteUseCase;
         this.listarClientesUseCase = listarClientesUseCase;
@@ -78,7 +78,7 @@ public class ClienteController extends BaseController {
         this.solicitarRecuperacaoSenhaClienteUseCase = solicitarRecuperacaoSenhaClienteUseCase;
         this.autenticarClienteUseCase = autenticarClienteUseCase;
         this.buscarDadosDashboardUseCase = buscarDadosDashboardUseCase;
-        this.listarServicosPorVeiculoClienteUseCase = listarServicosPorVeiculoClienteUseCase;
+        this.listarServicosPorVeiculoUseCase = listarServicosPorVeiculoUseCase;
         this.listarVeiculosClienteUseCase = listarVeiculosClienteUseCase;
     }
 
@@ -223,7 +223,7 @@ public class ClienteController extends BaseController {
             @PathVariable Long veiculoId,
             HttpServletRequest request) {
 
-        List<HistoricoServicoCard> response = listarServicosPorVeiculoClienteUseCase.executar(veiculoId);
+        List<HistoricoServicoCard> response = listarServicosPorVeiculoUseCase.executar(veiculoId);
         return success("Serviços do veiculo carregados com sucesso!", response, request);
     }
 

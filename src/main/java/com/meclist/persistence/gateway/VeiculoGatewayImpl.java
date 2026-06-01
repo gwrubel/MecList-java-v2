@@ -92,12 +92,11 @@ public class VeiculoGatewayImpl implements VeiculoGateway {
     private Veiculo mapearVeiculoComUltimaRevisao(VeiculoEntity entity) {
         Veiculo veiculo = VeiculoMapper.toDomain(entity, ClienteMapper.toDomain(entity.getCliente()));
 
-        servicoRepository.encontrarUltimaRevisao(entity.getId(), StatusProcesso.CONCLUIDO)
-                .ifPresent(servico -> {
-                    if (servico.getDataConclusao() != null) {
-                        veiculo.atualizarDataUltimaRevisao(servico.getDataConclusao().toLocalDate());
-                    }
-                });
+        servicoRepository
+            .findFirstByChecklistVeiculoIdAndStatusAndDataConclusaoIsNotNullOrderByDataConclusaoDescIdDesc(
+                entity.getId(),
+                StatusProcesso.CONCLUIDO)
+            .ifPresent(servico -> veiculo.atualizarDataUltimaRevisao(servico.getDataConclusao().toLocalDate()));
 
         return veiculo;
     }

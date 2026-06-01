@@ -63,6 +63,7 @@ public class SecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/mecanicos/dashboard/me").hasAnyRole("MECANICO", "ADMIN")
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/mecanicos/*/dashboard").hasRole("ADMIN")
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/mecanicos/*/servicos/concluidos").hasRole("ADMIN")
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/mecanicos/veiculos/*/servicos").hasAnyRole("MECANICO", "ADMIN")
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/mecanicos/**").hasRole("ADMIN")
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/mecanicos").hasRole("ADMIN")
                 .requestMatchers(org.springframework.http.HttpMethod.PUT, "/mecanicos/**").hasAnyRole("ADMIN", "MECANICO")

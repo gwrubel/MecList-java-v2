@@ -1,4 +1,4 @@
-package com.meclist.dto.cliente;
+package com.meclist.dto.veiculo;
 
 import java.time.LocalDateTime;
 

@@ -1,5 +1,6 @@
 package com.meclist.usecase.checklist;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 import org.springframework.stereotype.Service;
@@ -47,12 +48,23 @@ public class BuscarChecklistCompletoUseCase {
 
         var orcamento = orcamentoGateway.buscarPorChecklistId(checklistId).orElse(null);
 
-        String nomeMecanicoExecutor = servicoGateway
-                .buscarExecutorPorChecklistId(checklistId, checklist.getStatus())
-                .map(s -> s.getMecanico() != null ? s.getMecanico().getNome() : null)
-                .orElse(null);
+        var servicoExecutor = servicoGateway
+            .buscarExecutorPorChecklistId(checklistId, checklist.getStatus())
+            .orElse(null);
 
-        return ChecklistMapper.toVisualizacaoCompletaResponse(checklist, orcamento, nomeMecanicoExecutor);
+        String nomeMecanicoExecutor = servicoExecutor != null && servicoExecutor.getMecanico() != null
+            ? servicoExecutor.getMecanico().getNome()
+            : null;
+
+        LocalDateTime dataConclusao = servicoExecutor != null
+            ? servicoExecutor.getDataConclusao()
+            : null;
+
+        return ChecklistMapper.toVisualizacaoCompletaResponse(
+            checklist,
+            orcamento,
+            nomeMecanicoExecutor,
+            dataConclusao);
     }
 
     private void validarStatus(StatusProcesso status) {

@@ -222,7 +222,8 @@ public class ItemChecklistMapper {
                             po.getNomeProdutoSnapshot(),
                             po.getQuantidade(),
                             po.getValorUnitario(),
-                            po.getMarca()))
+                            po.getMarca(),
+                            po.getAprovadoCliente()))
                     .collect(Collectors.toList());
 
         return new ItemVisualizacaoCompletaResponse(

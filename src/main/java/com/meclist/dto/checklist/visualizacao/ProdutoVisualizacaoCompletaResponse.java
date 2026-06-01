@@ -7,6 +7,7 @@ public record ProdutoVisualizacaoCompletaResponse(
         String nomeProduto,
         Integer quantidade,
         BigDecimal preco,
-        String marca
+        String marca,
+        Boolean aprovadoCliente
 ) {
 }

@@ -16,12 +16,13 @@ public record ChecklistVisualizacaoCompletaResponse(
         String modelo,
         Integer ano,
         String cor,
+        Float quilometragem,
         String nomeCliente,
         String nomeMecanico,
         StatusProcesso status,
         BigDecimal valorTotal,
         LocalDateTime criadoEm,
-        LocalDateTime atualizadoEm,
+        LocalDateTime DataConclusao,
         Map<CategoriaParteVeiculo, List<ItemVisualizacaoCompletaResponse>> itensPorCategoria
 ) {
 }

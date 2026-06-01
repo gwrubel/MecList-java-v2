@@ -1,9 +1,14 @@
 package com.meclist.usecase.checklist;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +20,7 @@ import com.meclist.domain.Orcamento;
 import com.meclist.domain.enums.StatusProcesso;
 import com.meclist.dto.checklist.precificacao.PrecificarChecklistRequest;
 import com.meclist.dto.checklist.precificacao.PrecificarItemRequest;
+import com.meclist.dto.checklist.precificacao.PrecificarProdutoRequest;
 import com.meclist.exception.ChecklistNaoEncontradoException;
 import com.meclist.exception.ItemNaoPertenceAoChecklistException;
 import com.meclist.domain.Produto;
@@ -26,8 +32,12 @@ import com.meclist.interfaces.OrcamentoGateway;
 import com.meclist.interfaces.ProdutoGateway;
 import com.meclist.validator.ChecklistPrecificacaoValidator;
 
+
 @Service
 public class PrecificarChecklistUseCase {
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     private final ChecklistGateway checklistGateway;
     private final OrcamentoGateway orcamentoGateway;
@@ -78,21 +88,47 @@ public class PrecificarChecklistUseCase {
             itemChecklistGateway.salvar(item);
         });
 
-        // 3) valida se todos os itens TROCAR estão completamente precificados
-        precificacaoValidator.validarCompletudeDosItensTrocar(checklist);
+        // 3) flush envia os deletes/inserts ao banco; clear descarta o cache de 1º nível
+        //    para que o reload busque dados frescos e não as entidades em memória
+        entityManager.flush();
+        entityManager.clear();
 
-        // 4) calcula total e persiste orçamento
-        BigDecimal totalCalculado = checklist.calcularTotalGeral();
-        Orcamento orcamento = Orcamento.novo(checklist, totalCalculado, StatusProcesso.AGUARDANDO_APROVACAO);
+        // 4) recarrega checklist com estado real do banco
+        Checklist checklistAtualizado = checklistGateway.buscarPorId(checklistId)
+                .orElseThrow(() -> new ChecklistNaoEncontradoException("Checklist não encontrado: " + checklistId));
+
+        // 4) valida se todos os itens TROCAR estão completamente precificados
+        precificacaoValidator.validarCompletudeDosItensTrocar(checklistAtualizado);
+
+        // 5) calcula total e persiste orçamento
+        BigDecimal totalCalculado = checklistAtualizado.calcularTotalGeral();
+        Orcamento orcamento = Orcamento.novo(checklistAtualizado, totalCalculado, StatusProcesso.AGUARDANDO_APROVACAO);
         orcamentoGateway.salvar(orcamento);
 
-        // 5) finaliza checklist
-        checklist.finalizarPrecificacao();
-        checklistGateway.salvar(checklist);
+        // 6) finaliza checklist
+        checklistAtualizado.finalizarPrecificacao();
+        checklistGateway.salvar(checklistAtualizado);
     }
 
   private void atualizarDadosDoItem(ItemChecklist item, PrecificarItemRequest req) {
     item.definirMaoDeObra(req.maoDeObra());
+
+    // IDs que o admin quer manter (produtos existentes enviados no request)
+    Set<Long> idsNoRequest = req.produtos() == null ? Set.of() :
+            req.produtos().stream()
+                    .filter(p -> p.checklistProdutoId() != null)
+                    .map(PrecificarProdutoRequest::checklistProdutoId)
+                    .collect(Collectors.toSet());
+
+    // Produtos que estão no banco mas não vieram no request → excluir
+    List<Long> paraExcluir = item.getProdutosOrcados().stream()
+            .map(p -> p.getId())
+            .filter(id -> !idsNoRequest.contains(id))
+            .toList();
+
+    if (!paraExcluir.isEmpty()) {
+        checklistProdutoGateway.deletarPorIds(paraExcluir);
+    }
 
     if (req.produtos() != null) {
         req.produtos().forEach(prodReq -> {

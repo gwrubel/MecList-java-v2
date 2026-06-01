@@ -1,5 +1,6 @@
 package com.meclist.usecase.checklist;
 
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -81,9 +82,14 @@ public class ProcessarAprovacaoChecklistService {
         if (algumAprovado) {
             orcamento.aprovar();
             checklist.aprovar();
+            // Recalcula o valor total com base apenas nos produtos aprovados
+            BigDecimal valorAprovado = checklist.calcularTotalAprovado();
+            orcamento.setValorTotal(valorAprovado);
         } else {
             orcamento.reprovar();
             checklist.reprovar();
+            // Em caso de reprovação total, zera o valor
+            orcamento.setValorTotal(java.math.BigDecimal.ZERO);
         }
 
         orcamento.setOrigemAprovacaoFinal(origemAprovacao);

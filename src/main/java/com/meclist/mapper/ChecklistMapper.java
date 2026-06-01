@@ -1,6 +1,7 @@
 package com.meclist.mapper;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -224,7 +225,8 @@ public static ChecklistEntity toEntity(Checklist domain) {
 
     public static ChecklistVisualizacaoCompletaResponse toVisualizacaoCompletaResponse(Checklist checklist,
                                                                                         Orcamento orcamento,
-                                                                                        String nomeMecanicoExecutor) {
+                                                                                        String nomeMecanicoExecutor,
+                                                                                        LocalDateTime dataConclusao) {
         if (checklist == null) return null;
 
         Map<CategoriaParteVeiculo, List<ItemVisualizacaoCompletaResponse>> itensPorCategoria =
@@ -241,6 +243,7 @@ public static ChecklistEntity toEntity(Checklist domain) {
                 checklist.getVeiculo() != null ? checklist.getVeiculo().getModelo() : null,
                 checklist.getVeiculo() != null ? checklist.getVeiculo().getAno() : null,
                 checklist.getVeiculo() != null ? checklist.getVeiculo().getCor() : null,
+                checklist.getVeiculo() != null ? checklist.getVeiculo().getQuilometragem() : null,
                 checklist.getVeiculo() != null && checklist.getVeiculo().getCliente() != null
                         ? checklist.getVeiculo().getCliente().getNome()
                         : null,
@@ -248,7 +251,7 @@ public static ChecklistEntity toEntity(Checklist domain) {
                 checklist.getStatus(),
                 orcamento != null ? orcamento.getValorTotal() : BigDecimal.ZERO,
                 checklist.getCriadoEm(),
-                checklist.getAtualizadoEm(),
+                dataConclusao,
                 itensPorCategoria
         );
     }

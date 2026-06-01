@@ -59,8 +59,8 @@ public class ChecklistPrecificacaoValidator {
             return true;
         }
 
-        if (item.getProdutosOrcados() == null || item.getProdutosOrcados().isEmpty()) {
-            return true;
+        if (item.getProdutosOrcados() == null) {
+            return false;
         }
 
         return item.getProdutosOrcados().stream()

@@ -1,14 +1,13 @@
-package com.meclist.usecase.cliente;
+package com.meclist.usecase.veiculo;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
 import com.meclist.domain.Checklist;
 import com.meclist.domain.enums.StatusProcesso;
-import com.meclist.dto.cliente.HistoricoServicoCard;
+import com.meclist.dto.veiculo.HistoricoServicoCard;
 import com.meclist.exception.AcessoNegadoException;
 import com.meclist.exception.VeiculoNaoEncontrado;
 import com.meclist.interfaces.ChecklistGateway;
@@ -17,22 +16,17 @@ import com.meclist.interfaces.VeiculoGateway;
 import com.meclist.security.AuthenticatedUserProvider;
 
 @Service
-public class ListarServicosPorVeiculoClienteUseCase {
-
-    private static final Set<StatusProcesso> STATUSES_VISIVEIS = Set.of(
-            StatusProcesso.CONCLUIDO
-           
-    );
+public class ListarServicosPorVeiculoUseCase {
 
     private final ChecklistGateway checklistGateway;
     private final ServicoGateway servicoGateway;
     private final VeiculoGateway veiculoGateway;
     private final AuthenticatedUserProvider authenticatedUserProvider;
 
-    public ListarServicosPorVeiculoClienteUseCase(ChecklistGateway checklistGateway,
-                                                  ServicoGateway servicoGateway,
-                                                  VeiculoGateway veiculoGateway,
-                                                  AuthenticatedUserProvider authenticatedUserProvider) {
+    public ListarServicosPorVeiculoUseCase(ChecklistGateway checklistGateway,
+                                           ServicoGateway servicoGateway,
+                                           VeiculoGateway veiculoGateway,
+                                           AuthenticatedUserProvider authenticatedUserProvider) {
         this.checklistGateway = checklistGateway;
         this.servicoGateway = servicoGateway;
         this.veiculoGateway = veiculoGateway;
@@ -41,20 +35,23 @@ public class ListarServicosPorVeiculoClienteUseCase {
 
     public List<HistoricoServicoCard> executar(Long veiculoId) {
         var user = authenticatedUserProvider.get();
-        if (!"CLIENTE".equals(user.role())) {
-            throw new AcessoNegadoException("Apenas clientes podem listar servicos por veiculo.");
-        }
 
         var veiculo = veiculoGateway.buscarVeiculoPorId(veiculoId)
                 .orElseThrow(() -> new VeiculoNaoEncontrado("Veiculo nao encontrado: " + veiculoId));
 
-        Long clienteIdVeiculo = veiculo.getCliente() != null ? veiculo.getCliente().getId() : null;
-        if (clienteIdVeiculo == null || !clienteIdVeiculo.equals(user.id())) {
-            throw new AcessoNegadoException("Este veiculo pertence a outro cliente.");
+        switch (user.role()) {
+            case "CLIENTE" -> {
+                Long clienteIdVeiculo = veiculo.getCliente() != null ? veiculo.getCliente().getId() : null;
+                if (clienteIdVeiculo == null || !clienteIdVeiculo.equals(user.id())) {
+                    throw new AcessoNegadoException("Este veiculo pertence a outro cliente.");
+                }
+            }
+            case "MECANICO" -> { /* sem restrição de ownership */ }
+            default -> throw new AcessoNegadoException("Acesso negado para o perfil: " + user.role());
         }
 
         return checklistGateway.buscarPorVeiculoId(veiculoId).stream()
-                .filter(c -> STATUSES_VISIVEIS.contains(c.getStatus()))
+                .filter(c -> c.getStatus() == StatusProcesso.CONCLUIDO)
                 .sorted(Comparator.comparing(Checklist::getAtualizadoEm,
                         Comparator.nullsLast(Comparator.reverseOrder())))
                 .map(this::toHistoricoCard)
@@ -64,7 +61,8 @@ public class ListarServicosPorVeiculoClienteUseCase {
     private HistoricoServicoCard toHistoricoCard(Checklist checklist) {
         var servico = servicoGateway.buscarPorChecklistId(checklist.getId()).stream()
                 .filter(s -> s.getStatus() == StatusProcesso.CONCLUIDO)
-                .findFirst()
+                .filter(s -> s.getDataConclusao() != null)
+                .max(Comparator.comparing(s -> s.getDataConclusao()))
                 .orElse(null);
 
         String mecanico = servico != null && servico.getMecanico() != null

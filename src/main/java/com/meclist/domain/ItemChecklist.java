@@ -135,6 +135,29 @@ public class ItemChecklist {
                 })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
+
+    /**
+     * Calcula o total apenas dos produtos aprovados pelo cliente.
+     */
+    public BigDecimal calcularTotalProdutosAprovados() {
+        return getProdutosOrcados().stream()
+                .filter(p -> Boolean.TRUE.equals(p.getAprovadoCliente()))
+                .map(p -> {
+                    if (p.getValorUnitario() == null || p.getQuantidade() == null) {
+                        return BigDecimal.ZERO;
+                    }
+                    return p.getValorUnitario().multiply(BigDecimal.valueOf(p.getQuantidade()));
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    /**
+     * Verifica se este item possui pelo menos um produto aprovado.
+     */
+    public boolean possuiProdutoAprovado() {
+        return getProdutosOrcados().stream()
+                .anyMatch(p -> Boolean.TRUE.equals(p.getAprovadoCliente()));
+    }
 }
 
 

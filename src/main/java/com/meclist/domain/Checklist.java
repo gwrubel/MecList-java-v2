@@ -212,6 +212,24 @@ public BigDecimal calcularTotalProdutos() {
 public BigDecimal calcularTotalGeral() {
     return calcularTotalMaoDeObra().add(calcularTotalProdutos());
 }
+
+/**
+ * Calcula o total aprovado pelo cliente.
+ * Inclui apenas produtos aprovados + mão de obra de itens que tenham pelo menos um produto aprovado.
+ */
+public BigDecimal calcularTotalAprovado() {
+    BigDecimal totalProdutosAprovados = getItensChecklist().stream()
+            .map(ItemChecklist::calcularTotalProdutosAprovados)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+    BigDecimal totalMaoDeObraAutorizada = getItensChecklist().stream()
+            .filter(ItemChecklist::possuiProdutoAprovado)
+            .map(ItemChecklist::getMaoDeObra)
+            .filter(java.util.Objects::nonNull)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+    return totalProdutosAprovados.add(totalMaoDeObraAutorizada);
+}
 public void enviarParaPrecificacao() {
     if (this.status != StatusProcesso.INICIADO) {
         throw new IllegalStateException("O checklist deve estar em status INICIADO para ser enviado para precificação.");

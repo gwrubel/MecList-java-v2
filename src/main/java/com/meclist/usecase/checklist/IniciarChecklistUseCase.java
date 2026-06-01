@@ -55,13 +55,12 @@ public class IniciarChecklistUseCase {
                                 .orElseThrow(() -> new MecanicoNaoEncontradoException(
                                                 "Mecânico não encontrado: " + request.idMecanico()));
 
-                // 3. Atualiza e persiste a quilometragem do veículo
+                // 3. Valida a quilometragem no domínio (lança exceção se menor que a atual)
                 veiculo.atualizarQuilometragem(request.quilometragem());
-                Veiculo veiculoAtualizado = veiculoGateway.atualizarVeiculo(veiculo);
 
                 // 4. Cria o checklist de domínio já associado ao veículo com KM atualizada
                 Checklist checklist = Checklist.novo(
-                                veiculoAtualizado,
+                                veiculo,
                                 mecanico,
                                 request.quilometragem(),
                                 request.descricao());
@@ -69,23 +68,26 @@ public class IniciarChecklistUseCase {
                 // 5. Salva o checklist
                 Checklist checklistSalvo = checklistGateway.salvar(checklist);
 
-                // 6. Busca apenas itens ativos do catálogo
+                // 6. Persiste a quilometragem do veículo como consequência do checklist iniciado
+                veiculoGateway.atualizarVeiculo(veiculo);
+
+                // 7. Busca apenas itens ativos do catálogo
                 List<Item> todosItens = itemGateway.buscarAtivos();
 
                 // revisar salvamento em lote para evitar loop de chamadas ao banco
-                // 7. Prepara a lista de itens para inserção em lote
+                // 8. Prepara a lista de itens para inserção em lote
                 List<ItemChecklist> itensParaSalvar = todosItens.stream()
                                 .map(item -> ItemChecklist.novo(checklistSalvo, item))
                                 .toList();
 
-                // 7.1. Salva todos de uma vez (o Gateway deve suportar salvar uma lista)
+                // 8.1. Salva todos de uma vez (o Gateway deve suportar salvar uma lista)
                 itemChecklistGateway.salvarTodos(itensParaSalvar);
 
-                // 8. Busca o checklist completo com os itens criados
+                // 9. Busca o checklist completo com os itens criados
                 Checklist checklistCompleto = checklistGateway.buscarPorId(checklistSalvo.getId())
                                 .orElseThrow(() -> new ItemNaoEncontradoException("Erro ao buscar checklist criado"));
 
-                // 9. Retorna o response agrupado por categoria
+                // 10. Retorna o response agrupado por categoria
                 return ChecklistMapper.toResponse(checklistCompleto);
         }
 }

@@ -37,13 +37,9 @@ public interface ServicoRepository extends JpaRepository<ServicoEntity, Long> {
     List<ServicoEntity> findByMecanicoIdAndStatusInOrderByAtualizadoEmDescIdDesc(Long mecanicoId,
                                                                          Collection<StatusProcesso> statuses);
 
-    @Query("SELECT s FROM ServicoEntity s " +
-           "WHERE s.checklist.veiculo.id = :veiculoId " +
-           "AND s.status = :status " +
-           "ORDER BY s.dataConclusao DESC, s.id DESC " +
-           "LIMIT 1")
-    Optional<ServicoEntity> encontrarUltimaRevisao(@Param("veiculoId") Long veiculoId,
-                                                   @Param("status") StatusProcesso status);
+    Optional<ServicoEntity> findFirstByChecklistVeiculoIdAndStatusAndDataConclusaoIsNotNullOrderByDataConclusaoDescIdDesc(
+           Long veiculoId,
+           StatusProcesso status);
 
     @Query("SELECT COUNT(s) FROM ServicoEntity s WHERE s.criadoEm >= :dataInicio")
     Long contarTotal(@Param("dataInicio") java.time.LocalDateTime dataInicio);

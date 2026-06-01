@@ -36,6 +36,8 @@ import com.meclist.usecase.mecanico.DefinirSenhaMecanicoUseCase;
 import com.meclist.usecase.mecanico.ListarMecanicosUseCase;
 import com.meclist.usecase.mecanico.SolicitarRecuperacaoSenhaMecanicoUseCase;
 import com.meclist.dto.mecanico.ServicosConcluidoMecanicoResponse;
+import com.meclist.dto.veiculo.HistoricoServicoCard;
+import com.meclist.usecase.veiculo.ListarServicosPorVeiculoUseCase;
 
 
 @RestController
@@ -51,6 +53,7 @@ public class MecanicoController extends BaseController {
     private final BuscarServicosConcluidosMecanicoUseCase buscarServicosConcluidosMecanicoUseCase;
     private final SolicitarRecuperacaoSenhaMecanicoUseCase solicitarRecuperacaoSenhaMecanicoUseCase;
     private final DefinirSenhaMecanicoUseCase definirSenhaMecanicoUseCase;
+    private final ListarServicosPorVeiculoUseCase listarServicosPorVeiculoUseCase;
 
     public MecanicoController(
             CadastrarMecanicoUseCase cadastrarMecanicoUseCase,
@@ -61,7 +64,8 @@ public class MecanicoController extends BaseController {
             BuscarDashboardMecanicoUseCase buscarDashboardMecanicoUseCase,
             BuscarServicosConcluidosMecanicoUseCase buscarServicosConcluidosMecanicoUseCase,
             SolicitarRecuperacaoSenhaMecanicoUseCase solicitarRecuperacaoSenhaMecanicoUseCase,
-            DefinirSenhaMecanicoUseCase definirSenhaMecanicoUseCase) {
+            DefinirSenhaMecanicoUseCase definirSenhaMecanicoUseCase,
+            ListarServicosPorVeiculoUseCase listarServicosPorVeiculoUseCase) {
         this.listarMecanicosUseCase = listarMecanicosUseCase;
         this.cadastrarMecanicoUseCase = cadastrarMecanicoUseCase;
         this.atualizarDadosMecanicoUseCase = atualizarDadosMecanicoUseCase;
@@ -71,6 +75,7 @@ public class MecanicoController extends BaseController {
         this.buscarServicosConcluidosMecanicoUseCase = buscarServicosConcluidosMecanicoUseCase;
         this.solicitarRecuperacaoSenhaMecanicoUseCase = solicitarRecuperacaoSenhaMecanicoUseCase;
         this.definirSenhaMecanicoUseCase = definirSenhaMecanicoUseCase;
+        this.listarServicosPorVeiculoUseCase = listarServicosPorVeiculoUseCase;
     }
 
     /**
@@ -177,5 +182,13 @@ public class MecanicoController extends BaseController {
             HttpServletRequest servletRequest) {
         var response = buscarServicosConcluidosMecanicoUseCase.executar(mecanicoId);
         return success("Serviços concluídos do mecânico obtidos com sucesso!", response, servletRequest);
+    }
+
+    @GetMapping("/veiculos/{veiculoId}/servicos")
+    public ResponseEntity<ApiResponse<List<HistoricoServicoCard>>> listarServicosPorVeiculo(
+            @PathVariable Long veiculoId,
+            HttpServletRequest servletRequest) {
+        List<HistoricoServicoCard> response = listarServicosPorVeiculoUseCase.executar(veiculoId);
+        return success("Serviços do veículo carregados com sucesso!", response, servletRequest);
     }
 }

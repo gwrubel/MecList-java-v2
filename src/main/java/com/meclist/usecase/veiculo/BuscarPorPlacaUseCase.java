@@ -20,10 +20,14 @@ public class BuscarPorPlacaUseCase {
     }
 
     
-    public List<VeiculoBuscaResponse> buscarPlacaPorTermo(String termo) {
-    return veiculoGateway.buscarPlacasPorTrecho(termo)
-            .stream()
-            .map(veiculo -> new VeiculoBuscaResponse(
+        public List<VeiculoBuscaResponse> buscarPlacaPorTermo(String termo) {
+        String busca = termo == null ? "" : termo.trim();
+        // Se termo vazio, retorna top 10 ordenadas por placa (sem filtro)
+        if (busca.isEmpty()) {
+            // Busca todas as placas, mas limitado a 10 (ordenado por placa)
+            return veiculoGateway.buscarPlacasPorTrecho("")
+                .stream()
+                .map(veiculo -> new VeiculoBuscaResponse(
                     veiculo.getId(),
                     veiculo.getPlaca(),
                     veiculo.getModelo(),
@@ -32,9 +36,24 @@ public class BuscarPorPlacaUseCase {
                     veiculo.getAno(),
                     veiculo.getQuilometragem(),
                     veiculo.getDataUltimaRevisao()
+                ))
+                .toList();
+        }
+        // Busca normal por termo
+        return veiculoGateway.buscarPlacasPorTrecho(busca)
+            .stream()
+            .map(veiculo -> new VeiculoBuscaResponse(
+                veiculo.getId(),
+                veiculo.getPlaca(),
+                veiculo.getModelo(),
+                veiculo.getMarca(),
+                veiculo.getCor(),
+                veiculo.getAno(),
+                veiculo.getQuilometragem(),
+                veiculo.getDataUltimaRevisao()
             ))
             .toList();
-}
+        }
 
     public VeiculoResponse buscarPorPlaca(String placa) {
         return veiculoGateway.buscarPorPlaca(placa)
