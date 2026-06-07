@@ -12,6 +12,6 @@ public interface ItemGateway {
     Optional<Item> buscarPorId(Long id);
     List<Item> buscarTodos();
     List<Item> buscarAtivos();
-    boolean existeComMesmoNome(String nome);
+    boolean existeComMesmoNomeECategoria(String nome, CategoriaParteVeiculo categoria, Long idIgnorar);
     void excluir(Long id);
 }

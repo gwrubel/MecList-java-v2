@@ -71,8 +71,8 @@ public class ItemGatewayImpl implements ItemGateway {
     }
 
     @Override
-    public boolean existeComMesmoNome(String nome) {
-        return itemRepository.existsByNomeItem(nome);
+    public boolean existeComMesmoNomeECategoria(String nome, CategoriaParteVeiculo categoria, Long idIgnorar) {
+        return itemRepository.existsDuplicado(nome, categoria, idIgnorar);
     }
 
     @Override

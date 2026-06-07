@@ -16,5 +16,15 @@ public interface ItemRepository extends JpaRepository<ItemEntity, Long> {
     List<ItemEntity> findByCategoria(@Param("categoria") CategoriaParteVeiculo categoria);
 
     List<ItemEntity> findBySituacao(Situacao situacao);
-    boolean existsByNomeItem(String nomeItem);
+
+        @Query("""
+            SELECT COUNT(i) > 0
+            FROM ItemEntity i
+            WHERE i.nomeItem = :nomeItem
+              AND i.parteDoVeiculo = :categoria
+              AND (:idIgnorar IS NULL OR i.id <> :idIgnorar)
+            """)
+        boolean existsDuplicado(@Param("nomeItem") String nomeItem,
+            @Param("categoria") CategoriaParteVeiculo categoria,
+            @Param("idIgnorar") Long idIgnorar);
 }

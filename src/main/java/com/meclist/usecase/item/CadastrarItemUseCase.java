@@ -43,9 +43,10 @@ public class CadastrarItemUseCase {
             }
 
             // Verifica se já existe item com mesmo nome e categoria
-            boolean itemExiste = itemGateway.existeComMesmoNome(
-                request.nome()
-                
+            boolean itemExiste = itemGateway.existeComMesmoNomeECategoria(
+                request.nome(),
+                request.parteDoVeiculo(),
+                null
             );
             
             if (itemExiste) {
@@ -62,7 +63,7 @@ public class CadastrarItemUseCase {
                                    + "/" + nomeArquivo;
             
             byte[] imagemBytes = imagem.getBytes();
-            String urlImagem = uploadImagemGateway.upload(imagemBytes, caminhoRelativo);
+            String urlImagem = uploadImagemGateway.upload(imagemBytes, caminhoRelativo, contentType);
             
             // Cria o item com a URL da imagem
             Item item = Item.novo(request.nome(), request.parteDoVeiculo(), urlImagem);

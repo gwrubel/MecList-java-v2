@@ -1,12 +1,8 @@
 package com.meclist.usecase.item;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,9 +24,6 @@ public class AtualizarItemUseCase {
     private final ItemProdutoGateway itemProdutoGateway;
     private final UploadImagemGateway uploadImagemGateway;
 
-    @Value("${upload.path:uploads}")
-    private String uploadPath;
-
     public AtualizarItemUseCase(ItemGateway itemGateway, ItemProdutoGateway itemProdutoGateway, UploadImagemGateway uploadImagemGateway) {
         this.itemGateway = itemGateway;
         this.itemProdutoGateway = itemProdutoGateway;
@@ -43,6 +36,16 @@ public class AtualizarItemUseCase {
         if (optItem.isEmpty()) {
             throw new ItemNaoEncontradoException("Item não encontrado para id: " + id);
         }
+
+        boolean itemDuplicado = itemGateway.existeComMesmoNomeECategoria(
+                request.nome(),
+                request.parteDoVeiculo(),
+                id);
+
+        if (itemDuplicado) {
+            throw new IllegalArgumentException("Já existe um item com o nome '" + request.nome() + "' nessa categoria.");
+        }
+
         Item item = optItem.get();
 
         String imagemAtual = item.getImagemIlustrativa();
@@ -50,7 +53,7 @@ public class AtualizarItemUseCase {
         // Atualiza imagem se fornecida
         if (novaImagem != null && !novaImagem.isEmpty()) {
             try {
-                excluirImagemFisica(imagemAtual, item.getParteDoVeiculo().name());
+                uploadImagemGateway.delete(imagemAtual);
 
                 String nomeArquivo = System.currentTimeMillis() + "_"
                         + request.nome().replaceAll("\\s+", "_") + ".jpg";
@@ -58,7 +61,12 @@ public class AtualizarItemUseCase {
                         + request.parteDoVeiculo().name().toLowerCase()
                         + "/" + nomeArquivo;
                 byte[] imagemBytes = novaImagem.getBytes();
-                String urlImagem = uploadImagemGateway.upload(imagemBytes, caminhoRelativo);
+                String contentType = novaImagem.getContentType();
+                if (contentType == null || !contentType.startsWith("image/")) {
+                    throw new IllegalArgumentException("Arquivo deve ser uma imagem válida");
+                }
+
+                String urlImagem = uploadImagemGateway.upload(imagemBytes, caminhoRelativo, contentType);
 
                 imagemAtual = urlImagem;
             } catch (IOException e) {
@@ -71,23 +79,5 @@ public class AtualizarItemUseCase {
 
         Item itemAtualizado = itemGateway.salvar(item);
         return ItemMapper.toResponse(itemAtualizado, (int) itemProdutoGateway.contarPorItem(itemAtualizado.getId()));
-    }
-
-    private void excluirImagemFisica(String imagemIlustrativa, String parteDoVeiculo) {
-        try {
-            String nomeArquivo = imagemIlustrativa.substring(imagemIlustrativa.lastIndexOf("/") + 1);
-            String referencia = "itens" + "/" + parteDoVeiculo.toLowerCase();
-            Path caminhoArquivo = Paths.get(uploadPath, referencia, nomeArquivo);
-
-            if (Files.exists(caminhoArquivo)) {
-                Files.delete(caminhoArquivo);
-                System.out.println("Imagem deletada com sucesso: " + caminhoArquivo);
-            } else {
-                System.out.println("Arquivo de imagem não encontrado: " + caminhoArquivo);
-            }
-        } catch (Exception e) {
-            System.err.println("Erro ao excluir imagem física: " + e.getMessage());
-            e.printStackTrace();
-        }
     }
 }

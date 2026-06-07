@@ -14,4 +14,5 @@ public class SupabaseProperties {
     private String url;
     private String serviceKey;
     private String bucket;
+    private String bucketItensPublic;
 }

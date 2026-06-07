@@ -44,9 +44,6 @@ public class SecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/clientes/login").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/checklists/aprovacao-link/validar").permitAll()
 
-                // uploads estáticos
-                .requestMatchers("/uploads/**").permitAll()
-
                 // bootstrap (decidir se quer manter aberto)
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/adms").hasRole("ADMIN")
 
